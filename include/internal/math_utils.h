@@ -34,9 +34,8 @@ void filter(filter_T* b, size_t nb,
             y[i] += b[j] * x[i - j];
         }
 
-        size_t j_from = std::max<int>(1, i - 1);
-        j_to          = std::min<int>(i, na - 1);
-        for (size_t j = j_from; j <= j_to; j++) {
+        j_to = std::min<int>(i, na - 1);
+        for (size_t j = 1; j <= j_to; j++) {
             y[i] -= a[j] * y[i - j];
         }
     }

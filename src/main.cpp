@@ -49,13 +49,35 @@ int main(void)
     debug_print<sample_t>("ch2.test", ch2, len);
 
     // filter coeffs
+
+
+
     real a[] = {1.0000, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999};
-    real b[] = {0.0032, 0.0065, -0.0032, -0.0129, -0.0032, 0.0065, 0.0032};
+    real b[] = {0.003281, 0.0064564, -0.0032273, -0.0129112, -0.0032273, 0.0064564, 0.003281};
 
     //cout << sizeof(b) / sizeof(b[0]) << " " << sizeof(a) / sizeof(a[0]) << endl;
 
     real* sig1 = new real[len];
     real* sig2 = new real[len];
+
+    int N = 30;
+    sample_t test[N];
+    for (int i = 1; i <= N; i++) {
+        test[i - 1] = i;
+    }
+    real test_f[N];
+
+//    filter<real, sample_t, real>(b, 7,
+//                                a, 7,
+//                                test, test_f, N);
+
+//    filter<real, sample_t, real>(b, sizeof(b) / sizeof(b[0]),
+//                                a, sizeof(a) / sizeof(a[0]),
+//                                test, test_f, N);
+
+    filtfilt<real, sample_t, real>(b, sizeof(b) / sizeof(b[0]),
+                                   a, sizeof(a) / sizeof(a[0]),
+                                   test, test_f, N);
 
     filtfilt<real, sample_t, real>(b, sizeof(b) / sizeof(b[0]),
                                    a, sizeof(a) / sizeof(a[0]),
@@ -67,6 +89,7 @@ int main(void)
 
     debug_print("filt1.test", sig1, len);
     debug_print("filt2.test", sig2, len);
+    debug_print("filt.test", test_f, N);
 
 
     return 0;
