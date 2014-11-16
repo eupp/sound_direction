@@ -7,18 +7,35 @@
 #include "types.h"
 
 template <typename T>
-void conv(T* u, size_t un, T* v, size_t uv, T* out)
+T dot_product(T* x, T* y, size_t n)
 {
-    size_t outn = un + uv - 1;
-
-    for (size_t k = 0; k < outn; k++) {
-       size_t j_from = std::max<int>(0, k + 1 - outn);
-       size_t j_to   = std::min<int>(un - 1, k);
-       out[k] = 0;
-       for (size_t j = j_from; j <= j_to; j++) {
-           out[k] += u[j] * v[k - j];
-       }
+    T res = 0;
+    for (size_t i = 0; i < n; ++i) {
+        res += x[i] * y[i];
     }
+    return res;
+}
+
+template <typename T>
+int conv_peak(T* u, T* v, size_t n)
+{
+    size_t L = 40;
+    size_t conv_len = 2 * L + 1;
+    real_t* conv = new real_t[conv_len];
+
+    for (int i = -L; i <= 0; i++) {
+        conv[i + L]  = dot_product(v, u - i, n + i);
+    }
+    for (int i = 1; i <= L; i++) {
+        conv[i + L] = dot_product(v + i, u, n - i);
+    }
+
+    T* max = std::max_element(conv, conv + conv_len);
+    int d = max - conv;
+
+    delete[] conv;
+
+    return d - L;
 }
 
 template <typename filter_T, typename in_T, typename out_T>
@@ -60,16 +77,6 @@ void filtfilt(filter_T* b, size_t nb,
     filter(b, nb, a, na, y, y_h, n);
     reverse(y_h, y, n);
     delete[] y_h;
-}
-
-template <typename T>
-T dot_product(T* x, T* y, size_t n)
-{
-    T res = 0;
-    for (size_t i = 0; i < n; ++i) {
-        res += x[i] * y[i];
-    }
-    return res;
 }
 
 #endif // MATH_UTILS_H

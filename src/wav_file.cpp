@@ -1,31 +1,47 @@
 #include "include/internal/wav_file.h"
 
 #include <iostream>
+#include <cassert>
 #include <fstream>
 
 using namespace std;
 
-
-void read_wav(const char* filename, sample_t** buf, size_t* size)
+void read_wav(const char* filename, sample_t** buf, size_t* size, WavHeader* header, WavReadError* err)
 {
+    *buf = NULL;
+    *size = 0;
+    *err = NO_ERROR;
+
     ifstream file;
     file.open(filename);
     if (!file.is_open()) {
-        cerr << "Cannot open file " << filename << endl;
-        *buf = NULL;
-        *size = 0;
+        *err = CANNOT_OPEN_FILE;
         return;
     }
 
-    file.seekg(0, file.end);
-    size_t length = file.tellg() - 44;
-    file.seekg (44, file.beg);
+    assert(sizeof(WavHeader) == 44);
+    file.read((char*)header, sizeof(WavHeader));
 
+    if (!file.good()) {
+        *err = READ_FAIL;
+        return;
+    }
+
+    if (file.gcount() < sizeof(WavHeader)) {
+        *err = INCORRECT_FILE;
+        return;
+    }
+
+    size_t length = header->subchunk2Size;
     *size = length / sizeof(sample_t);
     *buf = new sample_t[*size];
 
-    // read data as a block:
     file.read((char*)(*buf), length);
+
+    if (!file.good()) {
+        *err = READ_FAIL;
+        return;
+    }
 }
 
 
