@@ -110,6 +110,11 @@ int main(int argc, char** argv)
         if (wav_err == READ_FAIL) {
             cout << "Error during file reading" << endl;
         }
+
+        if (buf != nullptr) {
+            delete[] buf;
+        }
+
         return 0;
     }
 
@@ -159,6 +164,12 @@ int main(int argc, char** argv)
     }
 
     cout << "Angle: " << (phi * 180) / pi << endl;
+
+    delete[] buf;
+    delete[] ch1;
+    delete[] ch2;
+    delete[] sig1;
+    delete[] sig2;
 
     return 0;
 }

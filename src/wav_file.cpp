@@ -8,7 +8,7 @@ using namespace std;
 
 void read_wav(const char* filename, sample_t** buf, size_t* size, WavHeader* header, WavReadError* err)
 {
-    *buf = NULL;
+    *buf = nullptr;
     *size = 0;
     *err = NO_ERROR;
 
