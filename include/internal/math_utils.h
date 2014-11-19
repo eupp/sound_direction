@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <iostream>
 
 #include "types.h"
 
@@ -17,11 +18,25 @@ T dot_product(T* x, T* y, size_t n)
 }
 
 template <typename T>
+void debug_print(const char* filename, T* array, size_t size)
+{
+    std::ofstream file;
+    file.open(filename);
+    if (!file.is_open()) {
+        std::cerr << "Cannot open file " << filename << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < size; i++) {
+        file << array[i] << std::endl;
+    }
+}
+
+template <typename T>
 int conv_peak(T* u, T* v, size_t n)
 {
     size_t L = 40;
     size_t conv_len = 2 * L + 1;
-    real_t* conv = new real_t[conv_len];
+    T* conv = new T[conv_len];
 
     for (int i = -L; i <= 0; i++) {
         conv[i + L]  = dot_product(v, u - i, n + i);
@@ -29,6 +44,8 @@ int conv_peak(T* u, T* v, size_t n)
     for (int i = 1; i <= L; i++) {
         conv[i + L] = dot_product(v + i, u, n - i);
     }
+
+    debug_print("conv.test", conv, conv_len);
 
     T* max = std::max_element(conv, conv + conv_len);
     int d = max - conv;

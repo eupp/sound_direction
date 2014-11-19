@@ -3,25 +3,30 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <ctime>
 
 #include "include/internal/math_utils.h"
 #include "include/internal/types.h"
 #include "include/internal/wav_file.h"
 
 using namespace std;
+using namespace fpml;
 
-template <typename T>
-void debug_print(const char* filename, T* array, size_t size)
+template<typename BB, unsigned char II, unsigned char FF>
+fpml::fixed_point<BB, II, FF> abs(fpml::fixed_point<BB, II, FF> val)
 {
-    ofstream file;
-    file.open(filename);
-    if (!file.is_open()) {
-        cerr << "Cannot open file " << filename << endl;
-        return;
-    }
-    for (size_t i = 0; i < size; i++) {
-        file << array[i] << endl;
-    }
+    return fabs(val);
+}
+
+inline double to_double(double val)
+{
+    return val;
+}
+
+template<typename BB, unsigned char II, unsigned char FF>
+inline double to_double(fpml::fixed_point<BB, II, FF> val)
+{
+    return val.to_double();
 }
 
 struct Arguments
@@ -75,6 +80,8 @@ Arguments parse_args(int argc, char** argv, CLIError* err)
 
 int main(int argc, char** argv)
 {
+    ios_base::sync_with_stdio(0);
+
     CLIError cli_err = OK;
     Arguments args = parse_args(argc, argv, &cli_err);
 
@@ -130,7 +137,11 @@ int main(int argc, char** argv)
     sample_t* ch1 = new sample_t[len];
     sample_t* ch2 = new sample_t[len];
 
+
     split_channels(buf + offset, ch1, ch2, size - offset);
+
+    debug_print("ch1.test", ch1, len);
+    debug_print("ch2.test", ch2, len);
 
     // filter coeffs
     real_t af[] = {1.0000, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999};
@@ -139,31 +150,63 @@ int main(int argc, char** argv)
     real_t* sig1 = new real_t[len];
     real_t* sig2 = new real_t[len];
 
+    clock_t c1 = clock();
+
     filtfilt(bf, sizeof(bf) / sizeof(bf[0]),
              af, sizeof(af) / sizeof(af[0]),
              ch1, sig1, len);
+
+    clock_t c2 = clock();
+
+    cout << "Time #1: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
+
+    c1 = clock();
 
     filtfilt(bf, sizeof(bf) / sizeof(bf[0]),
              af, sizeof(af) / sizeof(af[0]),
              ch2, sig2, len);
 
+    c2 = clock();
+
+    cout << "Time #2: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
+
+    debug_print("filt1.test", sig1, len);
+    debug_print("filt2.test", sig2, len);
+
+//    for (int i = 0; i < len; i++) {
+//        ch1[i] = round(sig1[i]);
+//        ch2[i] = round(sig2[i]);
+//    }
+
 
     int fs = header.sampleRate;
     real_t c = args.micr_dist;
     real_t pi = 3.14159265359;
+
+    c1 = clock();
+
     int d = conv_peak(sig1, sig2, len);
 
-    real_t a = ((real_t)d * 33000) / (2 * fs);
+    c2 = clock();
+
+    cout << "Time #3: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
+
+    real_t a = (real_t(d) * 33000) / (2 * fs);
+
+    cout << "d = " << d << "; a = " << a << endl;
 
     real_t phi = 0;
     if (abs(a) > abs(c)) {
-        phi = ((a > 0) - (a < 0)) * pi/2;
+        phi = ((a > real_t(0)) - (a < real_t(0))) * pi/2;
     }
     else {
-        phi = pi/2 - acos(a/c);
+        phi = pi/2 - real_t(acos(to_double(a/c)));
     }
 
     cout << "Angle: " << (phi * 180) / pi << endl;
+
+
+//    cout << "Time #4: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
 
     delete[] buf;
     delete[] ch1;

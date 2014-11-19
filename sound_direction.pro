@@ -3,6 +3,20 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+trik {
+	message("Building for Trik")
+	DEFINES += TRIK
+	BUILD_FOLDER = ../trik-build
+	DESTDIR = $$BUILD_FOLDER/
+	OBJECTS_DIR = $$BUILD_FOLDER/
+	MOC_DIR = $$BUILD_FOLDER/
+	RCC_DIR = $$BUILD_FOLDER/
+	UI_DIR = $$BUILD_FOLDER/
+	QMAKE_CXXFLAGS += -std=c++11	
+        CONFIG -= debug
+        CONFIG += release
+}
+
 SOURCES += \
     src/main.cpp \
     src/wav_file.cpp
@@ -13,6 +27,7 @@ qtcAddDeployment()
 HEADERS += \
     include/internal/wav_file.h \
     include/internal/math_utils.h \
-    include/internal/types.h
+    include/internal/types.h \
+    include/fpml/fixed_point.h
 
 CONFIG += c++11
