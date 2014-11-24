@@ -12,7 +12,7 @@ trik {
 	MOC_DIR = $$BUILD_FOLDER/
 	RCC_DIR = $$BUILD_FOLDER/
 	UI_DIR = $$BUILD_FOLDER/
-	QMAKE_CXXFLAGS += -std=c++11	
+
         CONFIG -= debug
         CONFIG += release
 }
@@ -31,3 +31,4 @@ HEADERS += \
     include/fpml/fixed_point.h
 
 CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11

@@ -140,12 +140,15 @@ int main(int argc, char** argv)
 
     split_channels(buf + offset, ch1, ch2, size - offset);
 
-    debug_print("ch1.test", ch1, len);
-    debug_print("ch2.test", ch2, len);
+//    debug_print("ch1.test", ch1, len);
+//    debug_print("ch2.test", ch2, len);
 
     // filter coeffs
     real_t af[] = {1.0000, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999};
     real_t bf[] = {0.003281, 0.0064564, -0.0032273, -0.0129112, -0.0032273, 0.0064564, 0.003281};
+
+//    debug_print("af.test", af, sizeof(af) / sizeof(af[0]));
+//    debug_print("bf.test", bf, sizeof(bf) / sizeof(bf[0]));
 
     real_t* sig1 = new real_t[len];
     real_t* sig2 = new real_t[len];
@@ -170,8 +173,8 @@ int main(int argc, char** argv)
 
     cout << "Time #2: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
 
-    debug_print("filt1.test", sig1, len);
-    debug_print("filt2.test", sig2, len);
+//    debug_print("filt1.test", sig1, len);
+//    debug_print("filt2.test", sig2, len);
 
 //    for (int i = 0; i < len; i++) {
 //        ch1[i] = round(sig1[i]);
@@ -181,7 +184,7 @@ int main(int argc, char** argv)
 
     int fs = header.sampleRate;
     real_t c = args.micr_dist;
-    real_t pi = 3.14159265359;
+    double pi = 3.14159265359;
 
     c1 = clock();
 
@@ -191,16 +194,16 @@ int main(int argc, char** argv)
 
     cout << "Time #3: " << (c2 - c1) / (CLOCKS_PER_SEC / 1000) << endl;
 
-    real_t a = (real_t(d) * 33000) / (2 * fs);
+    double a = (double(d) * 33000) / (2 * fs);
 
     cout << "d = " << d << "; a = " << a << endl;
 
-    real_t phi = 0;
+    double phi = 0;
     if (abs(a) > abs(c)) {
-        phi = ((a > real_t(0)) - (a < real_t(0))) * pi/2;
+        phi = ((a > 0) - (a < 0)) * pi/2;
     }
     else {
-        phi = pi/2 - real_t(acos(to_double(a/c)));
+        phi = pi/2 - acos(to_double(a/c));
     }
 
     cout << "Angle: " << (phi * 180) / pi << endl;
