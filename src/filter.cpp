@@ -7,7 +7,7 @@
 template <typename filter_T, typename in_T, typename out_T>
 void filter(filter_T* b, size_t nb,
             filter_T* a, size_t na,
-            in_T* x, out_T* y, size_t n)
+            const in_T* x, out_T* y, size_t n)
 {
     for (size_t i = 0; i < n; i++) {
         y[i] = 0;
@@ -34,7 +34,7 @@ void reverse(T* x, T* y, size_t n)
 
 void filtfilt(real_t* b, size_t nb,
               real_t* a, size_t na,
-              sample_t* x, sample_t* y, size_t n)
+              const sample_t* x, sample_t* y, size_t n)
 {
     // to do: reduce count of copies
     real_t* y_h1 = new real_t[n];
@@ -63,6 +63,6 @@ AudioBuffer AudioFilter::filter(const AudioBuffer& buf)
     QByteArray bytes(buf.size(), '\0');
     filtfilt(b, sizeof(b) / sizeof(b[0]),
              a, sizeof(a) / sizeof(a[0]),
-             (sample_t*) buf.data(), (sample_t*) bytes.data(), buf.sampleCount());
+             (const sample_t*) buf.data(), (sample_t*) bytes.data(), buf.sampleCount());
     return AudioBuffer(bytes, buf.audioFormat());
 }

@@ -6,17 +6,14 @@
 #include <QTimer>
 #include <QStringList>
 
-#include "include/internal/math_utils.h"
 #include "include/internal/types.h"
-#include "include/internal/wav_file.h"
-
-
+#include "include/internal/utils.h"
 #include "include/internal/wavfile.h"
 #include "include/internal/filter.h"
+#include "include/internal/angleDetector.h"
 
 using namespace std;
 using namespace fpml;
-
 
 class ArgumentsException: public exception
 {
@@ -76,6 +73,19 @@ void SoundAngleSensor::run()
 
     debug_print("filt1.test", (sample_t*) filt1.data(), filt1.sampleCount());
     debug_print("filt2.test", (sample_t*) filt2.data(), filt2.sampleCount());
+
+    AngleDetector detector;
+    double angle = 0;
+    try {
+        angle = detector.getAngle(filt1, filt2, mMicrDist);
+    }
+    catch (AngleDetector::IncorrectSignals& exc) {
+        cout << "Internal error occurred" << endl;
+        emit finished();
+        return;
+    }
+
+    cout << "Angle: " << angle << endl;
 
     emit finished();
 }
