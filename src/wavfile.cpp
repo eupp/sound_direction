@@ -63,6 +63,7 @@ bool WavFile::open(WavFile::OpenMode mode, const QAudioFormat& format)
             return false;
         }
     }
+    mFile.seek(wavHeaderSize);
     mMode = mode;
     return true;
 }

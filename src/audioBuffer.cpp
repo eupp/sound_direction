@@ -43,8 +43,11 @@ const void*AudioBuffer::constData() const
 AudioBuffer AudioBuffer::leftChannel() const
 {
     QByteArray leftChl(size() / 2, '\0');
-    for (int i = 0; i < size() / 2; ++i) {
-        leftChl[i] = mBytes[2*i];
+    for (int i = 0; i < sampleCount(); ++i) {
+        const char* sample = mBytes.data() + i * bytesPerSample() * mFormat.channelCount();
+        for (int j = 0; j < bytesPerSample(); ++j) {
+            leftChl[i * bytesPerSample() + j] = sample[j];
+        }
     }
     QAudioFormat fmt = mFormat;
     fmt.setChannelCount(1);
@@ -54,8 +57,11 @@ AudioBuffer AudioBuffer::leftChannel() const
 AudioBuffer AudioBuffer::rightChannel() const
 {
     QByteArray rightChl(size() / 2, '\0');
-    for (int i = 0; i < size() / 2; ++i) {
-        rightChl[i] = mBytes[2*i + 1];
+    for (int i = 0; i < sampleCount(); ++i) {
+        const char* sample = mBytes.data() + i * bytesPerSample() * mFormat.channelCount() + bytesPerSample();
+        for (int j = 0; j < bytesPerSample(); ++j) {
+            rightChl[i * bytesPerSample() + j] = sample[j];
+        }
     }
     QAudioFormat fmt = mFormat;
     fmt.setChannelCount(1);

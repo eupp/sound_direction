@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 
 #include "types.h"
 
@@ -59,7 +60,7 @@ int conv_peak(T* u, T* v, size_t n)
         conv[i + L] = dot_product(v + i, u, n - i);
     }
 
-//    debug_print("conv.test", conv, conv_len);
+    debug_print("conv.test", conv, conv_len);
 
     long long* max = std::max_element(conv, conv + conv_len);
     int d = max - conv;
@@ -69,33 +70,9 @@ int conv_peak(T* u, T* v, size_t n)
     return d - L;
 }
 
-template <typename filter_T, typename in_T, typename out_T>
-void filter(filter_T* b, size_t nb,
-            filter_T* a, size_t na,
-            in_T* x, out_T* y, size_t n)
-{
-    for (size_t i = 0; i < n; i++) {
-        y[i] = 0;
 
-        size_t j_to = std::min<int>(i, nb - 1);
-        for (size_t j = 0; j <= j_to; j++) {
-            y[i] += b[j] * x[i - j];
-        }
 
-        j_to = std::min<int>(i, na - 1);
-        for (size_t j = 1; j <= j_to; j++) {
-            y[i] -= a[j] * y[i - j];
-        }
-    }
-}
 
-template <typename T>
-void reverse(T* x, T* y, size_t n)
-{
-    for (size_t i = 0; i < n; i++) {
-        y[n - i - 1] = x[i];
-    }
-}
 
 template <typename filter_T, typename in_T, typename out_T>
 void filtfilt(filter_T* b, size_t nb,

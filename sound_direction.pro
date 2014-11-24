@@ -1,10 +1,10 @@
+QT += core multimedia
+QT -= gui
+
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG += qt
 
-QT += core multimedia
-QT -= gui
 
 trik {
 	message("Building for Trik")
@@ -24,7 +24,9 @@ SOURCES += \
     src/main.cpp \
     src/wav_file.cpp \
     src/wavfile.cpp \
-    src/audioBuffer.cpp
+    src/audioBuffer.cpp \
+    src/soundAngleSensor.cpp \
+    src/filter.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -35,7 +37,10 @@ HEADERS += \
     include/internal/types.h \
     include/fpml/fixed_point.h \
     include/internal/wavfile.h \
-    include/internal/audioBuffer.h
+    include/internal/audioBuffer.h \
+    include/internal/soundAngleSensor.h \
+    include/internal/filter.h \
+    include/internal/realTypeTraits.h
 
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11
