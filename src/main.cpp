@@ -13,7 +13,5 @@ int main(int argc, char** argv)
     QTimer::singleShot(0, sensor, SLOT(run()));
 
     return app.exec();
-
-    return 0;
 }
 
