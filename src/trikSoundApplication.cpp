@@ -1,4 +1,4 @@
-#include "include/internal/soundAngleSensor.h"
+#include "include/internal/trikSoundApplication.h"
 
 #include <iostream>
 
@@ -33,20 +33,25 @@ private:
     QString mMsg;
 };
 
-void SoundAngleSensor::run()
+TrikSoundApplication::TrikSoundApplication(QObject* parent):
+    QObject(parent)
+  , out(stdout, QIODevice::WriteOnly)
+{}
+
+void TrikSoundApplication::run()
 {
     try {
         parseArgs();
     }
     catch (ArgumentsException& exc) {
-        cout << "Arguments are incorrect. Error: " << exc.what() << endl;
+        out << "Arguments are incorrect. Error: " << exc.what() << endl;
         emit finished();
         return;
     }
 
     WavFile file(mFilename);
     if (!file.open(WavFile::ReadOnly)) {
-        cout << "Cannot open file " << mFilename.toAscii().data() << endl;
+        out << "Cannot open file " << mFilename.toAscii().data() << endl;
         emit finished();
         return;
     }
@@ -54,7 +59,7 @@ void SoundAngleSensor::run()
     // offset 1000 samles
     const int offset = 1000;
     if (file.sampleCount() < offset) {
-        cout << "File is too short" << endl;
+        out << "File is too short" << endl;
         emit finished();
         return;
     }
@@ -80,17 +85,17 @@ void SoundAngleSensor::run()
         angle = detector.getAngle(filt1, filt2, mMicrDist);
     }
     catch (AngleDetector::IncorrectSignals& exc) {
-        cout << "Internal error occurred" << endl;
+        out << "Internal error occurred" << endl;
         emit finished();
         return;
     }
 
-    cout << "Angle: " << angle << endl;
+    out << "Angle: " << angle << endl;
 
     emit finished();
 }
 
-void SoundAngleSensor::parseArgs()
+void TrikSoundApplication::parseArgs()
 {
     bool filenameSet = false;
     bool micrDistSet = false;
@@ -122,4 +127,52 @@ void SoundAngleSensor::parseArgs()
     if (!micrDistSet) {
         throw ArgumentsException("Microphone distance is missing or incorrect");
     }
+}
+
+void TrikSoundApplication::printAllDevicesInfo()
+{
+    out << "INPUT DEVICES:" << endl;
+    for (auto& info: QAudioDeviceInfo::availableDevices(QAudio::AudioInput)) {
+        printDeviceInfo(info);
+    }
+    out << "OUTPUT DEVICES:" << endl;
+    for (auto& info: QAudioDeviceInfo::availableDevices(QAudio::AudioOutput)) {
+        printDeviceInfo(info);
+    }
+}
+
+void TrikSoundApplication::printDeviceInfo(const QAudioDeviceInfo& info)
+{
+    out << "Device name: " << info.deviceName() << endl;
+    QString indent = "*   ";
+    out << indent << "Codecs: ";
+    for (auto& codec: info.supportedCodecs()) {
+        out << codec << " ";
+    }
+    out << endl;
+    out << indent << "Sample rates: ";
+    for (auto& rate: info.supportedSampleRates()) {
+        out << rate << " ";
+    }
+    out << endl;
+    out << indent << "Sample sizes: ";
+    for (auto& ssize: info.supportedSampleSizes()) {
+        out << ssize << " ";
+    }
+    out << endl;
+    out << indent << "Sample types: ";
+    for (auto& type: info.supportedSampleTypes()) {
+        out << type << " ";
+    }
+    out << endl;
+    out << indent << "Channels count: ";
+    for (auto& count: info.supportedChannelCounts()) {
+        out << count << " ";
+    }
+    out << endl;
+    out << indent << "Byte orders: ";
+    for (auto& order: info.supportedByteOrders()) {
+        out << order << " ";
+    }
+    out << endl;
 }
