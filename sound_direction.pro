@@ -49,7 +49,8 @@ HEADERS += \
     include/internal/circularBuffer.h \
     include/internal/trikSoundException.h \
     include/internal/audioCaptureFilter.h \
-    include/internal/iAudioFilter.h
+    include/internal/iAudioFilter.h \
+    include/internal/audioPipe.h
 
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11

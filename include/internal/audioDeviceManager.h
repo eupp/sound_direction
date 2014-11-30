@@ -28,18 +28,22 @@ public:
         {}
     };
 
-    AudioDeviceManager(const QAudioDeviceInfo& deviceInfo, const QAudioFormat& audioFormat, quint16 bufCapacity);
+    AudioDeviceManager(const QAudioDeviceInfo& deviceInfo, const QAudioFormat& audioFormat, size_t bufCapacity);
     virtual ~AudioDeviceManager() {}
 
     QAudioDeviceInfo deviceInfo() const;
     QAudioFormat audioFormat() const;
     QSharedPointer<QIODevice> buffer() const;
 
-    virtual double volume() const = 0;
-    virtual void setVolume(double vol) = 0;
+    virtual double volume() const {
+        return 1.0;
+    }
+    virtual void setVolume(double vol) {
+        Q_UNUSED(vol);
+    }
 
     quint16 bufferCapacity() const;
-    void setBufferCapacity(quint16 capacity);
+    void setBufferCapacity(size_t capacity);
 
     void start();
     void stop();

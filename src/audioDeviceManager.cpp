@@ -2,7 +2,7 @@
 
 AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                        const QAudioFormat& audioFormat,
-                                       quint16 bufCapacity):
+                                       size_t bufCapacity):
     mDeviceInfo(deviceInfo)
   , mInput(deviceInfo, audioFormat)
   , mBuffer(new CircularBuffer(bufCapacity))
@@ -28,7 +28,7 @@ quint16 AudioDeviceManager::bufferCapacity() const
     return mBuffer->capacity();
 }
 
-void AudioDeviceManager::setBufferCapacity(quint16 capacity)
+void AudioDeviceManager::setBufferCapacity(size_t capacity)
 {
     mBuffer->setCapacity(capacity);
 }

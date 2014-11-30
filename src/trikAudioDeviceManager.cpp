@@ -8,7 +8,7 @@ const int TrikAudioDeviceManager::mMaxVolume = 119;
 
 TrikAudioDeviceManager::TrikAudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                                const QAudioFormat& audioFormat,
-                                               size_t bufCapacity,):
+                                               size_t bufCapacity):
     AudioDeviceManager(deviceInfo, audioFormat, bufCapacity)
   , mVolume(1.0)
 {

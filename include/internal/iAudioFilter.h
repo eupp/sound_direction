@@ -11,7 +11,7 @@ public:
     virtual ~IAudioFilter() {}
 
 signals:
-    void output(const AudioBuffer& buf) = 0;
+    virtual void output(const AudioBuffer& buf) = 0;
 public slots:
     virtual void input(const AudioBuffer& buf) = 0;
 };

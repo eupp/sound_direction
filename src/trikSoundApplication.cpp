@@ -12,6 +12,9 @@
 #include "include/internal/wavfile.h"
 #include "include/internal/filter.h"
 #include "include/internal/angleDetector.h"
+#include "include/internal/audioPipe.h"
+#include "include/internal/audioCaptureFilter.h"
+#include "include/internal/trikAudioDeviceManager.h"
 
 using namespace std;
 using namespace fpml;
@@ -52,9 +55,22 @@ void TrikSoundApplication::run()
     emit finished();
 }
 
+void TrikSoundApplication::stopRecording()
+{
+    WavFile file(mFilename);
+    if (!file.open(WavFile::ReadOnly)) {
+        out << "Cannot open file " << mFilename.toAscii().data() << endl;
+        return;
+    }
+    file.write(AudioBuffer(mDeviceManager->buffer()->readAll(), mDeviceManager->audioFormat()));
+}
+
 void TrikSoundApplication::parseArgs()
 {
     mCmd = NO_COMMAND;
+    bool filenameSet = false;
+    bool micrDistSet = false;
+    bool durationSet = false;
 
     QStringList argv = QCoreApplication::arguments();
     int argc = argv.size();
@@ -63,30 +79,53 @@ void TrikSoundApplication::parseArgs()
         throw ArgumentsException("To few arguments. Specify filename and distance between microphones");
     }
 
+    for (int i = 2; i < argc; i++) {
+        if (argv[i] == "-f") {
+            if (++i >= argc) {
+                throw ArgumentsException("Filename is missing");
+            }
+            mFilename = argv[i];
+            filenameSet = true;
+        }
+        else if (argv[i] == "-c") {
+            if (++i >= argc) {
+                throw ArgumentsException("Microphone distance is missing");
+            }
+            mMicrDist = argv[i].toDouble(&micrDistSet);
+        }
+        else if (argv[i] == "-d") {
+            if (++i >= argc) {
+                throw ArgumentsException("Microphone distance is missing");
+            }
+            mDuration = argv[i].toInt(&durationSet);
+        }
+    }
+
     if (argv[1] == "listen-file") {
         mCmd = LISTEN_FILE;
-        bool filenameSet = false;
-        bool micrDistSet = false;
-        for (int i = 2; i < argc; i++) {
-            if (argv[i] == "-f") {
-                if (++i >= argc) {
-                    throw ArgumentsException("Filename is missing");
-                }
-                mFilename = argv[i];
-                filenameSet = true;
-            }
-            else if (argv[i] == "-c") {
-                if (++i >= argc) {
-                    throw ArgumentsException("Microphone distance is missing");
-                }
-                mMicrDist = argv[i].toDouble(&micrDistSet);
-            }
-        }
+
         if (!filenameSet) {
             throw ArgumentsException("Filename is missing");
         }
         if (!micrDistSet) {
             throw ArgumentsException("Microphone distance is missing or incorrect");
+        }
+    }
+    else if (argv[1] == "listen") {
+        mCmd = LISTEN_MICR;
+
+        if (!micrDistSet) {
+            throw ArgumentsException("Microphone distance is missing or incorrect");
+        }
+    }
+    else if (argv[1] == "record") {
+        mCmd = RECORD_FILE;
+
+        if (!filenameSet) {
+            throw ArgumentsException("Filename is missing");
+        }
+        if (!durationSet) {
+            throw ArgumentsException("Recording duration is missing or incorrect");
         }
     }
     else if (argv[1] == "list-devices") {
@@ -137,6 +176,65 @@ bool TrikSoundApplication::listenWavFile()
     out << "Angle: " << angle << endl;
 
     return true;
+}
+
+void TrikSoundApplication::listen()
+{
+    try {
+        initAudioDevice();
+    }
+    catch (TrikSoundException& exc) {
+        out << exc.what();
+        return;
+    }
+
+    QSharedPointer<IAudioFilter> capture(new AudioCaptureFilter(mDeviceManager,
+                                                                mDeviceManager->audioFormat().sampleRate() / 50));
+
+
+
+}
+
+void TrikSoundApplication::record()
+{
+    try {
+        initAudioDevice();
+    }
+    catch (TrikSoundException& exc) {
+        out << exc.what();
+        return;
+    }
+
+    mDeviceManager->setBufferCapacity((mDuration + 10) * mDeviceManager->audioFormat().sampleRate());
+
+    QTimer::singleShot(mDuration * 1000, this, SLOT(stopRecording()));
+    mDeviceManager->start();
+}
+
+void TrikSoundApplication::initAudioDevice()
+{
+    QAudioDeviceInfo deviceInfo = QAudioDeviceInfo::defaultInputDevice();
+
+    QAudioFormat audioFormat;
+    audioFormat.setByteOrder(QAudioFormat::LittleEndian);
+    audioFormat.setChannelCount(2);
+    audioFormat.setCodec("audio/pcm");
+    audioFormat.setSampleRate(44100);
+    audioFormat.setSampleType(QAudioFormat::SignedInt);
+    audioFormat.setSampleSize(16);
+
+    // 1 MB
+    size_t capacity = 1 * 1024 * 1024;
+
+    #ifdef TRIK
+        mDeviceManager = QSharedPointer<AudioDeviceManager>(new TrikAudioDeviceManager(deviceInfo,
+                                                                                      audioFormat,
+                                                                                      capacity));
+    #else
+        mDeviceManager = QSharedPointer<AudioDeviceManager>(new AudioDeviceManager(deviceInfo,
+                                                                                  audioFormat,
+                                                                                  capacity));
+    #endif
 }
 
 void TrikSoundApplication::printAllDevicesInfo()
