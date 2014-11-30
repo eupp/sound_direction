@@ -25,7 +25,11 @@ SOURCES += \
     src/audioBuffer.cpp \
     src/filter.cpp \
     src/angleDetector.cpp \
-    src/trikSoundApplication.cpp
+    src/trikSoundApplication.cpp \
+    src/audioDeviceManager.cpp \
+    src/trikAudioDeviceManager.cpp \
+    src/circularBuffer.cpp \
+    src/audioCaptureFilter.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -39,7 +43,13 @@ HEADERS += \
     include/internal/realTypeTraits.h \
     include/internal/angleDetector.h \
     include/internal/utils.h \
-    include/internal/trikSoundApplication.h
+    include/internal/trikSoundApplication.h \
+    include/internal/audioDeviceManager.h \
+    include/internal/trikAudioDeviceManager.h \
+    include/internal/circularBuffer.h \
+    include/internal/trikSoundException.h \
+    include/internal/audioCaptureFilter.h \
+    include/internal/iAudioFilter.h
 
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11

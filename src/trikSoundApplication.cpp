@@ -7,6 +7,7 @@
 #include <QStringList>
 
 #include "include/internal/types.h"
+#include "include/internal/trikSoundException.h"
 #include "include/internal/utils.h"
 #include "include/internal/wavfile.h"
 #include "include/internal/filter.h"
@@ -15,26 +16,17 @@
 using namespace std;
 using namespace fpml;
 
-class ArgumentsException: public exception
+class ArgumentsException: public TrikSoundException
 {
 public:
     ArgumentsException(const char* msg):
-        mMsg(msg)
+        TrikSoundException(msg)
     {}
-
-    ~ArgumentsException() throw()
-    {}
-
-    const char* what() const throw()
-    {
-        return mMsg.toAscii().data();
-    }
-private:
-    QString mMsg;
 };
 
 TrikSoundApplication::TrikSoundApplication(QObject* parent):
     QObject(parent)
+  , mCmd(NO_COMMAND)
   , out(stdout, QIODevice::WriteOnly)
 {}
 
@@ -49,19 +41,72 @@ void TrikSoundApplication::run()
         return;
     }
 
+    if (mCmd == LISTEN_FILE) {
+        listenWavFile();
+    }
+    else if (mCmd == LIST_DEVICES) {
+        printAllDevicesInfo();
+    }
+
+
+    emit finished();
+}
+
+void TrikSoundApplication::parseArgs()
+{
+    mCmd = NO_COMMAND;
+
+    QStringList argv = QCoreApplication::arguments();
+    int argc = argv.size();
+
+    if (argc <= 1) {
+        throw ArgumentsException("To few arguments. Specify filename and distance between microphones");
+    }
+
+    if (argv[1] == "listen-file") {
+        mCmd = LISTEN_FILE;
+        bool filenameSet = false;
+        bool micrDistSet = false;
+        for (int i = 2; i < argc; i++) {
+            if (argv[i] == "-f") {
+                if (++i >= argc) {
+                    throw ArgumentsException("Filename is missing");
+                }
+                mFilename = argv[i];
+                filenameSet = true;
+            }
+            else if (argv[i] == "-c") {
+                if (++i >= argc) {
+                    throw ArgumentsException("Microphone distance is missing");
+                }
+                mMicrDist = argv[i].toDouble(&micrDistSet);
+            }
+        }
+        if (!filenameSet) {
+            throw ArgumentsException("Filename is missing");
+        }
+        if (!micrDistSet) {
+            throw ArgumentsException("Microphone distance is missing or incorrect");
+        }
+    }
+    else if (argv[1] == "list-devices") {
+        mCmd = LIST_DEVICES;
+    }
+}
+
+bool TrikSoundApplication::listenWavFile()
+{
     WavFile file(mFilename);
     if (!file.open(WavFile::ReadOnly)) {
         out << "Cannot open file " << mFilename.toAscii().data() << endl;
-        emit finished();
-        return;
+        return false;
     }
 
     // offset 1000 samles
     const int offset = 1000;
     if (file.sampleCount() < offset) {
         out << "File is too short" << endl;
-        emit finished();
-        return;
+        return false;
     }
     file.seek(offset);
 
@@ -86,47 +131,12 @@ void TrikSoundApplication::run()
     }
     catch (AngleDetector::IncorrectSignals& exc) {
         out << "Internal error occurred" << endl;
-        emit finished();
-        return;
+        return false;
     }
 
     out << "Angle: " << angle << endl;
 
-    emit finished();
-}
-
-void TrikSoundApplication::parseArgs()
-{
-    bool filenameSet = false;
-    bool micrDistSet = false;
-
-    QStringList argv = QCoreApplication::arguments();
-    int argc = argv.size();
-
-    if (argc <= 1) {
-        throw ArgumentsException("To few arguments. Specify filename and distance between microphones");
-    }
-    for (int i = 1; i < argc; i++) {
-        if (argv[i] == QString("-f")) {
-            if (++i >= argc) {
-                throw ArgumentsException("Filename is missing");
-            }
-            mFilename = argv[i];
-            filenameSet = true;
-        }
-        else if (argv[i] == QString("-c")) {
-            if (++i >= argc) {
-                throw ArgumentsException("Microphone distance is missing");
-            }
-            mMicrDist = argv[i].toDouble(&micrDistSet);
-        }
-    }
-    if (!filenameSet) {
-        throw ArgumentsException("Filename is missing");
-    }
-    if (!micrDistSet) {
-        throw ArgumentsException("Microphone distance is missing or incorrect");
-    }
+    return true;
 }
 
 void TrikSoundApplication::printAllDevicesInfo()
