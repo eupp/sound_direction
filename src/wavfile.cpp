@@ -222,8 +222,10 @@ bool WavFile::writeHeader(const QAudioFormat& format)
     return mFile.write((char*) &header, sizeof(WavHeader)) == sizeof(WavHeader);
 }
 
-void WavFile::setHeaderDataSize(qint32 size)
+void WavFile::setHeaderDataSize(quint32 size)
 {
+    qDebug() << "Wav header: data size = " << size;
+
     qint64 currPos = mFile.pos();
     mFile.seek(wavHeaderSize - 4);
     mFile.write(reinterpret_cast<char*>(&size), sizeof(qint32));

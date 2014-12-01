@@ -6,7 +6,9 @@ AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
     mDeviceInfo(deviceInfo)
   , mInput(deviceInfo, audioFormat)
   , mBuffer(new CircularBuffer(bufCapacity))
-{}
+{
+    mBuffer->open(QIODevice::ReadWrite);
+}
 
 QAudioDeviceInfo AudioDeviceManager::deviceInfo() const
 {
@@ -23,7 +25,7 @@ QSharedPointer<QIODevice> AudioDeviceManager::buffer() const
     return mBuffer;
 }
 
-quint16 AudioDeviceManager::bufferCapacity() const
+size_t AudioDeviceManager::bufferCapacity() const
 {
     return mBuffer->capacity();
 }

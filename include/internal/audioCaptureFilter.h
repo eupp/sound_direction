@@ -12,14 +12,13 @@ class AudioCaptureFilter: public QObject, public IAudioFilter
     Q_OBJECT
 public:
     AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>& deviceManager,
-                       quint16 frameLength,
+                       size_t frameLength,
                        QObject* parent = 0);
 
 signals:
-    void output(const AudioBuffer& buf);
+    void output(AudioBuffer buf);
 public slots:
-    void input(const AudioBuffer &buf);
-
+    AudioBuffer input(const AudioBuffer &buf);
 private slots:
     void bufferReadyReadHandler();
 private:

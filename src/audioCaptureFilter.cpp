@@ -6,16 +6,17 @@
 
 
 AudioCaptureFilter::AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>& deviceManager,
-                                       quint16 frameLength,
+                                       size_t frameLength,
                                        QObject* parent):
     QObject(parent)
   , mDeviceManager(deviceManager)
   , mBuffer(deviceManager->buffer())
   , mFrameLength(frameLength)
 {
-    quint16 minCapacity = qMax((quint16)(4 * frameLength), std::numeric_limits<quint16>::max());
+    size_t minCapacity = 4 * frameLength;
     if (mDeviceManager->bufferCapacity() < minCapacity) {
         qDebug() << "Resize AudioDeviceManager internal buffer to fit frameLength of AudioCaptureFilter. "
+                 << "Old size: " << mDeviceManager->bufferCapacity() << "; "
                  << "New size: " << minCapacity << " bytes";
         mDeviceManager->setBufferCapacity(minCapacity);
     }
@@ -23,9 +24,10 @@ AudioCaptureFilter::AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>&
     connect(mBuffer.data(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
 }
 
-void AudioCaptureFilter::input(const AudioBuffer& buf)
+AudioBuffer AudioCaptureFilter::input(const AudioBuffer& buf)
 {
     Q_UNUSED(buf);
+    return AudioBuffer(QByteArray(), QAudioFormat());
 }
 
 void AudioCaptureFilter::bufferReadyReadHandler()

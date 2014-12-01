@@ -78,7 +78,7 @@ private:
     QAudioFormat readHeader();
     bool writeHeader(const QAudioFormat& format);
 
-    void setHeaderDataSize(qint32 size);
+    void setHeaderDataSize(quint32 size);
 
     static bool isAudioFormatCorrect(const QAudioFormat& format);
 

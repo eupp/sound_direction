@@ -6,7 +6,10 @@
 #include <QTextStream>
 #include <QSharedPointer>
 
+
 #include "include/internal/audioDeviceManager.h"
+#include "include/internal/iAudioFilter.h"
+#include "include/internal/audioPipe.h"
 
 class TrikSoundApplication: public QObject
 {
@@ -40,9 +43,13 @@ private:
     Command mCmd;
     QString mFilename;
     double mMicrDist;
+    double mThreshold;
     size_t mDuration;
 
     QSharedPointer<AudioDeviceManager> mDeviceManager;
+    QSharedPointer<IAudioFilter> mCapture;
+    QSharedPointer<IAudioFilter> mDetector;
+//    AudioPipe mPipe;
 
     QTextStream out;
 };

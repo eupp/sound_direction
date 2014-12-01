@@ -1,8 +1,17 @@
-#include "include/internal/filter.h"
+#include "include/internal/digitalAudioFilter.h"
 
 #include <algorithm>
 
 #include "include/internal/realTypeTraits.h"
+
+
+DigitalAudioFilter::DigitalAudioFilter():
+    // coeffs of filter are hardcoded
+    // to do: multiple coeff to some constant to reduce rounding error
+    filter_num({0.003281, 0.0064564, -0.0032273, -0.0129112, -0.0032273, 0.0064564, 0.003281})
+  , filter_denum({1.0000, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999})
+{}
+
 
 template <typename filter_T, typename in_T, typename out_T>
 void filter(filter_T* b, size_t nb,
@@ -51,18 +60,16 @@ void filtfilt(real_t* b, size_t nb,
     delete[] y_h2;
 }
 
-AudioBuffer AudioFilter::filter(const AudioBuffer& buf)
+AudioBuffer DigitalAudioFilter::input(const AudioBuffer& buf)
 {
     // to do: check is buffer in mono/stereo format
 
-    // coeffs of filter are hardcoded
-    // to do: multiple coeff to some constant to reduce rounding error
-    real_t a[] = {1.0000, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999};
-    real_t b[] = {0.003281, 0.0064564, -0.0032273, -0.0129112, -0.0032273, 0.0064564, 0.003281};
-
     QByteArray bytes(buf.size(), '\0');
-    filtfilt(b, sizeof(b) / sizeof(b[0]),
-             a, sizeof(a) / sizeof(a[0]),
+    filtfilt(filter_num.data(), filter_num.size(),
+             filter_denum.data(), filter_denum.size(),
              (const sample_t*) buf.data(), (sample_t*) bytes.data(), buf.sampleCount());
-    return AudioBuffer(bytes, buf.audioFormat());
+    AudioBuffer outBuf(bytes, buf.audioFormat());
+    emit output(outBuf);
+    return outBuf;
 }
+

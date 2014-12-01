@@ -42,7 +42,7 @@ public:
         Q_UNUSED(vol);
     }
 
-    quint16 bufferCapacity() const;
+    size_t bufferCapacity() const;
     void setBufferCapacity(size_t capacity);
 
     void start();
