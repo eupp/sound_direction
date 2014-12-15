@@ -20,6 +20,8 @@ AudioBuffer AngleFilter::input(const AudioBuffer& buf)
     if (isActive) {
         double angle = mDetector.getAngle(filt1, filt2, mMicrDist);
 
+        std::cout.setf( std::ios::fixed, std:: ios::floatfield );
+        std::cout.precision(2);
         cout << "Angle: " << angle << endl;
     }
 

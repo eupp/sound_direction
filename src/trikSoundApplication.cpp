@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include <QTimer>
 #include <QStringList>
+#include <QPair>
 
 #include "include/internal/types.h"
 #include "include/internal/trikSoundException.h"
@@ -64,13 +65,30 @@ void TrikSoundApplication::run()
 void TrikSoundApplication::stopRecording()
 {
     mDeviceManager->stop();
-    WavFile file(mFilename);
-    if (!file.open(WavFile::WriteOnly, mDeviceManager->audioFormat())) {
-        out << "Cannot open file " << mFilename.toAscii().data() << endl;
-        emit finished();
-        return;
+
+    QList< QPair<QString, AudioBuffer> > pairs;
+    const AudioBuffer buf(mDeviceManager->buffer()->readAll(), mDeviceManager->audioFormat());
+
+    if (mSplitChFlag) {
+        QString filename1 = mFilename + ".left";
+        QString filename2 = mFilename + ".right";
+
+        pairs << qMakePair(filename1, buf.leftChannel()) << qMakePair(filename2, buf.rightChannel());
     }
-    file.write(AudioBuffer(mDeviceManager->buffer()->readAll(), mDeviceManager->audioFormat()));
+    else {
+        pairs << qMakePair(mFilename, buf);
+    }
+
+    for (auto& pair: pairs) {
+        WavFile file(pair.first);
+        if (!file.open(WavFile::WriteOnly, pair.second.audioFormat())) {
+            out << "Cannot open file " << pair.first.toAscii().data() << endl;
+            emit finished();
+            return;
+        }
+        file.write(pair.second);
+    }
+
     emit finished();
 }
 
@@ -81,6 +99,9 @@ void TrikSoundApplication::parseArgs()
     bool micrDistSet = false;
     bool durationSet = false;
     bool thresholdSet = false;
+    bool frameLengthSet = false;
+
+    mSplitChFlag = false;
 
     QStringList argv = QCoreApplication::arguments();
     int argc = argv.size();
@@ -115,6 +136,15 @@ void TrikSoundApplication::parseArgs()
             }
             mThreshold = argv[i].toDouble(&thresholdSet);
         }
+        else if (argv[i] == "-s") {
+            mSplitChFlag = true;
+        }
+        else if (argv[i] == "-l") {
+            if (++i >= argc) {
+                throw ArgumentsException("Microphone distance is missing");
+            }
+            mFrameLength = argv[i].toInt(&frameLengthSet);
+        }
     }
 
     if (argv[1] == "listen-file") {
@@ -135,6 +165,9 @@ void TrikSoundApplication::parseArgs()
         }
         if (!thresholdSet) {
             throw ArgumentsException("VAD threshold is missing or incorrect");
+        }
+        if (!frameLengthSet) {
+            throw ArgumentsException("Frame length is missing or incorrect");
         }
     }
     else if (argv[1] == "record") {
@@ -179,6 +212,7 @@ bool TrikSoundApplication::listenWavFile()
     AudioBuffer filt1 = filter.input(chl1);
     AudioBuffer filt2 = filter.input(chl2);
 
+
     debug_print("filt1.test", (sample_t*) filt1.data(), filt1.sampleCount());
     debug_print("filt2.test", (sample_t*) filt2.data(), filt2.sampleCount());
 
@@ -191,6 +225,7 @@ bool TrikSoundApplication::listenWavFile()
         out << "Internal error occurred" << endl;
         return false;
     }
+
 
     out << "Angle: " << angle << endl;
 
@@ -208,7 +243,7 @@ void TrikSoundApplication::listen()
     }
 
     mCapture = QSharedPointer<IAudioFilter>(new AudioCaptureFilter(mDeviceManager,
-                                                     mDeviceManager->audioFormat().sampleRate() / 50));
+                                            (mDeviceManager->audioFormat().sampleRate() / 1000) * mFrameLength));
     mDetector = QSharedPointer<IAudioFilter>(new AngleFilter(mMicrDist, mThreshold));
 
     connect(dynamic_cast<QObject*>(mCapture.data()), SIGNAL(output(AudioBuffer)),

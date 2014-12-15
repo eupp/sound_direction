@@ -1,6 +1,7 @@
 #include "include/internal/thresholdVadFilter.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include <QDebug>
 
@@ -48,7 +49,9 @@ bool ThresholdVadFilter::vad(const AudioBuffer& buf)
         isActive = checkFrameThreshold(thrld, frame, buf.sampleCount());
     }
 
-    qDebug() << "Threshold Vad Filter: " << isActive;
+//    qDebug() << "Threshold Vad Filter: " << isActive;
+//    std::cout << (isActive ? 1 : 0);
+//    std::cout.flush();
 
     return isActive;
 }

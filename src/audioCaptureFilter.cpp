@@ -32,7 +32,7 @@ AudioBuffer AudioCaptureFilter::input(const AudioBuffer& buf)
 
 void AudioCaptureFilter::bufferReadyReadHandler()
 {
-    qDebug() << "AudioCaptureFilter - bytes available: " << mBuffer->bytesAvailable();
+//    qDebug() << "AudioCaptureFilter - bytes available: " << mBuffer->bytesAvailable();
 
     if (mBuffer->bytesAvailable() > mFrameLength) {
         emit output(AudioBuffer(mBuffer->read(mFrameLength), mDeviceManager->audioFormat()));

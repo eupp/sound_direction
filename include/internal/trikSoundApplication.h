@@ -45,6 +45,11 @@ private:
     double mMicrDist;
     double mThreshold;
     size_t mDuration;
+    size_t mFrameLength;
+    bool mSplitChFlag;
+
+    // flags
+    bool mDebugPrintFlag;
 
     QSharedPointer<AudioDeviceManager> mDeviceManager;
     QSharedPointer<IAudioFilter> mCapture;
