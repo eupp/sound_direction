@@ -29,7 +29,7 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
         conv[i + L] = dot_product(v + i, u, n - i);
     }
 
-    debug_print("conv.test", conv, conv_len);
+//    debug_print("conv.test", conv, conv_len);
 
     long long* max = std::max_element(conv, conv + conv_len);
     int d = max - conv;

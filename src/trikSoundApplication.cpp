@@ -32,8 +32,11 @@ public:
 TrikSoundApplication::TrikSoundApplication(QObject* parent):
     QObject(parent)
   , mCmd(NO_COMMAND)
-  , out(stdout, QIODevice::WriteOnly)
-{}
+  , mOut(stdout, QIODevice::WriteOnly)
+{
+    mOut.setRealNumberNotation(QTextStream::FixedNotation);
+    mOut.setRealNumberPrecision(4);
+}
 
 void TrikSoundApplication::run()
 {
@@ -41,7 +44,7 @@ void TrikSoundApplication::run()
         parseArgs();
     }
     catch (ArgumentsException& exc) {
-        out << "Arguments are incorrect. Error: " << exc.what() << endl;
+        mOut << "Arguments are incorrect. Error: " << exc.what() << endl;
         emit finished();
         return;
     }
@@ -66,6 +69,8 @@ void TrikSoundApplication::stopRecording()
 {
     mDeviceManager->stop();
 
+    mOut << "Stop recording" << endl;
+
     QList< QPair<QString, AudioBuffer> > pairs;
     const AudioBuffer buf(mDeviceManager->buffer()->readAll(), mDeviceManager->audioFormat());
 
@@ -82,7 +87,7 @@ void TrikSoundApplication::stopRecording()
     for (auto& pair: pairs) {
         WavFile file(pair.first);
         if (!file.open(WavFile::WriteOnly, pair.second.audioFormat())) {
-            out << "Cannot open file " << pair.first.toAscii().data() << endl;
+            mOut << "Cannot open file " << pair.first.toAscii().data() << endl;
             emit finished();
             return;
         }
@@ -126,13 +131,13 @@ void TrikSoundApplication::parseArgs()
         }
         else if (argv[i] == "-d") {
             if (++i >= argc) {
-                throw ArgumentsException("Microphone distance is missing");
+                throw ArgumentsException("Record duration is missing");
             }
             mDuration = argv[i].toInt(&durationSet);
         }
         else if (argv[i] == "-t") {
             if (++i >= argc) {
-                throw ArgumentsException("Microphone distance is missing");
+                throw ArgumentsException("Threshold is missing");
             }
             mThreshold = argv[i].toDouble(&thresholdSet);
         }
@@ -189,14 +194,14 @@ bool TrikSoundApplication::listenWavFile()
 {
     WavFile file(mFilename);
     if (!file.open(WavFile::ReadOnly)) {
-        out << "Cannot open file " << mFilename.toAscii().data() << endl;
+        mOut << "Cannot open file " << mFilename.toAscii().data() << endl;
         return false;
     }
 
     // offset 1000 samles
     const int offset = 1000;
     if (file.sampleCount() < offset) {
-        out << "File is too short" << endl;
+        mOut << "File is too short" << endl;
         return false;
     }
     file.seek(offset);
@@ -205,16 +210,16 @@ bool TrikSoundApplication::listenWavFile()
     AudioBuffer chl1 = buf.leftChannel();
     AudioBuffer chl2 = buf.rightChannel();
 
-    debug_print("ch1.test", (sample_t*) chl1.data(), chl1.sampleCount());
-    debug_print("ch2.test", (sample_t*) chl2.data(), chl2.sampleCount());
+//    debug_print("ch1.test", (sample_t*) chl1.data(), chl1.sampleCount());
+//    debug_print("ch2.test", (sample_t*) chl2.data(), chl2.sampleCount());
 
     DigitalAudioFilter filter;
     AudioBuffer filt1 = filter.input(chl1);
     AudioBuffer filt2 = filter.input(chl2);
 
 
-    debug_print("filt1.test", (sample_t*) filt1.data(), filt1.sampleCount());
-    debug_print("filt2.test", (sample_t*) filt2.data(), filt2.sampleCount());
+//    debug_print("filt1.test", (sample_t*) filt1.data(), filt1.sampleCount());
+//    debug_print("filt2.test", (sample_t*) filt2.data(), filt2.sampleCount());
 
     AngleDetector detector;
     double angle = 0;
@@ -222,12 +227,13 @@ bool TrikSoundApplication::listenWavFile()
         angle = detector.getAngle(filt1, filt2, mMicrDist);
     }
     catch (AngleDetector::IncorrectSignals& exc) {
-        out << "Internal error occurred" << endl;
+        mOut << "Internal error occurred" << endl;
         return false;
     }
 
 
-    out << "Angle: " << angle << endl;
+//    out << "Angle: " << angle << endl;
+    mOut << angle << endl;
 
     return true;
 }
@@ -238,7 +244,7 @@ void TrikSoundApplication::listen()
         initAudioDevice();
     }
     catch (TrikSoundException& exc) {
-        out << exc.what();
+        mOut << exc.what();
         return;
     }
 
@@ -259,14 +265,17 @@ void TrikSoundApplication::record()
         initAudioDevice();
     }
     catch (TrikSoundException& exc) {
-        out << exc.what();
+        mOut << exc.what();
         return;
     }
 
     mDeviceManager->setBufferCapacity((mDuration + 10) * mDeviceManager->audioFormat().sampleRate());
 
+
     QTimer::singleShot(mDuration * 1000, this, SLOT(stopRecording()));
     mDeviceManager->start();
+
+    mOut << "Start recording" << endl;
 }
 
 void TrikSoundApplication::initAudioDevice()
@@ -297,11 +306,11 @@ void TrikSoundApplication::initAudioDevice()
 
 void TrikSoundApplication::printAllDevicesInfo()
 {
-    out << "INPUT DEVICES:" << endl;
+    mOut << "INPUT DEVICES:" << endl;
     for (auto& info: QAudioDeviceInfo::availableDevices(QAudio::AudioInput)) {
         printDeviceInfo(info);
     }
-    out << "OUTPUT DEVICES:" << endl;
+    mOut << "OUTPUT DEVICES:" << endl;
     for (auto& info: QAudioDeviceInfo::availableDevices(QAudio::AudioOutput)) {
         printDeviceInfo(info);
     }
@@ -309,36 +318,36 @@ void TrikSoundApplication::printAllDevicesInfo()
 
 void TrikSoundApplication::printDeviceInfo(const QAudioDeviceInfo& info)
 {
-    out << "Device name: " << info.deviceName() << endl;
+    mOut << "Device name: " << info.deviceName() << endl;
     QString indent = "*   ";
-    out << indent << "Codecs: ";
+    mOut << indent << "Codecs: ";
     for (auto& codec: info.supportedCodecs()) {
-        out << codec << " ";
+        mOut << codec << " ";
     }
-    out << endl;
-    out << indent << "Sample rates: ";
+    mOut << endl;
+    mOut << indent << "Sample rates: ";
     for (auto& rate: info.supportedSampleRates()) {
-        out << rate << " ";
+        mOut << rate << " ";
     }
-    out << endl;
-    out << indent << "Sample sizes: ";
+    mOut << endl;
+    mOut << indent << "Sample sizes: ";
     for (auto& ssize: info.supportedSampleSizes()) {
-        out << ssize << " ";
+        mOut << ssize << " ";
     }
-    out << endl;
-    out << indent << "Sample types: ";
+    mOut << endl;
+    mOut << indent << "Sample types: ";
     for (auto& type: info.supportedSampleTypes()) {
-        out << type << " ";
+        mOut << type << " ";
     }
-    out << endl;
-    out << indent << "Channels count: ";
+    mOut << endl;
+    mOut << indent << "Channels count: ";
     for (auto& count: info.supportedChannelCounts()) {
-        out << count << " ";
+        mOut << count << " ";
     }
-    out << endl;
-    out << indent << "Byte orders: ";
+    mOut << endl;
+    mOut << indent << "Byte orders: ";
     for (auto& order: info.supportedByteOrders()) {
-        out << order << " ";
+        mOut << order << " ";
     }
-    out << endl;
+    mOut << endl;
 }

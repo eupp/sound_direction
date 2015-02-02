@@ -56,7 +56,7 @@ private:
     QSharedPointer<IAudioFilter> mDetector;
 //    AudioPipe mPipe;
 
-    QTextStream out;
+    QTextStream mOut;
 };
 
 #endif // TRIKSOUNDAPPLICATION_H
