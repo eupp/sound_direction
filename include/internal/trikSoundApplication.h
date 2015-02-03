@@ -20,7 +20,8 @@ public:
         LISTEN_FILE,
         LISTEN_MICR,
         RECORD_FILE,
-        LIST_DEVICES
+        LIST_DEVICES,
+        BENCHMARK
     };
 
     TrikSoundApplication(QObject* parent);
@@ -35,6 +36,7 @@ private:
     bool listenWavFile();
     void listen();
     void record();
+    void benchmark();
     void initAudioDevice();
     void printAllDevicesInfo();
     void printDeviceInfo(const QAudioDeviceInfo& info);

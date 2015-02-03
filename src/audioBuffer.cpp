@@ -25,6 +25,11 @@ qint64 AudioBuffer::sampleCount() const
     return count;
 }
 
+qint64 AudioBuffer::duration() const
+{
+    return (sampleCount() * 1000) / mFormat.sampleRate();
+}
+
 void* AudioBuffer::data()
 {
     return reinterpret_cast<void*>(mBytes.data());

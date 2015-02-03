@@ -21,10 +21,17 @@ public:
      * @return Number of samples in buffer. If audio frame in stereo mode then it returns number of pairs of samples.
      */
     qint64 sampleCount() const;
+    /**
+     * @brief duration
+     * @return
+     */
+    qint64 duration() const;
 
     void* data();
     const void* data() const;
     const void* constData() const;
+
+    AudioBuffer subBuffer(qint32 pos, qint32 len = -1);
 
     /**
      * @brief leftChannel

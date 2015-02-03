@@ -18,6 +18,8 @@
 #include "include/internal/trikAudioDeviceManager.h"
 #include "include/internal/thresholdVadFilter.h"
 
+#include "tests/benchmark.h"
+
 using namespace std;
 using namespace fpml;
 
@@ -58,6 +60,10 @@ void TrikSoundApplication::run()
     }
     else if (mCmd == RECORD_FILE) {
         record();
+    }
+    else if (mCmd == BENCHMARK) {
+        benchmark();
+        emit finished();
     }
     else if (mCmd == LIST_DEVICES) {
         printAllDevicesInfo();
@@ -185,6 +191,16 @@ void TrikSoundApplication::parseArgs()
             throw ArgumentsException("Recording duration is missing or incorrect");
         }
     }
+    else if (argv[1] == "benchmark") {
+        mCmd = BENCHMARK;
+
+        if (!filenameSet) {
+            throw ArgumentsException("Filename is missing");
+        }
+        if (!durationSet) {
+            throw ArgumentsException("Frame duration is missing or incorrect");
+        }
+    }
     else if (argv[1] == "list-devices") {
         mCmd = LIST_DEVICES;
     }
@@ -276,6 +292,13 @@ void TrikSoundApplication::record()
     mDeviceManager->start();
 
     mOut << "Start recording" << endl;
+}
+
+void TrikSoundApplication::benchmark()
+{
+    qint32 res = angleDetectorBenchmark(mFilename, mDuration);
+
+    mOut << "Benchmark result: " << res << endl;
 }
 
 void TrikSoundApplication::initAudioDevice()
