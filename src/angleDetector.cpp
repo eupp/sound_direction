@@ -3,28 +3,23 @@
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <map>
+#include <utility>
 
 #include "include/internal/utils.h"
-
-long long dot_product(const sample_t* x, const sample_t* y, size_t n)
-{
-    long long res = 0;
-    for (size_t i = 0; i < n; ++i) {
-        res += x[i] * y[i];
-    }
-    return res;
-}
 
 int conv_peak(const sample_t* u, const sample_t* v, size_t n)
 {
     const size_t L = 40;
     const size_t frameSize = 2 * L + 1;
-    const size_t windowSize = 512;
+    const size_t windowSize = 128;
 
     long long conv[frameSize];
 
     n -= frameSize;
 
+    int result = 0;
+    int num = 1;
     while (windowSize < n) {
         for (size_t i = 0; i <= frameSize; i++) {
 //            conv[i] += std::inner_product(v, v + windowSize, u + i, 0ll);
@@ -35,11 +30,31 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
         v += windowSize;
         u += windowSize;
         n -= windowSize;
+
+        if (0) {
+            typedef std::map<long long, int> mmap;
+            mmap map;
+            for (int i = 0; i < frameSize; ++i) {
+                map.insert(std::make_pair(conv[i], i));
+            }
+
+            int k = 1;
+            auto end = map.rbegin();
+            std::advance(end, 3);
+            for (auto itr = map.rbegin(); itr != end; ++itr) {
+                result = itr->second - L;
+
+                qDebug() << "Hypothesis #" << num << " ; Top #" << k << " : " << result;
+                ++k;
+            }
+            num++;
+            qDebug() << " ";
+        }
     }
 
-    long long* max_conv = std::max_element(conv, conv + frameSize);
+    result = (std::max_element(conv, conv + frameSize) - conv) - L;
 
-    return (max_conv - conv) - L;
+    return result;
 }
 
 double AngleDetector::getAngle(const AudioBuffer& signal1, const AudioBuffer& signal2, double micrDist)

@@ -24,13 +24,13 @@ qint32 angleDetectorBenchmark(const QString& filename, size_t frameSize)
     qDebug() << "Bytes count in frame: " <<  bytesCount;
 
     const double micrDist = 10.0;
-    const int iterCount = 2500;
+    const int iterCount = 100;
 
     clock_t c1 = clock();
     for (int i = 0; i < iterCount; ++i) {
-//        AudioBuffer filt1 = filter.input(chl1);
-//        AudioBuffer filt2 = filter.input(chl2);
-        detector.getAngle(chl1, chl2, micrDist);
+        AudioBuffer filt1 = filter.input(chl1);
+        AudioBuffer filt2 = filter.input(chl2);
+        detector.getAngle(filt1, filt2, micrDist);
     }
     clock_t c2 = clock();
 

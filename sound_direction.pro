@@ -56,7 +56,8 @@ HEADERS += \
     include/internal/thresholdVadFilter.h \
     include/internal/digitalAudioFilter.h \
     include/internal/angleFilter.h \
-    tests/benchmark.h
+    tests/benchmark.h \
+    tests/tests.h
 
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11 -g
