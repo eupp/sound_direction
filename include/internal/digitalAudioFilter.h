@@ -42,10 +42,10 @@ private:
         y_h2.resize(n);
 
         filter(first, last, y_h1.begin());
-//        std::reverse(y_h1.begin(), y_h1.end());
+        std::reverse(y_h1.begin(), y_h1.end());
         filter(y_h1.begin(), y_h1.end(), y_h2.begin());
 
-//        std::transform(y_h2.rbegin(), y_h2.rend(), dst, std::ptr_fun(RealTypeTraits<real_t>::toInt16));
+        std::transform(y_h2.rbegin(), y_h2.rend(), dst, std::ptr_fun(RealTypeTraits<real_t>::toInt16));
     }
 
     template <typename in_T, typename out_T>
@@ -54,8 +54,8 @@ private:
                 out_T dst)
     {
         const real_t zero = 0;
-        std::copy(first, first + filter_size, dst);
-        dst += filter_size;
+//        std::copy(first, first + filter_size, dst);
+//        dst += filter_size;
         last -= filter_size;
         for (; first != last; ++first, ++dst) {
 
