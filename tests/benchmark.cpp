@@ -24,7 +24,7 @@ qint32 angleDetectorBenchmark(const QString& filename, size_t frameSize)
     qDebug() << "Bytes count in frame: " <<  bytesCount;
 
     const double micrDist = 10.0;
-    const int iterCount = 100;
+    const int iterCount = 2500;
 
     clock_t c1 = clock();
     for (int i = 0; i < iterCount; ++i) {

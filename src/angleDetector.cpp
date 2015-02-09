@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 
 #include "include/internal/utils.h"
 
@@ -16,27 +17,29 @@ long long dot_product(const sample_t* x, const sample_t* y, size_t n)
 
 int conv_peak(const sample_t* u, const sample_t* v, size_t n)
 {
-    size_t L = 40;
-    size_t conv_len = 2 * L + 1;
-    long long* conv = new long long[conv_len];
+    const size_t L = 40;
+    const size_t frameSize = 2 * L + 1;
+    const size_t windowSize = 512;
 
-    // to do: reduce complexity of computations
-    // calculate 1 dot product instead of 80 and then update it
-    for (int i = -L; i <= 0; i++) {
-        conv[i + L]  = dot_product(v, u - i, n + i);
+    long long conv[frameSize];
+
+    n -= frameSize;
+
+    while (windowSize < n) {
+        for (size_t i = 0; i <= frameSize; i++) {
+//            conv[i] += std::inner_product(v, v + windowSize, u + i, 0ll);
+            for (size_t j = 0; j < windowSize; ++j) {
+                conv[i] += u[i + j] * v[j];
+            }
+        }
+        v += windowSize;
+        u += windowSize;
+        n -= windowSize;
     }
-    for (int i = 1; i <= L; i++) {
-        conv[i + L] = dot_product(v + i, u, n - i);
-    }
 
-//    debug_print("conv.test", conv, conv_len);
+    long long* max_conv = std::max_element(conv, conv + frameSize);
 
-    long long* max = std::max_element(conv, conv + conv_len);
-    int d = max - conv;
-
-    delete[] conv;
-
-    return d - L;
+    return (max_conv - conv) - L;
 }
 
 double AngleDetector::getAngle(const AudioBuffer& signal1, const AudioBuffer& signal2, double micrDist)
