@@ -12,19 +12,21 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
 {
     const size_t L = 40;
     const size_t frameSize = 2 * L + 1;
-    const size_t windowSize = 128;
+    const size_t windowSize = 512; // n - frameSize;
 
-    long long conv[frameSize];
+    long long conv[frameSize] = {0};
 
     n -= frameSize;
+    v += L;
 
     int result = 0;
     int num = 1;
     while (windowSize < n) {
-        for (size_t i = 0; i <= frameSize; i++) {
+        for (size_t i = 0; i < frameSize; i++) {
 //            conv[i] += std::inner_product(v, v + windowSize, u + i, 0ll);
             for (size_t j = 0; j < windowSize; ++j) {
                 conv[i] += u[i + j] * v[j];
+//                conv[frameSize - i - 1] += v[j] * u[i + j];
             }
         }
         v += windowSize;
@@ -42,7 +44,7 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
             auto end = map.rbegin();
             std::advance(end, 3);
             for (auto itr = map.rbegin(); itr != end; ++itr) {
-                result = itr->second - L;
+                result = frameSize - itr->second - 1 - L;
 
                 qDebug() << "Hypothesis #" << num << " ; Top #" << k << " : " << result;
                 ++k;
@@ -52,9 +54,10 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
         }
     }
 
-    result = (std::max_element(conv, conv + frameSize) - conv) - L;
+    long long* max_conv = std::max_element(conv, conv + frameSize);
+    size_t pos = frameSize - (max_conv - conv) - 1;
 
-    return result;
+    return pos - L;
 }
 
 double AngleDetector::getAngle(const AudioBuffer& signal1, const AudioBuffer& signal2, double micrDist)

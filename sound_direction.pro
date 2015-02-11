@@ -60,5 +60,5 @@ HEADERS += \
     tests/tests.h
 
 CONFIG += c++11
-QMAKE_CXXFLAGS += -std=c++11 -g
+QMAKE_CXXFLAGS += -std=c++11 -g -Wall -Wextra
 
