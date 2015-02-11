@@ -18,6 +18,11 @@ if [ -d "$DEST" ]; then
 fi
 mkdir "$DEST"
 
+# remove file with previous results
+if [ -d "$RES_FILE" ]; then
+    rm "$RES_FILE"
+fi
+
 # iterate over test files
 FILES="$DIR""*.wav"
 
