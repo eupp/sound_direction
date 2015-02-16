@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "include/internal/utils.h"
+#include "include/internal/debugUtils.h"
 
 long long dot_product(const sample_t* x, const sample_t* y, size_t n)
 {
@@ -29,7 +30,7 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
         conv[i + L] = dot_product(v + i, u, n - i);
     }
 
-//    debug_print("conv.test", conv, conv_len);
+    dprint_sequence("conv.test", conv, conv + conv_len);
 
     long long* max = std::max_element(conv, conv + conv_len);
     int d = max - conv;

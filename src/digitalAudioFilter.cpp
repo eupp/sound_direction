@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "include/internal/realTypeTraits.h"
+#include "include/internal/debugUtils.h"
 
 
 DigitalAudioFilter::DigitalAudioFilter():

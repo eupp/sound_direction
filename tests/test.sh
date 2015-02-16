@@ -28,6 +28,7 @@ FILES="$DIR""*.wav"
 
 for FILE in $FILES
 do
+    # launch application on test file
     ANGLE=` $APP_PATH./sound_direction listen-file -c $DIST -f $FILE `
     
     # extract name of file 
@@ -41,9 +42,18 @@ do
     echo $STR >> $RES_FILE
 
     # move files with graphs data
-    TEST_EXT="*.test"    
-    if [ `find "$APP_PATH" -maxdepth 1 -type f -name "$TEST_EXT" | wc -l` != 0 ]; then 
-        mv "$APP_PATH"$TEST_EXT "$DESTDIR"
+    TEST_PATH="./"
+    TEST_EXT="*.test"
+    GRAPH_EXT="*.png"    
+    if [ `find "$TEST_PATH" -maxdepth 1 -type f -name "$TEST_EXT" | wc -l` != 0 ]; then 
+        # for each .test file plot graph
+        for GRAPH in "$TEST_PATH"$TEST_EXT
+        do
+            python ./plot.py $GRAPH            
+            rm $GRAPH
+        done
+
+        mv "$TEST_PATH"$GRAPH_EXT "$DESTDIR"
     fi 
         
 done
