@@ -17,6 +17,7 @@
 #include "include/internal/audioCaptureFilter.h"
 #include "include/internal/trikAudioDeviceManager.h"
 #include "include/internal/thresholdVadFilter.h"
+#include "include/internal/debugUtils.h"
 
 #include "tests/benchmark.h"
 
@@ -226,16 +227,16 @@ bool TrikSoundApplication::listenWavFile()
     AudioBuffer chl1 = buf.leftChannel();
     AudioBuffer chl2 = buf.rightChannel();
 
-//    debug_print("ch1.test", (sample_t*) chl1.data(), chl1.sampleCount());
-//    debug_print("ch2.test", (sample_t*) chl2.data(), chl2.sampleCount());
+    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
+    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
 
     DigitalAudioFilter filter;
     AudioBuffer filt1 = filter.input(chl1);
     AudioBuffer filt2 = filter.input(chl2);
 
 
-//    debug_print("filt1.test", (sample_t*) filt1.data(), filt1.sampleCount());
-//    debug_print("filt2.test", (sample_t*) filt2.data(), filt2.sampleCount());
+    dprint_sequence("filt1.test", (sample_t*) filt1.data(), (sample_t*) filt1.data() + filt1.sampleCount());
+    dprint_sequence("filt2.test", (sample_t*) filt2.data(), (sample_t*) filt2.data() + filt2.sampleCount());
 
     AngleDetector detector;
     double angle = 0;

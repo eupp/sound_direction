@@ -1,8 +1,5 @@
 #include "include/internal/digitalAudioFilter.h"
 
-#include <algorithm>
-#include <cassert>
-
 AudioBuffer DigitalAudioFilter::input(const AudioBuffer& buf)
 {
     // to do: check is buffer in mono/stereo format

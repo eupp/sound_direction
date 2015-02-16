@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "include/internal/utils.h"
+#include "include/internal/debugUtils.h"
 
 int conv_peak(const sample_t* u, const sample_t* v, size_t n)
 {
@@ -53,6 +54,8 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
             qDebug() << " ";
         }
     }
+
+    dprint_sequence("conv.test", conv, conv + conv_len);
 
     long long* max_conv = std::max_element(conv, conv + frameSize);
     size_t pos = frameSize - (max_conv - conv) - 1;
