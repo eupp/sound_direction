@@ -55,7 +55,7 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
         }
     }
 
-    dprint_sequence("conv.test", conv, conv + conv_len);
+    dprint_sequence("conv.test", conv, conv + frameSize);
 
     long long* max_conv = std::max_element(conv, conv + frameSize);
     size_t pos = frameSize - (max_conv - conv) - 1;

@@ -3,6 +3,8 @@
 
 #include <array>
 
+#include <QDebug>
+
 #include "include/internal/types.h"
 #include "include/internal/audioBuffer.h"
 #include "include/internal/iAudioFilter.h"
@@ -54,7 +56,7 @@ private:
                 out_T dst)
     {
         const real_t zero = 0;
-//        std::copy(first, first + filter_size, dst);
+        std::fill(dst, dst + filter_size, zero);
 //        dst += filter_size;
         last -= filter_size;
         for (; first != last; ++first, ++dst) {
@@ -64,13 +66,7 @@ private:
 
             auto x = std::inner_product(b.begin(), b.end(), first, zero);
             auto y = std::inner_product(a.begin(), a.end(), dst, zero);
-            dst[filter_size] = x - y;
-
-//            size_t j_to = std::min<int>(i, filter_size - 1);
-//            for (size_t j = 0; j <= j_to; j++) {
-//                dst[j_to] += b[j] * first[j];
-//                dst[j_to] -= a[j] * dst[j];
-//            }
+            dst[filter_size - 1] = x - y;
         }
         std::copy(first, first + filter_size, dst);
     }

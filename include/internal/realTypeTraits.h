@@ -19,6 +19,16 @@ public:
     {
         return (qint32) val;
     }
+
+    static float toFloat(T val)
+    {
+        return (float) val;
+    }
+
+    static double toDouble(T val)
+    {
+        return (double) val;
+    }
 };
 
 template <>
@@ -33,6 +43,16 @@ public:
     static qint32 toInt32(fixed_point val)
     {
         return val.to_int();
+    }
+
+    static float toFloat(fixed_point val)
+    {
+        return val.to_float();
+    }
+
+    static double toDouble(fixed_point val)
+    {
+        return val.to_double();
     }
 };
 
