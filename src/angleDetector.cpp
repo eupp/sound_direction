@@ -22,7 +22,7 @@ int conv_peak(const sample_t* u, const sample_t* v, size_t n)
 
     int result = 0;
     int num = 1;
-    while (windowSize < n) {
+    while (windowSize <= n) {
         for (size_t i = 0; i < frameSize; i++) {
 //            conv[i] += std::inner_product(v, v + windowSize, u + i, 0ll);
             for (size_t j = 0; j < windowSize; ++j) {
