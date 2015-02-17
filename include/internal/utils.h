@@ -6,7 +6,6 @@
 
 #include <QtGlobal>
 #include <QAudioFormat>
-#include <QDebug>
 
 inline qint64 bytesForDuration(qint64 duration, const QAudioFormat& format)
 {
