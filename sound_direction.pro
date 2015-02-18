@@ -31,7 +31,6 @@ SOURCES += \
     src/audioCaptureFilter.cpp \
     src/thresholdVadFilter.cpp \
     src/digitalAudioFilter.cpp \
-    src/angleFilter.cpp \
     tests/benchmark.cpp
 
 include(deployment.pri)
@@ -55,10 +54,10 @@ HEADERS += \
     include/internal/audioPipe.h \
     include/internal/thresholdVadFilter.h \
     include/internal/digitalAudioFilter.h \
-    include/internal/angleFilter.h \
     tests/benchmark.h \
     include/internal/debugUtils.h \
-    include/internal/angleDetectorImpl.h
+    include/internal/angleDetectorImpl.h \
+    include/internal/DigitalAudioFilterImpl.h
 
 CONFIG += c++11
 QMAKE_CXXFLAGS += -std=c++11 -g -Wall -Wextra

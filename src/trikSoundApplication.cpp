@@ -12,7 +12,6 @@
 #include "include/internal/utils.h"
 #include "include/internal/wavfile.h"
 #include "include/internal/digitalAudioFilter.h"
-#include "include/internal/angleFilter.h"
 #include "include/internal/audioPipe.h"
 #include "include/internal/audioCaptureFilter.h"
 #include "include/internal/trikAudioDeviceManager.h"
@@ -209,70 +208,70 @@ void TrikSoundApplication::parseArgs()
 
 bool TrikSoundApplication::listenWavFile()
 {
-    WavFile file(mFilename);
-    if (!file.open(WavFile::ReadOnly)) {
-        mOut << "Cannot open file " << mFilename.toAscii().data() << endl;
-        return false;
-    }
+//    WavFile file(mFilename);
+//    if (!file.open(WavFile::ReadOnly)) {
+//        mOut << "Cannot open file " << mFilename.toAscii().data() << endl;
+//        return false;
+//    }
 
-    // offset 1000 samles
-    const int offset = 1000;
-    if (file.sampleCount() < offset) {
-        mOut << "File is too short" << endl;
-        return false;
-    }
-    file.seek(offset);
+//    // offset 1000 samles
+//    const int offset = 1000;
+//    if (file.sampleCount() < offset) {
+//        mOut << "File is too short" << endl;
+//        return false;
+//    }
+//    file.seek(offset);
 
-    AudioBuffer buf = file.readAll();
-    AudioBuffer chl1 = buf.leftChannel();
-    AudioBuffer chl2 = buf.rightChannel();
+//    AudioBuffer buf = file.readAll();
+//    AudioBuffer chl1 = buf.leftChannel();
+//    AudioBuffer chl2 = buf.rightChannel();
 
-    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
-    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
+//    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
+//    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
 
-    DigitalAudioFilter filter;
-    AudioBuffer filt1 = filter.input(chl1);
-    AudioBuffer filt2 = filter.input(chl2);
-
-
-    dprint_sequence("filt1.test", (sample_t*) filt1.data(), (sample_t*) filt1.data() + filt1.sampleCount());
-    dprint_sequence("filt2.test", (sample_t*) filt2.data(), (sample_t*) filt2.data() + filt2.sampleCount());
-
-    AngleDetector detector;
-    double angle = 0;
-    try {
-        angle = detector.getAngle(filt1, filt2, mMicrDist);
-    }
-    catch (AngleDetector::IncorrectSignals& exc) {
-        mOut << "Internal error occurred" << endl;
-        return false;
-    }
+//    DigitalAudioFilter filter;
+//    AudioBuffer filt1 = filter.input(chl1);
+//    AudioBuffer filt2 = filter.input(chl2);
 
 
-//    out << "Angle: " << angle << endl;
-    mOut << angle << endl;
+//    dprint_sequence("filt1.test", (sample_t*) filt1.data(), (sample_t*) filt1.data() + filt1.sampleCount());
+//    dprint_sequence("filt2.test", (sample_t*) filt2.data(), (sample_t*) filt2.data() + filt2.sampleCount());
+
+//    AngleDetector detector;
+//    double angle = 0;
+//    try {
+//        angle = detector.getAngle(filt1, filt2, mMicrDist);
+//    }
+//    catch (AngleDetector::IncorrectSignals& exc) {
+//        mOut << "Internal error occurred" << endl;
+//        return false;
+//    }
+
+
+////    out << "Angle: " << angle << endl;
+//    mOut << angle << endl;
 
     return true;
 }
 
 void TrikSoundApplication::listen()
 {
-    try {
-        initAudioDevice();
-    }
-    catch (TrikSoundException& exc) {
-        mOut << exc.what();
-        return;
-    }
+//    try {
+//        initAudioDevice();
+//    }
+//    catch (TrikSoundException& exc) {
+//        mOut << exc.what();
+//        return;
+//    }
 
-    mCapture = QSharedPointer<IAudioFilter>(new AudioCaptureFilter(mDeviceManager,
-                                            (mDeviceManager->audioFormat().sampleRate() / 1000) * mFrameLength));
-    mDetector = QSharedPointer<IAudioFilter>(new AngleFilter(mMicrDist, mThreshold));
+//    mCapture = QSharedPointer<IAudioFilter>(new AudioCaptureFilter(mDeviceManager,
+//                                            (mDeviceManager->audioFormat().sampleRate() / 1000) * mFrameLength));
+//    mDetector = QSharedPointer<IAudioFilter>(new AngleFilter(mMicrDist, mThreshold));
 
-    connect(dynamic_cast<QObject*>(mCapture.data()), SIGNAL(output(AudioBuffer)),
-            dynamic_cast<QObject*>(mDetector.data()), SLOT(input(AudioBuffer)));
+//    connect(dynamic_cast<QObject*>(mCapture.data()), SIGNAL(output(AudioBuffer)),
+//            dynamic_cast<QObject*>(mDetector.data()), SLOT(input(AudioBuffer)));
 
-    mDeviceManager->start();
+//    mDeviceManager->start();
 
 }
 
@@ -297,9 +296,14 @@ void TrikSoundApplication::record()
 
 void TrikSoundApplication::benchmark()
 {
-    qint32 res = angleDetectorBenchmark(mFilename, mDuration);
+//    qint32 res = angleDetectorBenchmark(mFilename, mDuration);
 
-    mOut << "Benchmark result: " << res << endl;
+    ofstream out;
+    out.open("testWindow.test");
+
+    testWindowHandler(mFilename, out, mDuration);
+
+//    mOut << "Benchmark result: " << res << endl;
 }
 
 void TrikSoundApplication::initAudioDevice()

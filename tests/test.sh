@@ -29,8 +29,9 @@ FILES="$DIR""*.wav"
 for FILE in $FILES
 do
     # launch application on test file
-    ANGLE=` $APP_PATH./sound_direction listen-file -c $DIST -f $FILE `
-    
+    #ANGLE=` $APP_PATH./sound_direction listen-file -c $DIST -f $FILE `
+    ANGLE=` $APP_PATH./sound_direction benchmark -f "$FILE" -d 0 `
+
     # extract name of file 
     FILENAME=$(basename "$FILE" | cut -d'.' -f1)
     DESTDIR="$DEST/$FILENAME"
