@@ -4,6 +4,7 @@
 #include <vector>
 #include <ctime>
 #include <iomanip>
+#include <string>
 
 #include <QDebug>
 
@@ -60,7 +61,7 @@ qint32 angleDetectorBenchmark(const QString& filename, size_t frameSize)
         filter.handleWindow(chl1.begin(), chl1.end());
         filter.handleWindow(chl2.begin(), chl2.end());
         detector.handleWindow(chl1.begin(), chl1.end(), chl2.begin(), chl2.end());
-        double angle = detector.getAngle();
+        double angle = detector.getAngle(1);
     }
     clock_t c2 = clock();
 
@@ -106,26 +107,27 @@ void testWindowHandler(const QString& filename, std::ostream& out, size_t durati
     chl1.resize(chl1.size() - rpadd);
     chl2.resize(chl2.size() - rpadd);
 
-    detector.handleWindow(chl1.begin(), chl1.end(), chl2.begin(), chl2.end());
-    double angle = detector.getAngle();
-
-    out << "Angle (whole file): " << fixed << setprecision(4) << angle << endl;
-
-    AngleDetector<sample_vector> windowDetector(fmt, 10.2);
-
     int signalSize = chl1.size();
     const int windowSize = 512;
 
-    out << endl << "Window size: " << windowSize << endl << endl;
+//    out << endl << "Window size: " << windowSize << endl << endl;
+
 
     auto u = chl1.begin();
     auto v = chl2.begin();
     int windowNum = 1;
+    const string delim = "";
     while (windowSize <= signalSize) {
-        windowDetector.handleWindow(u, u + windowSize, v, v + windowSize);
-        double angle = windowDetector.getAngle();
 
-        out << "window #" << windowNum << "; hypothesis: " << angle << endl;
+        detector.handleWindow(u, u + windowSize, v, v + windowSize);
+
+        for (int i = 1; i <= windowNum; ++i) {
+            double angle = detector.getAngle(i);
+            out << fixed << setprecision(4) << /*setw(8) <<*/ angle << delim << " ";
+        }
+        out << endl;
+
+//        out << "window #" << windowNum << "; hypothesis: " << angle << endl;
 
         ++windowNum;
         signalSize -= windowSize;
