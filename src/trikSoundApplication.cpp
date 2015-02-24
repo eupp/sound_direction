@@ -17,6 +17,7 @@
 #include "include/internal/trikAudioDeviceManager.h"
 #include "include/internal/thresholdVadFilter.h"
 #include "include/internal/debugUtils.h"
+#include "include/internal/angleDetector.h"
 
 #include "tests/benchmark.h"
 
@@ -208,48 +209,47 @@ void TrikSoundApplication::parseArgs()
 
 bool TrikSoundApplication::listenWavFile()
 {
-//    WavFile file(mFilename);
-//    if (!file.open(WavFile::ReadOnly)) {
-//        mOut << "Cannot open file " << mFilename.toAscii().data() << endl;
-//        return false;
-//    }
+    WavFile file(mFilename);
+    if (!file.open(WavFile::ReadOnly)) {
+        mOut << "Cannot open file " << mFilename.toAscii().data() << endl;
+        return false;
+    }
 
-//    // offset 1000 samles
-//    const int offset = 1000;
-//    if (file.sampleCount() < offset) {
-//        mOut << "File is too short" << endl;
-//        return false;
-//    }
-//    file.seek(offset);
+    // offset 1000 samles
+    const int offset = 1000;
+    if (file.sampleCount() < offset) {
+        mOut << "File is too short" << endl;
+        return false;
+    }
+    file.seek(offset);
 
-//    AudioBuffer buf = file.readAll();
-//    AudioBuffer chl1 = buf.leftChannel();
-//    AudioBuffer chl2 = buf.rightChannel();
+    AudioBuffer buf = file.readAll();
+    AudioBuffer chl1 = buf.leftChannel();
+    AudioBuffer chl2 = buf.rightChannel();
 
-//    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
-//    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
+    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
+    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
 
-//    DigitalAudioFilter filter;
-//    AudioBuffer filt1 = filter.input(chl1);
-//    AudioBuffer filt2 = filter.input(chl2);
+    vector<sample_t> vchl1((sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
+    vector<sample_t> vchl2((sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
+
+    DigitalAudioFilter<vector<sample_t>> filter;
+    filter.handleWindow(vchl1.begin(), vchl1.end());
+    filter.handleWindow(vchl2.begin(), vchl2.end());
 
 
-//    dprint_sequence("filt1.test", (sample_t*) filt1.data(), (sample_t*) filt1.data() + filt1.sampleCount());
-//    dprint_sequence("filt2.test", (sample_t*) filt2.data(), (sample_t*) filt2.data() + filt2.sampleCount());
+    dprint_sequence("filt1.test", vchl1.begin(), vchl1.end());
+    dprint_sequence("filt2.test", vchl2.begin(), vchl2.end());
 
-//    AngleDetector detector;
-//    double angle = 0;
-//    try {
-//        angle = detector.getAngle(filt1, filt2, mMicrDist);
-//    }
-//    catch (AngleDetector::IncorrectSignals& exc) {
-//        mOut << "Internal error occurred" << endl;
-//        return false;
-//    }
+    AngleDetector<vector<sample_t>> detector(file.audioFormat(), mMicrDist);
+    double angle = 0;
+    detector.handleWindow(vchl1.begin(), vchl1.end(),
+                          vchl2.begin(), vchl2.end());
+    angle = detector.getAngle(1);
 
 
 ////    out << "Angle: " << angle << endl;
-//    mOut << angle << endl;
+    mOut << angle << endl;
 
     return true;
 }

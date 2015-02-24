@@ -4,12 +4,21 @@ from os.path import basename, splitext
 
 if __name__ == "__main__":
 
-    src = argv[1]
-    dst = argv[2]
-    col = int(argv[3])
+    try:
+        src = argv[1]
+    except IndexError:
+        print "Filename is missing"
+        exit()
 
-    if dst is None:
+    try:
+        dst = argv[2]
+    except IndexError:
         dst = splitext(basename(argv[1]))[0]
+
+    try:
+        col = int(argv[3])
+    except IndexError:
+        col = None
 
     fsrc = open(src)
 
