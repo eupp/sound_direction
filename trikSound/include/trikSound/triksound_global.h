@@ -1,0 +1,12 @@
+#ifndef TRIKSOUND_GLOBAL_H
+#define TRIKSOUND_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(TRIKSOUND_LIBRARY)
+#  define TRIKSOUNDSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define TRIKSOUNDSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // TRIKSOUND_GLOBAL_H
