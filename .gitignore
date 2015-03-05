@@ -2,5 +2,8 @@ Makefile
 *.pro.user
 *.autosave
 tests/wav/*
+bin/*
+.*
+!/.gitignore
 
 
