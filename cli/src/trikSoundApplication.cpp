@@ -1,4 +1,4 @@
-#include "include/internal/trikSoundApplication.h"
+#include "trikSoundApplication.h"
 
 #include <iostream>
 
@@ -19,7 +19,7 @@
 //#include "trikSound/debugUtils.h"
 #include "trikSound/angleDetector.h"
 
-//#include "tests/benchmark.h"
+#include "benchmark.h"
 
 using namespace std;
 using namespace fpml;
@@ -302,7 +302,7 @@ void TrikSoundApplication::benchmark()
     ofstream out;
     out.open("testWindow.test");
 
-//    testWindowHandler(mFilename, out, mDuration);
+    testWindowHandler(mFilename, out, mDuration);
 
 //    mOut << "Benchmark result: " << res << endl;
 }

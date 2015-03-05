@@ -12,9 +12,11 @@ TEMPLATE = app
 
 SOURCES += \
     src/main.cpp \
-    src/trikSoundApplication.cpp
+    src/trikSoundApplication.cpp \
+    src/benchmark.cpp
 
 HEADERS += \
-    include/internal/trikSoundApplication.h
+    include/internal/trikSoundApplication.h \
+    include/internal/benchmark.h
 
 uses(trikSound)

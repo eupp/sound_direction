@@ -6,7 +6,7 @@
 
 #include <boost/circular_buffer.hpp>
 
-#include "debugUtils.h"
+#include "../trikSound/debugUtils.h"
 
 namespace trikSound {
 
@@ -113,8 +113,6 @@ typename AngleDetectorImpl<C>::corr_array AngleDetectorImpl<C>::calcCorrelation(
             corr[i] += u[i + j] * v[j];
         }
     }
-
-    dprint_sequence("corr_orig.test", corr.begin(), corr.end());
 
     return corr;
 }

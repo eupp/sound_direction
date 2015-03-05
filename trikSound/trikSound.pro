@@ -40,5 +40,7 @@ HEADERS += \
     include/trikSound/trikSoundException.h \
     include/trikSound/types.h \
     include/trikSound/wavfile.h \
-    include/trikSound/triksound_global.h
+    include/trikSound/triksound_global.h \
+    include/trikSound/debugUtils.h \
+    include/trikSound/utils.h
 

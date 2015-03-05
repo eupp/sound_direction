@@ -1,4 +1,4 @@
-#include "tests/benchmark.h"
+#include "benchmark.h"
 
 #include <utility>
 #include <vector>
@@ -8,14 +8,16 @@
 
 #include <QDebug>
 
-#include "include/internal/angleDetector.h"
-#include "include/internal/audioBuffer.h"
-#include "include/internal/wavfile.h"
-#include "include/internal/utils.h"
-#include "include/internal/debugUtils.h"
-#include "include/internal/digitalAudioFilter.h"
+#include "trikSound/angleDetector.h"
+#include "trikSound/audioBuffer.h"
+#include "trikSound/wavfile.h"
+#include "trikSound/types.h"
+#include "trikSound/debugUtils.h"
+#include "trikSound/utils.h"
+#include "trikSound/digitalAudioFilter.h"
 
 using namespace std;
+using namespace trikSound;
 
 typedef vector<sample_t> sample_vector;
 
