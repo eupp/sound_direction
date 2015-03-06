@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <QIODevice>
 #include <QSharedPointer>
 
@@ -8,11 +7,11 @@
 
 namespace trikSound {
 
-class CircularBuffer : public QIODevice
+class CircularBufferQAdapter : public QIODevice
 {
     Q_OBJECT
 public:
-    CircularBuffer(size_t n, QObject *parent = 0);
+    CircularBufferQAdapter(size_t n, QObject *parent = 0);
 
     bool isSequential() const;
 

@@ -14,10 +14,10 @@ SOURCES += \
     src/audioBuffer.cpp \
     src/audioCaptureFilter.cpp \
     src/audioDeviceManager.cpp \
-    src/circularBuffer.cpp \
     src/thresholdVadFilter.cpp \
     src/trikAudioDeviceManager.cpp \
-    src/wavfile.cpp
+    src/wavfile.cpp \
+    src/circularBufferQAdapter.cpp
 
 HEADERS += \
     triksound_global.h \
@@ -42,5 +42,6 @@ HEADERS += \
     include/trikSound/wavfile.h \
     include/trikSound/triksound_global.h \
     include/trikSound/debugUtils.h \
-    include/trikSound/utils.h
+    include/trikSound/utils.h \
+    include/trikSound/circularBufferQAdapter.h
 

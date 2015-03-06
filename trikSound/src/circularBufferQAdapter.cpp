@@ -1,10 +1,10 @@
-#include "circularBuffer.h"
+#include "circularBufferQAdapter.h"
 
 #include <QDebug>
 
 using namespace trikSound;
 
-CircularBuffer::CircularBuffer(size_t n, QObject *parent) :
+CircularBufferQAdapter::CircularBufferQAdapter(size_t n, QObject *parent) :
     QIODevice(parent)
   , mBuffer(new boost::circular_buffer<char>(n))
   , mPos(0)
@@ -12,18 +12,18 @@ CircularBuffer::CircularBuffer(size_t n, QObject *parent) :
   , mBytesAvailable(0)
 {}
 
-bool CircularBuffer::isSequential() const
+bool CircularBufferQAdapter::isSequential() const
 {
     return true;
 }
 
-bool CircularBuffer::open(QIODevice::OpenMode mode)
+bool CircularBufferQAdapter::open(QIODevice::OpenMode mode)
 {
     setOpenMode(mode);
     return true;
 }
 
-void CircularBuffer::close()
+void CircularBufferQAdapter::close()
 {
     emit aboutToClose();
     setErrorString("");
@@ -31,76 +31,76 @@ void CircularBuffer::close()
     setOpenMode(NotOpen);
 }
 
-qint64 CircularBuffer::pos() const
+qint64 CircularBufferQAdapter::pos() const
 {
     return 0;
 }
 
-qint64 CircularBuffer::size() const
+qint64 CircularBufferQAdapter::size() const
 {
     return mBuffer->size();
 }
 
-bool CircularBuffer::seek(qint64 pos)
+bool CircularBufferQAdapter::seek(qint64 pos)
 {
     Q_UNUSED(pos);
     return false;
 }
 
-bool CircularBuffer::atEnd() const
+bool CircularBufferQAdapter::atEnd() const
 {
     // circular buffer has no end
     return false;
 }
 
-bool CircularBuffer::reset()
+bool CircularBufferQAdapter::reset()
 {
     return false;
 }
 
-size_t CircularBuffer::capacity()
+size_t CircularBufferQAdapter::capacity()
 {
     return mBuffer->capacity();
 }
 
-void CircularBuffer::setCapacity(size_t n)
+void CircularBufferQAdapter::setCapacity(size_t n)
 {
     mBuffer->set_capacity(n);
 }
 
-qint64 CircularBuffer::bytesAvailable() const
+qint64 CircularBufferQAdapter::bytesAvailable() const
 {
     return mBytesAvailable + QIODevice::bytesAvailable();
 }
 
-qint64 CircularBuffer::bytesToWrite() const
+qint64 CircularBufferQAdapter::bytesToWrite() const
 {
     return 0;
 }
 
-bool CircularBuffer::canReadLine() const
+bool CircularBufferQAdapter::canReadLine() const
 {
     return false;
 }
 
-bool CircularBuffer::waitForReadyRead(int msecs)
+bool CircularBufferQAdapter::waitForReadyRead(int msecs)
 {
     Q_UNUSED(msecs);
     return true;
 }
 
-bool CircularBuffer::waitForBytesWritten(int msecs)
+bool CircularBufferQAdapter::waitForBytesWritten(int msecs)
 {
     Q_UNUSED(msecs);
     return true;
 }
 
-qint64 CircularBuffer::reserve() const
+qint64 CircularBufferQAdapter::reserve() const
 {
     return mBuffer->reserve();
 }
 
-void CircularBuffer::clear()
+void CircularBufferQAdapter::clear()
 {
     mBuffer->clear();
     mBytesAvailable = 0;
@@ -108,7 +108,7 @@ void CircularBuffer::clear()
     QIODevice::seek(QIODevice::pos() + QIODevice::bytesAvailable());
 }
 
-qint64 CircularBuffer::readData(char* data, qint64 maxlen)
+qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
 {
     qint64 len = qMin(maxlen, mBytesAvailable);
     std::uninitialized_copy(mBuffer->begin() + mPos, mBuffer->begin() + mPos + len, data);
@@ -117,7 +117,7 @@ qint64 CircularBuffer::readData(char* data, qint64 maxlen)
     return len;
 }
 
-qint64 CircularBuffer::readLineData(char* data, qint64 maxlen)
+qint64 CircularBufferQAdapter::readLineData(char* data, qint64 maxlen)
 {
     int counter = 0;
     char* ch = data;
@@ -135,7 +135,7 @@ qint64 CircularBuffer::readLineData(char* data, qint64 maxlen)
     return counter;
 }
 
-qint64 CircularBuffer::writeData(const char *data, qint64 len)
+qint64 CircularBufferQAdapter::writeData(const char *data, qint64 len)
 {
     int reserve = 0;
     if (mBuffer->reserve() == 0) {

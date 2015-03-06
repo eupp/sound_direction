@@ -7,7 +7,7 @@ AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                        size_t bufCapacity):
     mDeviceInfo(deviceInfo)
   , mInput(deviceInfo, audioFormat)
-  , mBuffer(new CircularBuffer(bufCapacity))
+  , mBuffer(new CircularBufferQAdapter(bufCapacity))
 {
     mBuffer->open(QIODevice::ReadWrite);
 }

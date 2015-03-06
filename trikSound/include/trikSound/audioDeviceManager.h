@@ -6,7 +6,7 @@
 
 #include "triksound_global.h"
 #include "trikSoundException.h"
-#include "circularBuffer.h"
+#include "circularBufferQAdapter.h"
 
 namespace trikSound {
 
@@ -55,7 +55,7 @@ public:
 private:
     QAudioDeviceInfo mDeviceInfo;
     QAudioInput mInput;
-    QSharedPointer<CircularBuffer> mBuffer;
+    QSharedPointer<CircularBufferQAdapter> mBuffer;
 };
 
 }
