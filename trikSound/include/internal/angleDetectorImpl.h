@@ -19,7 +19,7 @@ public:
 
     static const int offset = 40;
     static const int corrSize = 2 * offset + 1;
-    static const size_t historySize = 120;
+    static const size_t historySize = 400;
 
     typedef long long corr_type;
     typedef std::array<corr_type, corrSize> corr_array;

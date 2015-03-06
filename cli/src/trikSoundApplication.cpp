@@ -305,6 +305,8 @@ void TrikSoundApplication::benchmark()
     testWindowHandler(mFilename, out, mDuration);
 
 //    mOut << "Benchmark result: " << res << endl;
+
+    emit finished();
 }
 
 void TrikSoundApplication::initAudioDevice()

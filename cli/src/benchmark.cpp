@@ -96,7 +96,7 @@ void testWindowHandler(const QString& filename, std::ostream& out, size_t durati
     dprint_sequence("channel2.test", chl2.begin(), chl2.end());
 
     DigitalAudioFilter<sample_vector> filter;
-    AngleDetector<sample_vector> detector(fmt, 10.2);
+    AngleDetector<sample_vector> detector(fmt, 7.6);
 
     filter.handleWindow(chl1.begin(), chl1.end());
     filter.handleWindow(chl2.begin(), chl2.end());
@@ -119,6 +119,7 @@ void testWindowHandler(const QString& filename, std::ostream& out, size_t durati
     auto v = chl2.begin();
     int windowNum = 1;
     const string delim = "";
+    const int maxHistoryDepth = 120;
     while (windowSize <= signalSize) {
 
         detector.handleWindow(u, u + windowSize, v, v + windowSize);

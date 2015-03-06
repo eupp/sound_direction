@@ -33,8 +33,8 @@ for FILE in $FILES
 do    
     
     # launch application on test file
-    ANGLE=` "$APP" listen-file -c $DIST -f $FILE `
-    #ANGLE=` "$APP" benchmark -f "$FILE" -d 0 `
+    #ANGLE=` "$APP" listen-file -c $DIST -f $FILE `
+    ANGLE=` "$APP" benchmark -f "$FILE" -d 0 `
 
     # extract name of file 
     FILENAME=$(basename "$FILE" | cut -d'.' -f1)
