@@ -69,7 +69,8 @@ template <typename Iter>
 void AngleDetector<Iter>::handleWindowImpl(Iter first, Iter last)
 {
     try {
-        return mImpl->handleWindowImpl(first, last);
+        mImpl->handleWindowImpl(first, last);
+        return make_pair(first, last);
     }
     catch (AngleDetectorImpl::IncorrectSignalException& exc) {
         throw IncorrectSignalException(exc.what());
