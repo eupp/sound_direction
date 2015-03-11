@@ -2,16 +2,14 @@
 
 #include <QProcess>
 
-#include "circularBuffer.h"
-
 using namespace trikSound;
 
 const int TrikAudioDeviceManager::mMaxVolume = 119;
 
 TrikAudioDeviceManager::TrikAudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                                const QAudioFormat& audioFormat,
-                                               size_t bufCapacity):
-    AudioDeviceManager(deviceInfo, audioFormat, bufCapacity)
+                                               const std::shared_ptr<QIODevice>& buffer):
+    AudioDeviceManager(deviceInfo, audioFormat, buffer)
   , mVolume(1.0)
 {
     QStringList initCommands;

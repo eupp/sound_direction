@@ -6,7 +6,7 @@
 
 using namespace trikSound;
 
-AudioCaptureFilter::AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>& deviceManager,
+AudioCaptureFilter::AudioCaptureFilter(const std::shared_ptr<AudioDeviceManager>& deviceManager,
                                        size_t frameLength,
                                        QObject* parent):
     QObject(parent)
@@ -14,15 +14,15 @@ AudioCaptureFilter::AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>&
   , mBuffer(deviceManager->buffer())
   , mFrameLength(frameLength)
 {
-    size_t minCapacity = 4 * frameLength;
-    if (mDeviceManager->bufferCapacity() < minCapacity) {
-        qDebug() << "Resize AudioDeviceManager internal buffer to fit frameLength of AudioCaptureFilter. "
-                 << "Old size: " << mDeviceManager->bufferCapacity() << "; "
-                 << "New size: " << minCapacity << " bytes";
-        mDeviceManager->setBufferCapacity(minCapacity);
-    }
+//    size_t minCapacity = 4 * frameLength;
+//    if (mDeviceManager->bufferCapacity() < minCapacity) {
+//        qDebug() << "Resize AudioDeviceManager internal buffer to fit frameLength of AudioCaptureFilter. "
+//                 << "Old size: " << mDeviceManager->bufferCapacity() << "; "
+//                 << "New size: " << minCapacity << " bytes";
+//        mDeviceManager->setBufferCapacity(minCapacity);
+//    }
 
-    connect(mBuffer.data(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
+    connect(mBuffer.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
 }
 
 AudioBuffer AudioCaptureFilter::input(const AudioBuffer& buf)

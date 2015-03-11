@@ -4,12 +4,12 @@ using namespace trikSound;
 
 AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                        const QAudioFormat& audioFormat,
-                                       size_t bufCapacity):
+                                       const std::shared_ptr<QIODevice>& buffer):
     mDeviceInfo(deviceInfo)
   , mInput(deviceInfo, audioFormat)
-  , mBuffer(new CircularBufferQAdapter(bufCapacity))
+  , mBuffer(buffer)
 {
-    mBuffer->open(QIODevice::ReadWrite);
+    mBuffer->open(QIODevice::WriteOnly);
 }
 
 QAudioDeviceInfo AudioDeviceManager::deviceInfo() const
@@ -22,24 +22,14 @@ QAudioFormat AudioDeviceManager::audioFormat() const
     return mInput.format();
 }
 
-QSharedPointer<QIODevice> AudioDeviceManager::buffer() const
+std::shared_ptr<QIODevice> AudioDeviceManager::buffer() const
 {
     return mBuffer;
 }
 
-size_t AudioDeviceManager::bufferCapacity() const
-{
-    return mBuffer->capacity();
-}
-
-void AudioDeviceManager::setBufferCapacity(size_t capacity)
-{
-    mBuffer->setCapacity(capacity);
-}
-
 void AudioDeviceManager::start()
 {
-    mInput.start(mBuffer.data());
+    mInput.start(mBuffer.get());
 }
 
 void AudioDeviceManager::stop()

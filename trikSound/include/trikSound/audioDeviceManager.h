@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QObject>
+#include <memory>
+
 #include <QAudioInput>
-#include <QSharedPointer>
 
 #include "triksound_global.h"
 #include "trikSoundException.h"
@@ -30,12 +30,14 @@ public:
         {}
     };
 
-    AudioDeviceManager(const QAudioDeviceInfo& deviceInfo, const QAudioFormat& audioFormat, size_t bufCapacity);
+    AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
+                       const QAudioFormat& audioFormat,
+                       const std::shared_ptr<QIODevice>& buffer);
     virtual ~AudioDeviceManager() {}
 
     QAudioDeviceInfo deviceInfo() const;
     QAudioFormat audioFormat() const;
-    QSharedPointer<QIODevice> buffer() const;
+    std::shared_ptr<QIODevice> buffer() const;
 
     virtual double volume() const {
         return 1.0;
@@ -43,9 +45,6 @@ public:
     virtual void setVolume(double vol) {
         Q_UNUSED(vol);
     }
-
-    size_t bufferCapacity() const;
-    void setBufferCapacity(size_t capacity);
 
     void start();
     void stop();
@@ -55,7 +54,7 @@ public:
 private:
     QAudioDeviceInfo mDeviceInfo;
     QAudioInput mInput;
-    QSharedPointer<CircularBufferQAdapter> mBuffer;
+    std::shared_ptr<QIODevice> mBuffer;
 };
 
 }

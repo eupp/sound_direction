@@ -228,13 +228,13 @@ bool TrikSoundApplication::listenWavFile()
     AudioBuffer chl1 = buf.leftChannel();
     AudioBuffer chl2 = buf.rightChannel();
 
-    dprint_sequence("ch1.test", (sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
-    dprint_sequence("ch2.test", (sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
+    dprint_sequence("ch1.test", (sample_type*) chl1.data(), (sample_type*) chl1.data() + chl1.sampleCount());
+    dprint_sequence("ch2.test", (sample_type*) chl2.data(), (sample_type*) chl2.data() + chl2.sampleCount());
 
-    vector<sample_t> vchl1((sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount());
-    vector<sample_t> vchl2((sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount());
+    vector<sample_type> vchl1((sample_type*) chl1.data(), (sample_type*) chl1.data() + chl1.sampleCount());
+    vector<sample_type> vchl2((sample_type*) chl2.data(), (sample_type*) chl2.data() + chl2.sampleCount());
 
-    DigitalAudioFilter<vector<sample_t>> filter;
+    DigitalAudioFilter<vector<sample_type>> filter;
     filter.handleWindow(vchl1.begin(), vchl1.end());
     filter.handleWindow(vchl2.begin(), vchl2.end());
 
@@ -242,7 +242,7 @@ bool TrikSoundApplication::listenWavFile()
     dprint_sequence("filt1.test", vchl1.begin(), vchl1.end());
     dprint_sequence("filt2.test", vchl2.begin(), vchl2.end());
 
-    AngleDetector<vector<sample_t>> detector(file.audioFormat(), mMicrDist);
+    AngleDetector<vector<sample_type>> detector(file.audioFormat(), mMicrDist);
     double angle = 0;
     detector.handleWindow(vchl1.begin(), vchl1.end(),
                           vchl2.begin(), vchl2.end());
@@ -278,21 +278,21 @@ void TrikSoundApplication::listen()
 
 void TrikSoundApplication::record()
 {
-    try {
-        initAudioDevice();
-    }
-    catch (TrikSoundException& exc) {
-        mOut << exc.what();
-        return;
-    }
+//    try {
+//        initAudioDevice();
+//    }
+//    catch (TrikSoundException& exc) {
+//        mOut << exc.what();
+//        return;
+//    }
 
-    mDeviceManager->setBufferCapacity((mDuration + 10) * mDeviceManager->audioFormat().sampleRate());
+//    mDeviceManager->setBufferCapacity((mDuration + 10) * mDeviceManager->audioFormat().sampleRate());
 
 
-    QTimer::singleShot(mDuration * 1000, this, SLOT(stopRecording()));
-    mDeviceManager->start();
+//    QTimer::singleShot(mDuration * 1000, this, SLOT(stopRecording()));
+//    mDeviceManager->start();
 
-    mOut << "Start recording" << endl;
+//    mOut << "Start recording" << endl;
 }
 
 void TrikSoundApplication::benchmark()
@@ -324,6 +324,9 @@ void TrikSoundApplication::initAudioDevice()
     // 1 MB
     size_t capacity = 1 * 1024 * 1024;
 
+    auto cbPtr = make_shared<boost::circular_buffer<sample_type>>(capacity);
+    auto cbAPtr = make_shared<CircularBufferQAdapter>(cbPtr);
+
     #ifdef TRIK
         mDeviceManager = QSharedPointer<AudioDeviceManager>(new TrikAudioDeviceManager(deviceInfo,
                                                                                       audioFormat,
@@ -331,7 +334,7 @@ void TrikSoundApplication::initAudioDevice()
     #else
         mDeviceManager = QSharedPointer<AudioDeviceManager>(new AudioDeviceManager(deviceInfo,
                                                                                   audioFormat,
-                                                                                  capacity));
+                                                                                  cbAPtr));
     #endif
 }
 

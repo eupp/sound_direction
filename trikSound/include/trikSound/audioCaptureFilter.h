@@ -13,7 +13,7 @@ class TRIKSOUNDSHARED_EXPORT AudioCaptureFilter: public QObject, public IAudioFi
 {
     Q_OBJECT
 public:
-    AudioCaptureFilter(const QSharedPointer<AudioDeviceManager>& deviceManager,
+    AudioCaptureFilter(const std::shared_ptr<AudioDeviceManager>& deviceManager,
                        size_t frameLength,
                        QObject* parent = 0);
 
@@ -24,8 +24,8 @@ public slots:
 private slots:
     void bufferReadyReadHandler();
 private:
-    QSharedPointer<AudioDeviceManager> mDeviceManager;
-    QSharedPointer<QIODevice> mBuffer;
+    std::shared_ptr<AudioDeviceManager> mDeviceManager;
+    std::shared_ptr<QIODevice> mBuffer;
     quint16 mFrameLength;
 };
 

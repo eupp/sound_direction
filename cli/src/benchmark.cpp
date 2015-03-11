@@ -19,7 +19,7 @@
 using namespace std;
 using namespace trikSound;
 
-typedef vector<sample_t> sample_vector;
+typedef vector<sample_type> sample_vector;
 
 pair<sample_vector, sample_vector> readWavToVector(WavFile& file, qint64 samplesNum = -1)
 {
@@ -34,8 +34,8 @@ pair<sample_vector, sample_vector> readWavToVector(WavFile& file, qint64 samples
     sample_vector svector1(chl1.sampleCount());
     sample_vector svector2(chl2.sampleCount());
 
-    std::copy((sample_t*) chl1.data(), (sample_t*) chl1.data() + chl1.sampleCount(), svector1.begin());
-    std::copy((sample_t*) chl2.data(), (sample_t*) chl2.data() + chl2.sampleCount(), svector2.begin());
+    std::copy((sample_type*) chl1.data(), (sample_type*) chl1.data() + chl1.sampleCount(), svector1.begin());
+    std::copy((sample_type*) chl2.data(), (sample_type*) chl2.data() + chl2.sampleCount(), svector2.begin());
 
     return make_pair(svector1, svector2);
 }

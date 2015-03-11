@@ -9,7 +9,7 @@ class TRIKSOUNDSHARED_EXPORT TrikAudioDeviceManager: public AudioDeviceManager
 public:
     TrikAudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                            const QAudioFormat& audioFormat,
-                           size_t bufCapacity);
+                           const std::shared_ptr<QIODevice>& buffer);
 
     double volume() const;
     void setVolume(double vol);
