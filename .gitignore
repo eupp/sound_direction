@@ -4,6 +4,6 @@ Makefile
 tests/wav/*
 bin/*
 .*
-!/.gitignore
+!/.gitignore    
 
 
