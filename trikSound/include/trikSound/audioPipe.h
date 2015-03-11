@@ -4,7 +4,7 @@
 #include <QSharedPointer>
 
 #include "triksound_global.h"
-#include "iAudioFilter.h"
+#include "audioFilter.h"
 
 namespace trikSound {
 

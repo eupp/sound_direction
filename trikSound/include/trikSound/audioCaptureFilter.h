@@ -4,12 +4,12 @@
 #include <QSharedPointer>
 
 #include "triksound_global.h"
-#include "iAudioFilter.h"
+#include "audioFilter.h"
 #include "audioDeviceManager.h"
 
 namespace trikSound {
 
-class TRIKSOUNDSHARED_EXPORT AudioCaptureFilter: public QObject, public IAudioFilter
+class TRIKSOUNDSHARED_EXPORT AudioCaptureFilter: public QObject
 {
     Q_OBJECT
 public:

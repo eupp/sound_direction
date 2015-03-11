@@ -2,25 +2,30 @@
 
 #include <array>
 #include <vector>
+#include <iterator>
+#include <utility>
 
 #include "../trikSound/types.h"
+#include "../trikSound/audioFilter.h"
 #include "realTypeTraits.h"
 
 namespace trikSound {
 
-template <typename C>
+template <typename Iter>
 class DigitalAudioFilterImpl
 {
 public:
 
-    typedef typename C::iterator iterator_type;
-    typedef typename C::const_iterator const_iterator_type;
-
     DigitalAudioFilterImpl();
 
-    void handleWindow(iterator_type first, iterator_type last);
+    AudioFilter::range_type handleWindowImpl(Iter first, Iter last, std::random_access_iterator_tag);
 
 private:
+
+    void filtfilt(Iter first, Iter last);
+
+    template <typename T, typename U>
+    void filter(typename T::const_iterator first, typename T::const_iterator last, typename U::iterator dst);
 
     const static int filter_size = 7;
 
@@ -30,50 +35,48 @@ private:
     filter_coeffs filter_num = {{0.003281, 0.0064564, -0.0032273, -0.0129112, -0.0032273, 0.0064564, 0.003281}};
     filter_coeffs filter_denum = {{0, -4.4221, 8.2622, -8.3659, 4.8404, -1.5142, 0.1999}};
 
-    void filtfilt(iterator_type first, iterator_type last);
-
-    template <typename T, typename U>
-    void filter(typename T::const_iterator first, typename T::const_iterator last, typename U::iterator dst);
+    fsignal_type mTmpSignal1;
+    fsignal_type mTmpSignal2;
 };
 
-template <typename C>
-DigitalAudioFilterImpl<C>::DigitalAudioFilterImpl()
+template <typename Iter>
+DigitalAudioFilterImpl<Iter>::DigitalAudioFilterImpl():
 {
     std::reverse(filter_denum.begin(), filter_denum.end());
     std::reverse(filter_num.begin(), filter_num.end());
 }
 
-template <typename C>
-void DigitalAudioFilterImpl<C>::handleWindow(iterator_type first,
-                                             iterator_type last)
+void DigitalAudioFilterImpl::handleWindowImpl(trikSound::Iter first,
+                                          trikSound::Iter last,
+                                          std::random_access_iterator_tag)
 {
     filtfilt(first, last);
+    return std::make_pair(first, last);
 }
 
-template <typename C>
-void DigitalAudioFilterImpl<C>::filtfilt(iterator_type first, iterator_type last)
+template <typename Iter>
+void DigitalAudioFilterImpl<Iter>::filtfilt(Iter first, Iter last)
 {
-    const size_t n = last - first;
+    const int n = distance(first, last);
 
-    static fsignal_type y_h1(n);
-    static fsignal_type y_h2(n);
-    y_h1.resize(n);
-    y_h2.resize(n);
+    mTmpSignal1.resize(n);
+    mTmpSignal2.resize(n);
 
-    filter<C, fsignal_type>(first, last, y_h1.begin());
-    std::reverse(y_h1.begin(), y_h1.end());
-    filter<fsignal_type, fsignal_type>(y_h1.begin(), y_h1.end(), y_h2.begin());
+    filterSignal(first, last, mTmpSignal1.begin());
+    std::reverse(mTmpSignal1.begin(), mTmpSignal1.end());
+    filterSignal(mTmpSignal1.begin(), mTmpSignal1.end(), mTmpSignal2.begin());
 
-    std::transform(y_h2.rbegin(), y_h2.rend(), first, std::ptr_fun(RealTypeTraits<real_t>::toInt16));
+    std::transform(mTmpSignal2.rbegin(), mTmpSignal2.rend(), first, std::ptr_fun(RealTypeTraits<real_t>::toInt16));
 }
 
-template <typename C>
-template <typename T, typename U>
-void DigitalAudioFilterImpl<C>::filter(typename T::const_iterator first,
-                                       typename T::const_iterator last,
-                                       typename U::iterator dst)
+template <typename Iter>
+template <typename InputIter, typename OutputIter>
+void DigitalAudioFilterImpl<Iter>::filterSignal(InputIter first,
+                                                InputIter last,
+                                                OutputIter dst)
 {
     const real_t zero = 0;
+    // fill first bytes with zeros
     std::fill(dst, dst + filter_size, zero);
     last -= filter_size;
 
@@ -86,6 +89,7 @@ void DigitalAudioFilterImpl<C>::filter(typename T::const_iterator first,
         dst[filter_size - 1] = x - y;
     }
 
+    // fill last bytes with original samples
     std::copy(first, first + filter_size, dst);
 }
 

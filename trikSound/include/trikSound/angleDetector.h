@@ -5,48 +5,75 @@
 #include <QAudioFormat>
 
 #include "triksound_global.h"
-#include "types.h"
+#include "audioFilter.h"
 #include "angleDetectorImpl.h"
+#include "types.h"
 
 namespace trikSound {
 
-template <typename C>
-class TRIKSOUNDSHARED_EXPORT AngleDetector
+template <typename Iter>
+class TRIKSOUNDSHARED_EXPORT AngleDetector : public AudioFilter<Iter>
 {
 public:
 
-    typedef typename AngleDetectorImpl<C>::iterator_type iterator_type;
+    class IncorrectSignalException : public TrikSoundException
+    {
+    public:
+        IncorrectSignalException(const char* msg):
+            TrikSoundException(msg)
+        {}
+    };
 
-    class IncorrectSignals {};
+    AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
+                  const AudioFilter::ptrFilter& prevFilter = AudioFilter::ptrFilter());
 
-    AngleDetector(const QAudioFormat& format, double micrDist);
+    void setHistoryDepth(int historyDepth);
+    int historyDepth() const;
 
-    double getAngle(size_t historyDepth);
+    double getAngle();
 
-    void handleWindow(iterator_type first1, iterator_type last1, iterator_type first2, iterator_type last2);
+protected:
+
+    void handleWindowImpl(Iter first, Iter last);
 
 private:
-    std::unique_ptr<AngleDetectorImpl<C>> mImpl;
+    std::unique_ptr<AngleDetectorImpl<Iter>> mImpl;
 };
 
-template <typename C>
-AngleDetector<C>::AngleDetector(const QAudioFormat& format, double micrDist):
-    mImpl(new AngleDetectorImpl<C>(format, micrDist))
+template <typename Iter>
+AngleDetector<Iter>::AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
+                                   const ptrFilter& prevFilter):
+    AudioFilter(prevFilter)
+  , mImpl(new AngleDetectorImpl<Iter>(format, micrDist, historyDepth))
 {}
 
-template <typename C>
-double AngleDetector<C>::getAngle(size_t historyDepth)
+template <typename Iter>
+void AngleDetector::setHistoryDepth(int historyDepth)
 {
-    return mImpl->getAngle(historyDepth);
+    mImpl->setHistoryDepth();
 }
 
-template <typename C>
-void AngleDetector<C>::handleWindow(iterator_type first1,
-                                    iterator_type last1,
-                                    iterator_type first2,
-                                    iterator_type last2)
+template <typename Iter>
+int AngleDetector<Iter>::historyDepth() const
 {
-    return mImpl->handleWindow(first1, last1, first2, last2);
+    return mImpl->getHistoryDepth();
+}
+
+template <typename Iter>
+double AngleDetector<Iter>::getAngle()
+{
+    return mImpl->getAngle();
+}
+
+template <typename Iter>
+void AngleDetector<Iter>::handleWindowImpl(Iter first, Iter last)
+{
+    try {
+        return mImpl->handleWindowImpl(first, last);
+    }
+    catch (AngleDetectorImpl::IncorrectSignalException& exc) {
+        throw IncorrectSignalException(exc.what());
+    }
 }
 
 }

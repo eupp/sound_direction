@@ -62,7 +62,7 @@ public:
     readIterator readBegin() const;
     readIterator readEnd() const;
 
-    circularBufferPtr getBuffer() const;
+    circularBufferPtr buffer() const;
 
 signals:
 

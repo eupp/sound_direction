@@ -32,9 +32,7 @@ HEADERS += \
     include/trikSound/audioBuffer.h \
     include/trikSound/audioCaptureFilter.h \
     include/trikSound/audioDeviceManager.h \
-    include/trikSound/audioPipe.h \
     include/trikSound/digitalAudioFilter.h \
-    include/trikSound/iAudioFilter.h \
     include/trikSound/thresholdVadFilter.h \
     include/trikSound/trikAudioDeviceManager.h \
     include/trikSound/trikSoundException.h \
@@ -43,5 +41,6 @@ HEADERS += \
     include/trikSound/triksound_global.h \
     include/trikSound/debugUtils.h \
     include/trikSound/utils.h \
-    include/trikSound/circularBufferQAdapter.h
+    include/trikSound/circularBufferQAdapter.h \
+    include/trikSound/audioFilter.h
 

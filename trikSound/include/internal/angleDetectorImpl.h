@@ -3,19 +3,29 @@
 #include <array>
 #include <memory>
 #include <cassert>
+#include <iterator>
 
 #include <boost/circular_buffer.hpp>
 
+#include <QAudioFormat>
+
 #include "../trikSound/debugUtils.h"
+#include "../trikSound/trikSoundException.h"
 
 namespace trikSound {
 
-template <typename C>
+template <typename Iter>
 class AngleDetectorImpl
 {
 public:
 
-    typedef typename C::iterator iterator_type;
+    class IncorrectSignalException : public TrikSoundException
+    {
+    public:
+        IncorrectSignalException():
+            TrikSoundException("Signal should contain left and right channel")
+        {}
+    };
 
     static const int offset = 40;
     static const int corrSize = 2 * offset + 1;
@@ -24,52 +34,57 @@ public:
     typedef long long corr_type;
     typedef std::array<corr_type, corrSize> corr_array;
 
-    AngleDetectorImpl(const QAudioFormat& format, double micrDist);
+    AngleDetectorImpl(const QAudioFormat& format, double micrDist, int historyDepth);
 
-    void handleWindow(iterator_type first1, iterator_type last1,
-                      iterator_type first2, iterator_type last2);
+    void handleWindowImpl(Iter first1, Iter last, std::random_access_iterator_tag);
 
-    double getAngle(size_t historyDepth);
+    double getAngle();
 
     int getHypothesis(size_t historyDepth);
 
+    int historyDepth() const;
+    void setHistoryDepth(int historyDepth);
+
 private:
 
-    corr_array calcCorrelation(iterator_type first1, iterator_type last1,
-                               iterator_type first2, iterator_type last2);
+    corr_array calcCorrelation(Iter first1, Iter last1,
+                               Iter first2, Iter last2);
     int calcPeakPos(size_t historyDepth);
 
     const int mSampleRate;
     const int mMicrDist;
 
+    int mHistoryDepth;
     boost::circular_buffer<corr_array> mCorrHistory;
     boost::circular_buffer<int> mHypthHistory;
 };
 
-template <typename C>
-AngleDetectorImpl<C>::AngleDetectorImpl(const QAudioFormat& format, double micrDist):
+template <typename Iter>
+AngleDetectorImpl<Iter>::AngleDetectorImpl(const QAudioFormat& format, double micrDist, int historyDepth):
     mSampleRate(format.sampleRate())
   , mMicrDist(micrDist)
+  , mHistoryDepth(historyDepth)
   , mCorrHistory(historySize)
   , mHypthHistory(historySize)
 {}
 
-template <typename C>
-void AngleDetectorImpl<C>::handleWindow(iterator_type first1,
-                                        iterator_type last1,
-                                        iterator_type first2,
-                                        iterator_type last2)
+template <typename Iter>
+void AngleDetectorImpl<Iter>::handleWindowImpl(Iter first, Iter last)
 {
+    int n = distance(first, last);
+    auto first1 = first;
+    auto last1  = first + n / 2;
+    auto first2 = first + n / 2;
+    auto last2  = last;
     const corr_array corr = calcCorrelation(first1, last1, first2, last2);
     mCorrHistory.push_back(corr);
 }
 
-template <typename C>
-double AngleDetectorImpl<C>::getAngle(size_t historyDepth)
+template <typename Iter>
+double AngleDetectorImpl<Iter>::getAngle()
 {
     int fs = mSampleRate;
-
-    int peak = calcPeakPos(historyDepth);
+    int peak = calcPeakPos(mHistoryDepth);
 
     double a = (double(peak) * 33000) / (2 * fs);
     double c = mMicrDist;
@@ -87,17 +102,29 @@ double AngleDetectorImpl<C>::getAngle(size_t historyDepth)
     return (phi * 180) / pi;
 }
 
-template <typename C>
-int AngleDetectorImpl<C>::getHypothesis(size_t historyDepth)
+template <typename Iter>
+int AngleDetectorImpl<Iter>::getHypothesis(size_t historyDepth)
 {
     return mHypthHistory.at(mHypthHistory.size() - 1 - historyDepth);
 }
 
-template <typename C>
-typename AngleDetectorImpl<C>::corr_array AngleDetectorImpl<C>::calcCorrelation(iterator_type first1,
-                                                                                iterator_type last1,
-                                                                                iterator_type first2,
-                                                                                iterator_type last2)
+template <typename Iter>
+int AngleDetectorImpl<Iter>::historyDepth() const
+{
+    return mHistoryDepth;
+}
+
+template <typename Iter>
+void AngleDetectorImpl<Iter>::setHistoryDepth(int historyDepth)
+{
+    mHistoryDepth = historyDepth;
+}
+
+template <typename Iter>
+typename AngleDetectorImpl<Iter>::corr_array AngleDetectorImpl<Iter>::calcCorrelation(Iter first1,
+                                                                                      Iter last1,
+                                                                                      Iter first2,
+                                                                                      Iter last2)
 {
     const std::ptrdiff_t windowSize = last1 - first1;
     const std::ptrdiff_t windowSize2 = last2 - first2;

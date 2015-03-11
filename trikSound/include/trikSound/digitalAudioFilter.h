@@ -1,35 +1,36 @@
 #pragma once
 
 #include <memory>
+#include <iterator>
 
 #include "triksound_global.h"
+#include "audioFilter.h"
 #include "digitalAudioFilterImpl.h"
 
 namespace trikSound {
 
-template <typename C>
-class TRIKSOUNDSHARED_EXPORT DigitalAudioFilter
+template <typename Iter>
+class TRIKSOUNDSHARED_EXPORT DigitalAudioFilter : public AudioFilter<Iter>
 {
 public:
-    DigitalAudioFilter();
+    DigitalAudioFilter(const std::shared_ptr<AudioFilter<Iter>>& prevFilter = std::shared_ptr<AudioFilter<Iter>>());
 
-    typedef typename DigitalAudioFilterImpl<C>::iterator_type iterator_type;
-
-    void handleWindow(iterator_type first, iterator_type last);
 
 private:
-    std::unique_ptr<DigitalAudioFilterImpl<C>> mImpl;
+    AudioFilter::range_type handleWindowImpl(Iter first, Iter last);
+
+    std::unique_ptr<DigitalAudioFilterImpl<Iter>> mImpl;
 };
 
-template <typename C>
-DigitalAudioFilter<C>::DigitalAudioFilter():
-    mImpl(new DigitalAudioFilterImpl<C>())
+template <typename Iter>
+DigitalAudioFilter<Iter>::DigitalAudioFilter():
+    mImpl(new DigitalAudioFilterImpl<Iter>())
 {}
 
-template <typename C>
-void DigitalAudioFilter<C>::handleWindow(iterator_type first, iterator_type last)
+template <typename Iter>
+void DigitalAudioFilter<Iter>::handleWindow(Iter first, Iter last)
 {
-    mImpl->handleWindow(first, last);
+    mImpl->handleWindowImpl(first, last, typename std::iterator_traits<Iter>::iterator_category());
 }
 
 }

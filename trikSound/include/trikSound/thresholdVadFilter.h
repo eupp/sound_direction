@@ -1,11 +1,11 @@
 #pragma once
 
 #include "triksound_global.h"
-#include "iAudioFilter.h"
+#include "audioFilter.h"
 
 namespace trikSound {
 
-class TRIKSOUNDSHARED_EXPORT ThresholdVadFilter: public QObject, public IAudioFilter
+class TRIKSOUNDSHARED_EXPORT ThresholdVadFilter: public QObject
 {
     Q_OBJECT
 public:

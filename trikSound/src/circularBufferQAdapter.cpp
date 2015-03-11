@@ -99,7 +99,7 @@ CircularBufferQAdapter::readIterator CircularBufferQAdapter::readEnd() const
     return mBuffer->end();
 }
 
-CircularBufferQAdapter::circularBufferPtr CircularBufferQAdapter::getBuffer() const
+CircularBufferQAdapter::circularBufferPtr CircularBufferQAdapter::buffer() const
 {
     return mBuffer;
 }
