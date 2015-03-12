@@ -17,7 +17,7 @@ public:
 
 
 private:
-    AudioFilter::range_type handleWindowImpl(Iter first, Iter last);
+    void handleWindowImpl(Iter first, Iter last);
 
     std::unique_ptr<DigitalAudioFilterImpl<Iter>> mImpl;
 };
@@ -28,7 +28,7 @@ DigitalAudioFilter<Iter>::DigitalAudioFilter():
 {}
 
 template <typename Iter>
-void DigitalAudioFilter<Iter>::handleWindow(Iter first, Iter last)
+void DigitalAudioFilter<Iter>::handleWindowImpl(Iter first, Iter last)
 {
     mImpl->handleWindowImpl(first, last, typename std::iterator_traits<Iter>::iterator_category());
 }

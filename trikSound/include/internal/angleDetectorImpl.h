@@ -11,6 +11,7 @@
 
 #include "../trikSound/debugUtils.h"
 #include "../trikSound/trikSoundException.h"
+#include "../trikSound/stereoAudioFilter.h"
 
 namespace trikSound {
 
@@ -36,7 +37,9 @@ public:
 
     AngleDetectorImpl(const QAudioFormat& format, double micrDist, int historyDepth);
 
-    void handleWindowImpl(Iter first1, Iter last, std::random_access_iterator_tag);
+    void handleWindowImpl(StereoAudioFilter::range_type channel1,
+                          StereoAudioFilter::range_type channel2,
+                          std::random_access_iterator_tag);
 
     double getAngle();
 
@@ -69,14 +72,12 @@ AngleDetectorImpl<Iter>::AngleDetectorImpl(const QAudioFormat& format, double mi
 {}
 
 template <typename Iter>
-void AngleDetectorImpl<Iter>::handleWindowImpl(Iter first, Iter last)
+void AngleDetectorImpl<Iter>::handleWindowImpl(StereoAudioFilter::range_type channel1,
+                                               StereoAudioFilter::range_type channel2,
+                                               std::random_access_iterator_tag)
 {
-    int n = distance(first, last);
-    auto first1 = first;
-    auto last1  = first + n / 2;
-    auto first2 = first + n / 2;
-    auto last2  = last;
-    const corr_array corr = calcCorrelation(first1, last1, first2, last2);
+    const corr_array corr = calcCorrelation(channel1.first, channel1.second,
+                                            channel2.first, channel2.second);
     mCorrHistory.push_back(corr);
 }
 
@@ -144,8 +145,8 @@ typename AngleDetectorImpl<Iter>::corr_array AngleDetectorImpl<Iter>::calcCorrel
     return corr;
 }
 
-template <typename C>
-int AngleDetectorImpl<C>::calcPeakPos(size_t historyDepth)
+template <typename Iter>
+int AngleDetectorImpl<Iter>::calcPeakPos(size_t historyDepth)
 {
     corr_array corrRes;
     corrRes.fill(0);

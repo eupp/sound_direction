@@ -5,14 +5,14 @@
 #include <QAudioFormat>
 
 #include "triksound_global.h"
-#include "audioFilter.h"
+#include "stereoAudioFilter.h"
 #include "angleDetectorImpl.h"
 #include "types.h"
 
 namespace trikSound {
 
 template <typename Iter>
-class TRIKSOUNDSHARED_EXPORT AngleDetector : public AudioFilter<Iter>
+class TRIKSOUNDSHARED_EXPORT AngleDetector : public StereoAudioFilter<Iter>
 {
 public:
 
@@ -25,7 +25,7 @@ public:
     };
 
     AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
-                  const AudioFilter::ptrFilter& prevFilter = AudioFilter::ptrFilter());
+                  const StereoAudioFilter::ptrFilter& prevFilter = StereoAudioFilter::ptrFilter());
 
     void setHistoryDepth(int historyDepth);
     int historyDepth() const;
@@ -34,7 +34,7 @@ public:
 
 protected:
 
-    void handleWindowImpl(Iter first, Iter last);
+    void handleWindowImpl(range_type channel1, range_type channel2);
 
 private:
     std::unique_ptr<AngleDetectorImpl<Iter>> mImpl;
@@ -43,7 +43,7 @@ private:
 template <typename Iter>
 AngleDetector<Iter>::AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
                                    const ptrFilter& prevFilter):
-    AudioFilter(prevFilter)
+    StereoAudioFilter(prevFilter)
   , mImpl(new AngleDetectorImpl<Iter>(format, micrDist, historyDepth))
 {}
 
@@ -66,11 +66,10 @@ double AngleDetector<Iter>::getAngle()
 }
 
 template <typename Iter>
-void AngleDetector<Iter>::handleWindowImpl(Iter first, Iter last)
+void AngleDetector<Iter>::handleWindowImpl(range_type channel1, range_type channel2)
 {
     try {
-        mImpl->handleWindowImpl(first, last);
-        return make_pair(first, last);
+        mImpl->handleWindowImpl(channel1, channel2, std::iterator_traits<Iter>::iterator_category());
     }
     catch (AngleDetectorImpl::IncorrectSignalException& exc) {
         throw IncorrectSignalException(exc.what());

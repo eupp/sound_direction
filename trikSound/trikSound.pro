@@ -42,5 +42,7 @@ HEADERS += \
     include/trikSound/debugUtils.h \
     include/trikSound/utils.h \
     include/trikSound/circularBufferQAdapter.h \
-    include/trikSound/audioFilter.h
+    include/trikSound/audioFilter.h \
+    include/trikSound/splitFilter.h \
+    include/trikSound/stereoAudioFilter.h
 

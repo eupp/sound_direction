@@ -3,11 +3,9 @@
 #include <memory>
 #include <utility>
 
-#include "audioBuffer.h"
-
+#include "triksound_global.h"
 
 namespace trikSound {
-
 
 template <typename Iter>
 class TRIKSOUNDSHARED_EXPORT AudioFilter
@@ -21,11 +19,11 @@ public:
     AudioFilter(const ptrFilter& prevFilter = ptrFilter());
     virtual ~AudioFilter() {}
 
-    range_type handleWindow(Iter first, Iter last);
+    void handleWindow(Iter first, Iter last);
 
 protected:
 
-    virtual range_type handleWindowImpl(Iter first, Iter last) = 0;
+    virtual void handleWindowImpl(Iter first, Iter last) = 0;
 
 private:
     std::shared_ptr<AudioFilter<Iter>> mPrev;
@@ -37,14 +35,12 @@ AudioFilter<Iter>::AudioFilter(const ptrFilter& prevFilter):
 {}
 
 template <typename Iter>
-typename AudioFilter<Iter>::range_type AudioFilter<Iter>::handleWindow(Iter first, Iter last)
+void AudioFilter<Iter>::handleWindow(Iter first, Iter last)
 {
     if (mPrev) {
-        auto range = mPrev->handleWindow(first, last);
-        first = range.first;
-        last = range.second;
+        mPrev->handleWindow(first, last);
     }
-    return handleWindowImpl(first, last);
+    handleWindowImpl(first, last);
 }
 
 }
