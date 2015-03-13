@@ -13,7 +13,8 @@ template <typename Iter>
 class TRIKSOUNDSHARED_EXPORT DigitalAudioFilter : public AudioFilter<Iter>
 {
 public:
-    DigitalAudioFilter(const std::shared_ptr<AudioFilter<Iter>>& prevFilter = std::shared_ptr<AudioFilter<Iter>>());
+
+    DigitalAudioFilter(const FilterPtr& prevFilter = FilterPtr());
 
 
 private:
@@ -23,8 +24,9 @@ private:
 };
 
 template <typename Iter>
-DigitalAudioFilter<Iter>::DigitalAudioFilter():
-    mImpl(new DigitalAudioFilterImpl<Iter>())
+DigitalAudioFilter<Iter>::DigitalAudioFilter(const FilterPtr& prevFilter):
+    AudioFilter(prevFilter)
+  , mImpl(new DigitalAudioFilterImpl<Iter>())
 {}
 
 template <typename Iter>

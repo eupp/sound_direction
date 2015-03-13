@@ -10,7 +10,7 @@ using namespace trikSound;
 const QString CircularBufferQAdapter::errorIncorrectBuffer =
         "CircularBufferQAdapter Error: Incorrect buffer passed";
 
-CircularBufferQAdapter::CircularBufferQAdapter(const CircularBufferQAdapter::circularBufferPtr& cb,
+CircularBufferQAdapter::CircularBufferQAdapter(const CircularBufferQAdapter::CircularBufferPtr& cb,
                                                QObject* parent):
     QIODevice(parent)
   , mBuffer(cb)
@@ -63,8 +63,7 @@ bool CircularBufferQAdapter::reset()
 
 qint64 CircularBufferQAdapter::bytesAvailable() const
 {
-    auto tmp = (mBuffer->end() - mReadItr) * sizeof(sample_type);
-    return tmp;
+    return samplesAvailable() * sizeof(sample_type);
 }
 
 qint64 CircularBufferQAdapter::bytesToWrite() const
@@ -89,17 +88,22 @@ bool CircularBufferQAdapter::waitForBytesWritten(int msecs)
     return false;
 }
 
-CircularBufferQAdapter::readIterator CircularBufferQAdapter::readBegin() const
+qint64 CircularBufferQAdapter::samplesAvailable() const
+{
+    return (mBuffer->end() - mReadItr);
+}
+
+CircularBufferQAdapter::ReadIterator CircularBufferQAdapter::readBegin() const
 {
     return mReadItr;
 }
 
-CircularBufferQAdapter::readIterator CircularBufferQAdapter::readEnd() const
+CircularBufferQAdapter::ReadIterator CircularBufferQAdapter::readEnd() const
 {
     return mBuffer->end();
 }
 
-CircularBufferQAdapter::circularBufferPtr CircularBufferQAdapter::buffer() const
+CircularBufferQAdapter::CircularBufferPtr CircularBufferQAdapter::buffer() const
 {
     return mBuffer;
 }

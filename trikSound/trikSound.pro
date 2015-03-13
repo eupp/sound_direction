@@ -14,10 +14,11 @@ SOURCES += \
     src/audioBuffer.cpp \
     src/audioCaptureFilter.cpp \
     src/audioDeviceManager.cpp \
-    src/thresholdVadFilter.cpp \
+#    src/thresholdVadFilter.cpp \
     src/trikAudioDeviceManager.cpp \
     src/wavfile.cpp \
-    src/circularBufferQAdapter.cpp
+    src/circularBufferQAdapter.cpp \
+    src/trikSoundController.cpp
 
 HEADERS += \
     triksound_global.h \
@@ -30,10 +31,10 @@ HEADERS += \
     include/internal/utils.h \
     include/trikSound/angleDetector.h \
     include/trikSound/audioBuffer.h \
-    include/trikSound/audioCaptureFilter.h \
+#    include/trikSound/audioCaptureFilter.h \
     include/trikSound/audioDeviceManager.h \
     include/trikSound/digitalAudioFilter.h \
-    include/trikSound/thresholdVadFilter.h \
+#    include/trikSound/thresholdVadFilter.h \
     include/trikSound/trikAudioDeviceManager.h \
     include/trikSound/trikSoundException.h \
     include/trikSound/types.h \
@@ -44,5 +45,8 @@ HEADERS += \
     include/trikSound/circularBufferQAdapter.h \
     include/trikSound/audioFilter.h \
     include/trikSound/splitFilter.h \
-    include/trikSound/stereoAudioFilter.h
+    include/trikSound/stereoAudioFilter.h \
+    include/trikSound/trikSoundController.h \
+    include/trikSound/audioEventListener.h \
+    include/trikSound/audioEvent.h
 

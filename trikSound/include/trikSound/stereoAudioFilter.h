@@ -13,12 +13,14 @@ public:
 
     typedef std::pair<Iter, Iter> range_type;
 
-    typedef std::shared_ptr<StereoAudioFilter<Iter>> ptrFilter;
+    typedef std::shared_ptr<StereoAudioFilter<Iter>> FilterPtr;
 
-    StereoAudioFilter(const ptrFilter& prevFilter = ptrFilter());
+    StereoAudioFilter(const FilterPtr& prevFilter = FilterPtr());
     virtual ~AudioFilter() {}
 
     void handleWindow(range_type channel1, range_type channel2);
+
+    friend FilterPtr& operator<<(FilterPtr& filter, const FilterPtr& prevFilter);
 
 protected:
     virtual void handleWindowImpl(range_type channel1, range_type channel2) = 0;
@@ -28,7 +30,7 @@ private:
 };
 
 template <typename Iter>
-StereoAudioFilter<Iter>::StereoAudioFilter(const ptrFilter& prevFilter):
+StereoAudioFilter<Iter>::StereoAudioFilter(const FilterPtr& prevFilter):
     mPrev(prevFilter)
 {}
 
@@ -39,6 +41,14 @@ void StereoAudioFilter<Iter>::handleWindow(range_type channel1, range_type chann
         mPrev->handleWindow(channel1, channel2);
     }
     handleWindowImpl(channel1, channel2);
+}
+
+template <typename Iter>
+StereoAudioFilter<Iter>::FilterPtr& StereoAudioFilter<Iter>::operator<<(StereoAudioFilter<Iter>::FilterPtr& filter,
+                                                                        const StereoAudioFilter<Iter>::FilterPtr& prevFilter)
+{
+    filter->mPrev = prevFilter;
+    return filter;
 }
 
 }

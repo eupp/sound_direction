@@ -25,7 +25,7 @@ public:
     };
 
     AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
-                  const StereoAudioFilter::ptrFilter& prevFilter = StereoAudioFilter::ptrFilter());
+                  const FilterPtr& prevFilter = FilterPtr());
 
     void setHistoryDepth(int historyDepth);
     int historyDepth() const;
@@ -42,7 +42,7 @@ private:
 
 template <typename Iter>
 AngleDetector<Iter>::AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
-                                   const ptrFilter& prevFilter):
+                                   const FilterPtr& prevFilter):
     StereoAudioFilter(prevFilter)
   , mImpl(new AngleDetectorImpl<Iter>(format, micrDist, historyDepth))
 {}

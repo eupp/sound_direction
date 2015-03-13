@@ -12,14 +12,14 @@ class TRIKSOUNDSHARED_EXPORT AudioFilter
 {
 public:
 
-    typedef std::pair<Iter, Iter> range_type;
+    typedef std::shared_ptr<AudioFilter<Iter>> FilterPtr;
 
-    typedef std::shared_ptr<AudioFilter<Iter>> ptrFilter;
-
-    AudioFilter(const ptrFilter& prevFilter = ptrFilter());
+    AudioFilter(const FilterPtr& prevFilter = FilterPtr());
     virtual ~AudioFilter() {}
 
     void handleWindow(Iter first, Iter last);
+
+    friend FilterPtr& operator<<(FilterPtr& filter, const FilterPtr& prevFilter);
 
 protected:
 
@@ -30,7 +30,7 @@ private:
 };
 
 template <typename Iter>
-AudioFilter<Iter>::AudioFilter(const ptrFilter& prevFilter):
+AudioFilter<Iter>::AudioFilter(const FilterPtr& prevFilter):
     mPrev(prevFilter)
 {}
 
@@ -41,6 +41,14 @@ void AudioFilter<Iter>::handleWindow(Iter first, Iter last)
         mPrev->handleWindow(first, last);
     }
     handleWindowImpl(first, last);
+}
+
+template <typename Iter>
+AudioFilter<Iter>::FilterPtr& AudioFilter<Iter>::operator<<(AudioFilter<Iter>::FilterPtr& filter,
+                                                            const AudioFilter<Iter>::FilterPtr& prevFilter)
+{
+    filter->mPrev = prevFilter;
+    return filter;
 }
 
 }

@@ -7,6 +7,7 @@
 
 #include <QIODevice>
 
+#include "triksound_global.h"
 #include "types.h"
 
 namespace trikSound {
@@ -25,19 +26,19 @@ namespace trikSound {
  *        and forward reading are allowed.
  *
  */
-class CircularBufferQAdapter : public QIODevice
+class TRIKSOUNDSHARED_EXPORT CircularBufferQAdapter : public QIODevice
 {
     Q_OBJECT
 public:
 
-    typedef boost::circular_buffer<sample_type> circularBuffer;
+    typedef boost::circular_buffer<sample_type> CircularBuffer;
 
-    typedef std::shared_ptr<circularBuffer> circularBufferPtr;
+    typedef std::shared_ptr<CircularBuffer> CircularBufferPtr;
 
-    typedef circularBuffer::const_iterator readIterator;
-    typedef std::back_insert_iterator<circularBuffer> writeIterator;
+    typedef CircularBuffer::const_iterator ReadIterator;
+    typedef std::back_insert_iterator<CircularBuffer> WriteIterator;
 
-    CircularBufferQAdapter(const circularBufferPtr& cb, QObject *parent = 0);
+    CircularBufferQAdapter(const CircularBufferPtr& cb, QObject *parent = 0);
 
     bool isSequential() const;
 
@@ -59,10 +60,12 @@ public:
     bool waitForReadyRead(int msecs);
     bool waitForBytesWritten(int msecs);
 
-    readIterator readBegin() const;
-    readIterator readEnd() const;
+    qint64 samplesAvailable() const;
 
-    circularBufferPtr buffer() const;
+    ReadIterator readBegin() const;
+    ReadIterator readEnd() const;
+
+    CircularBufferPtr buffer() const;
 
 signals:
 
@@ -74,9 +77,9 @@ private slots:
 
 private:
 
-    circularBufferPtr mBuffer;
-    readIterator mReadItr;
-    writeIterator mWriteItr;
+    CircularBufferPtr mBuffer;
+    ReadIterator mReadItr;
+    WriteIterator mWriteItr;
 
     static const QString errorIncorrectBuffer;
 };
