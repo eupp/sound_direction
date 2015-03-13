@@ -135,9 +135,15 @@ typename AngleDetectorImpl<Iter>::corr_array AngleDetectorImpl<Iter>::calcCorrel
                                                                                       Iter first2,
                                                                                       Iter last2)
 {
-    const std::ptrdiff_t windowSize = last1 - first1;
-    const std::ptrdiff_t windowSize2 = last2 - first2;
+    std::ptrdiff_t windowSize = last1 - first1;
+    std::ptrdiff_t windowSize2 = last2 - first2;
+
     assert(windowSize == windowSize2);
+    assert(windowSize > corrSize);
+
+    // reduce window size for shifting one signal relatively to another safely
+    windowSize -= corrSize;
+
 
     corr_array corr;
     corr.fill(0);

@@ -62,13 +62,11 @@ void AngleDetectorFixture::readAudioData(const QString& filename)
     bufl = buf.leftChannel();
     bufr = buf.rightChannel();
 
-    const int rpadd = 100;
-
     channel1.first = (sample_type*) bufl.data();
-    channel1.second = (sample_type*) bufl.data() + bufl.sampleCount() - rpadd;
+    channel1.second = (sample_type*) bufl.data() + bufl.sampleCount();
 
     channel2.first = (sample_type*) bufr.data();
-    channel2.second = (sample_type*) bufr.data() + bufr.sampleCount() - rpadd;
+    channel2.second = (sample_type*) bufr.data() + bufr.sampleCount();
 }
 
 BOOST_FIXTURE_TEST_SUITE(testAngleDetector, AngleDetectorFixture)
