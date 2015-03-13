@@ -19,14 +19,15 @@ public:
 
     void handleWindow(Iter first, Iter last);
 
-    friend FilterPtr& operator<<(FilterPtr& filter, const FilterPtr& prevFilter);
+    FilterPtr prevFilter() const;
+    void setPrevFilter(const FilterPtr& prevFilter);
 
 protected:
 
     virtual void handleWindowImpl(Iter first, Iter last) = 0;
 
 private:
-    std::shared_ptr<AudioFilter<Iter>> mPrev;
+    FilterPtr mPrev;
 };
 
 template <typename Iter>
@@ -44,11 +45,16 @@ void AudioFilter<Iter>::handleWindow(Iter first, Iter last)
 }
 
 template <typename Iter>
-AudioFilter<Iter>::FilterPtr& AudioFilter<Iter>::operator<<(AudioFilter<Iter>::FilterPtr& filter,
-                                                            const AudioFilter<Iter>::FilterPtr& prevFilter)
+typename AudioFilter<Iter>::FilterPtr AudioFilter<Iter>::prevFilter() const
 {
-    filter->mPrev = prevFilter;
-    return filter;
+    return mPrev;
 }
+
+template <typename Iter>
+void AudioFilter<Iter>::setPrevFilter(const typename AudioFilter::FilterPtr& prev)
+{
+    mPrev = prev;
+}
+
 
 }

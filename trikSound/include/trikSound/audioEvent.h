@@ -10,20 +10,20 @@ class TRIKSOUNDSHARED_EXPORT AudioEvent
 public:
 
     double angle() const;
-    void setAngle(double angle);
+    void setAngle(double newAngle);
 
 private:
     double mAngle;
 };
 
-double AudioEvent::angle() const
+inline double AudioEvent::angle() const
 {
     return mAngle;
 }
 
-void AudioEvent::setAngle(double angle)
+inline void AudioEvent::setAngle(double newAngle)
 {
-    mAngle = angle;
+    mAngle = newAngle;
 }
 
 

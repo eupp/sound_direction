@@ -16,9 +16,9 @@ SOURCES += \
     src/audioDeviceManager.cpp \
 #    src/thresholdVadFilter.cpp \
     src/trikAudioDeviceManager.cpp \
-    src/wavfile.cpp \
     src/circularBufferQAdapter.cpp \
-    src/trikSoundController.cpp
+    src/trikSoundController.cpp \
+    src/wavFile.cpp
 
 HEADERS += \
     triksound_global.h \
@@ -38,7 +38,6 @@ HEADERS += \
     include/trikSound/trikAudioDeviceManager.h \
     include/trikSound/trikSoundException.h \
     include/trikSound/types.h \
-    include/trikSound/wavfile.h \
     include/trikSound/triksound_global.h \
     include/trikSound/debugUtils.h \
     include/trikSound/utils.h \
@@ -48,5 +47,6 @@ HEADERS += \
     include/trikSound/stereoAudioFilter.h \
     include/trikSound/trikSoundController.h \
     include/trikSound/audioEventListener.h \
-    include/trikSound/audioEvent.h
+    include/trikSound/audioEvent.h \
+    include/trikSound/wavFile.h
 

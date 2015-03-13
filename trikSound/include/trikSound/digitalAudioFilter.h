@@ -14,6 +14,8 @@ class TRIKSOUNDSHARED_EXPORT DigitalAudioFilter : public AudioFilter<Iter>
 {
 public:
 
+    typedef typename AudioFilter<Iter>::FilterPtr FilterPtr;
+
     DigitalAudioFilter(const FilterPtr& prevFilter = FilterPtr());
 
 
@@ -25,7 +27,7 @@ private:
 
 template <typename Iter>
 DigitalAudioFilter<Iter>::DigitalAudioFilter(const FilterPtr& prevFilter):
-    AudioFilter(prevFilter)
+    AudioFilter<Iter>(prevFilter)
   , mImpl(new DigitalAudioFilterImpl<Iter>())
 {}
 

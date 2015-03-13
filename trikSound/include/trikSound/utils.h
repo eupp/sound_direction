@@ -19,15 +19,25 @@ inline qint64 bytesForDuration(qint64 duration, const QAudioFormat& format)
     return (duration * format.sampleRate() * (format.sampleSize() / 8) * format.channelCount()) / 1000;
 }
 
+/**
+ * Extract channel from buffer with interweave channels to separate buffer.
+ */
 template <int channelCount, int channelNum, typename InputIter, typename OutputIter>
 void extractChannel(InputIter first, InputIter last, OutputIter dst)
 {
-    int n = distance(first, last);
+    int n = distance(first, last) / channelCount;
     for (int i = 0; i < n; ++i) {
-        *dst = first[i * channelCount + channelNum];
+        dst[i] = first[i * channelCount + channelNum];
     }
 }
 
+/**
+ * Extract channel from buffer with interweave channels to separate buffer.
+ *
+ * @param src Source buffer
+ * @param dst Destination buffer. Must have size equal to (count / channelCount)
+ * @param count Size of src buffer
+ */
 template <int bytesPerSample, int channelCount, int channelNum>
 void extractChannel(const char* src, char* dst, size_t count)
 {

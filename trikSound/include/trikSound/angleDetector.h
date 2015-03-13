@@ -16,6 +16,9 @@ class TRIKSOUNDSHARED_EXPORT AngleDetector : public StereoAudioFilter<Iter>
 {
 public:
 
+    typedef typename StereoAudioFilter<Iter>::range_type range_type;
+    typedef typename StereoAudioFilter<Iter>::FilterPtr FilterPtr;
+
     class IncorrectSignalException : public TrikSoundException
     {
     public:
@@ -24,11 +27,19 @@ public:
         {}
     };
 
-    AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
+    AngleDetector(const FilterPtr& prevFilter = FilterPtr());
+
+    AngleDetector(int sampleRate, double micrDist, int historyDepth = 1,
                   const FilterPtr& prevFilter = FilterPtr());
 
     void setHistoryDepth(int historyDepth);
     int historyDepth() const;
+
+    void setSampleRate(int sampleRate);
+    int sampleRate() const;
+
+    void setMicrDist(double micrDistance);
+    double micrDistance() const;
 
     double getAngle();
 
@@ -41,14 +52,19 @@ private:
 };
 
 template <typename Iter>
-AngleDetector<Iter>::AngleDetector(const QAudioFormat& format, double micrDist, int historyDepth,
-                                   const FilterPtr& prevFilter):
-    StereoAudioFilter(prevFilter)
-  , mImpl(new AngleDetectorImpl<Iter>(format, micrDist, historyDepth))
+AngleDetector<Iter>::AngleDetector(const FilterPtr& prevFilter):
+    AngleDetector(-1, -1, 1, prevFilter)
 {}
 
 template <typename Iter>
-void AngleDetector::setHistoryDepth(int historyDepth)
+AngleDetector<Iter>::AngleDetector(int sampleRate, double micrDist, int historyDepth,
+                                   const FilterPtr& prevFilter):
+    StereoAudioFilter<Iter>(prevFilter)
+  , mImpl(new AngleDetectorImpl<Iter>(sampleRate, micrDist, historyDepth))
+{}
+
+template <typename Iter>
+void AngleDetector<Iter>::setHistoryDepth(int historyDepth)
 {
     mImpl->setHistoryDepth();
 }
@@ -57,6 +73,30 @@ template <typename Iter>
 int AngleDetector<Iter>::historyDepth() const
 {
     return mImpl->getHistoryDepth();
+}
+
+template <typename Iter>
+void AngleDetector<Iter>::setSampleRate(int sampleRate)
+{
+    mImpl->setSampleRate(sampleRate);
+}
+
+template <typename Iter>
+int AngleDetector<Iter>::sampleRate() const
+{
+    return mImpl->sampleRate();
+}
+
+template <typename Iter>
+void AngleDetector<Iter>::setMicrDist(double micrDistance)
+{
+    mImpl->setMicrDist(micrDistance);
+}
+
+template <typename Iter>
+double AngleDetector<Iter>::micrDistance() const
+{
+    return mImpl->micrDistance();
 }
 
 template <typename Iter>
@@ -69,9 +109,9 @@ template <typename Iter>
 void AngleDetector<Iter>::handleWindowImpl(range_type channel1, range_type channel2)
 {
     try {
-        mImpl->handleWindowImpl(channel1, channel2, std::iterator_traits<Iter>::iterator_category());
+        mImpl->handleWindowImpl(channel1, channel2, typename std::iterator_traits<Iter>::iterator_category());
     }
-    catch (AngleDetectorImpl::IncorrectSignalException& exc) {
+    catch (typename AngleDetectorImpl<Iter>::IncorrectSignalException& exc) {
         throw IncorrectSignalException(exc.what());
     }
 }

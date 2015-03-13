@@ -18,14 +18,14 @@ public:
 
     DigitalAudioFilterImpl();
 
-    AudioFilter::range_type handleWindowImpl(Iter first, Iter last, std::random_access_iterator_tag);
+    void handleWindowImpl(Iter first, Iter last, std::random_access_iterator_tag);
 
 private:
 
     void filtfilt(Iter first, Iter last);
 
-    template <typename T, typename U>
-    void filter(typename T::const_iterator first, typename T::const_iterator last, typename U::iterator dst);
+    template <typename InputIter, typename OutputIter>
+    void filterSignal(InputIter first, InputIter last, OutputIter dst);
 
     const static int filter_size = 7;
 
@@ -40,24 +40,24 @@ private:
 };
 
 template <typename Iter>
-DigitalAudioFilterImpl<Iter>::DigitalAudioFilterImpl():
+DigitalAudioFilterImpl<Iter>::DigitalAudioFilterImpl()
 {
     std::reverse(filter_denum.begin(), filter_denum.end());
     std::reverse(filter_num.begin(), filter_num.end());
 }
 
-void DigitalAudioFilterImpl::handleWindowImpl(trikSound::Iter first,
-                                          trikSound::Iter last,
-                                          std::random_access_iterator_tag)
+template <typename Iter>
+void DigitalAudioFilterImpl<Iter>::handleWindowImpl(Iter first,
+                                                    Iter last,
+                                                    std::random_access_iterator_tag)
 {
     filtfilt(first, last);
-    return std::make_pair(first, last);
 }
 
 template <typename Iter>
 void DigitalAudioFilterImpl<Iter>::filtfilt(Iter first, Iter last)
 {
-    const int n = distance(first, last);
+    const int n = std::distance(first, last);
 
     mTmpSignal1.resize(n);
     mTmpSignal2.resize(n);

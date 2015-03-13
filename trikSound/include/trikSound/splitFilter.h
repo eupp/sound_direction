@@ -14,8 +14,12 @@ class TRIKSOUNDSHARED_EXPORT SplitFilter : public StereoAudioFilter<Iter>
 {
 public:
 
-    SplitFilter(const AudioFilter<Iter>::FilterPtr& channelFilter = AudioFilter<Iter>::FilterPtr(),
-                const StereoAudioFilter<Iter>::FilterPtr& prevFilter = StereoAudioFilter<Iter>::FilterPtr());
+    typedef typename StereoAudioFilter<Iter>::range_type range_type;
+    typedef typename AudioFilter<Iter>::FilterPtr FilterPtr;
+    typedef typename StereoAudioFilter<Iter>::FilterPtr StereoFilterPtr;
+
+    SplitFilter(const FilterPtr& channelFilter = FilterPtr(),
+                const StereoFilterPtr& prevFilter = StereoFilterPtr());
 
 protected:
 
@@ -23,22 +27,24 @@ protected:
                           range_type channel2);
 
 private:
-    AudioFilter::ptrFilter mChannelFilter;
+    FilterPtr mChannelFilter;
 };
 
 template <typename Iter>
-SplitFilter::SplitFilter(const AudioFilter<Iter>::FilterPtr& channelFilter,
-                         const StereoAudioFilter<Iter>::FilterPtr& prevFilter):
-    StereoAudioFilter(prevFilter)
+SplitFilter<Iter>::SplitFilter(const SplitFilter<Iter>::FilterPtr& channelFilter,
+                               const SplitFilter<Iter>::StereoFilterPtr& prevFilter):
+    StereoAudioFilter<Iter>(prevFilter)
   , mChannelFilter(channelFilter)
 {}
 
 template <typename Iter>
-void SplitFilter::handleWindowImpl(range_type channel1,
-                                   range_type channel2)
+void SplitFilter<Iter>::handleWindowImpl(range_type channel1,
+                                         range_type channel2)
 {
-    mChannelFilter->handleWindow(channel1.first, channel1.second);
-    mChannelFilter->handleWindow(channel2.first, channel2.second);
+    if (mChannelFilter) {
+        mChannelFilter->handleWindow(channel1.first, channel1.second);
+        mChannelFilter->handleWindow(channel2.first, channel2.second);
+    }
 }
 
 }

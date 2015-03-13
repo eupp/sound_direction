@@ -36,9 +36,10 @@ private slots:
 
 private:
 
-    typedef BufferIterator::value_type range_value_type;
-    typedef std::vector<range_value_type> WindowContainer;
+    typedef sample_type range_value_type;
+    typedef std::vector<sample_type> WindowContainer;
     typedef WindowContainer::iterator BufferIterator;
+
 
     typedef std::shared_ptr<AngleDetector<BufferIterator>> AngleDetectorPtr;
     typedef std::shared_ptr<AudioEventListener> ListenerPtr;

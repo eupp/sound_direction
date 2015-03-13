@@ -20,6 +20,8 @@ class AngleDetectorImpl
 {
 public:
 
+    typedef typename StereoAudioFilter<Iter>::range_type range_type;
+
     class IncorrectSignalException : public TrikSoundException
     {
     public:
@@ -35,10 +37,10 @@ public:
     typedef long long corr_type;
     typedef std::array<corr_type, corrSize> corr_array;
 
-    AngleDetectorImpl(const QAudioFormat& format, double micrDist, int historyDepth);
+    AngleDetectorImpl(int sampleRate, double micrDist, int historyDepth);
 
-    void handleWindowImpl(StereoAudioFilter::range_type channel1,
-                          StereoAudioFilter::range_type channel2,
+    void handleWindowImpl(range_type channel1,
+                          range_type channel2,
                           std::random_access_iterator_tag);
 
     double getAngle();
@@ -48,14 +50,20 @@ public:
     int historyDepth() const;
     void setHistoryDepth(int historyDepth);
 
+    double micrDist() const;
+    void setMicrDist(double micrDist);
+
+    int sampleRate() const;
+    void setSampleRate(int sampleRate);
+
 private:
 
     corr_array calcCorrelation(Iter first1, Iter last1,
                                Iter first2, Iter last2);
     int calcPeakPos(size_t historyDepth);
 
-    const int mSampleRate;
-    const int mMicrDist;
+    int mSampleRate;
+    double mMicrDist;
 
     int mHistoryDepth;
     boost::circular_buffer<corr_array> mCorrHistory;
@@ -63,8 +71,8 @@ private:
 };
 
 template <typename Iter>
-AngleDetectorImpl<Iter>::AngleDetectorImpl(const QAudioFormat& format, double micrDist, int historyDepth):
-    mSampleRate(format.sampleRate())
+AngleDetectorImpl<Iter>::AngleDetectorImpl(int sampleRate, double micrDist, int historyDepth):
+    mSampleRate(sampleRate)
   , mMicrDist(micrDist)
   , mHistoryDepth(historyDepth)
   , mCorrHistory(historySize)
@@ -72,8 +80,8 @@ AngleDetectorImpl<Iter>::AngleDetectorImpl(const QAudioFormat& format, double mi
 {}
 
 template <typename Iter>
-void AngleDetectorImpl<Iter>::handleWindowImpl(StereoAudioFilter::range_type channel1,
-                                               StereoAudioFilter::range_type channel2,
+void AngleDetectorImpl<Iter>::handleWindowImpl(typename AngleDetectorImpl<Iter>::range_type channel1,
+                                               typename AngleDetectorImpl<Iter>::range_type channel2,
                                                std::random_access_iterator_tag)
 {
     const corr_array corr = calcCorrelation(channel1.first, channel1.second,
@@ -134,8 +142,8 @@ typename AngleDetectorImpl<Iter>::corr_array AngleDetectorImpl<Iter>::calcCorrel
     corr_array corr;
     corr.fill(0);
 
-    iterator_type u = first1;
-    iterator_type v = first2 + offset;
+    Iter u = first1;
+    Iter v = first2 + offset;
     for (size_t i = 0; i < corrSize; i++) {
         for (size_t j = 0; j < windowSize; ++j) {
             corr[i] += u[i + j] * v[j];
@@ -168,6 +176,31 @@ int AngleDetectorImpl<Iter>::calcPeakPos(size_t historyDepth)
     // invert position of peak and subset offset from center
     return (corrSize - 1 - diff) - offset;
 }
+
+template <typename Iter>
+int AngleDetectorImpl<Iter>::sampleRate() const
+{
+    return mSampleRate;
+}
+
+template <typename Iter>
+void AngleDetectorImpl<Iter>::setSampleRate(int sampleRate)
+{
+    mSampleRate = sampleRate;
+}
+
+template <typename Iter>
+double AngleDetectorImpl<Iter>::micrDist() const
+{
+    return mMicrDist;
+}
+
+template <typename Iter>
+void AngleDetectorImpl<Iter>::setMicrDist(double micrDist)
+{
+    mMicrDist = micrDist;
+}
+
 
 }
 

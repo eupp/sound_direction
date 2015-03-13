@@ -1,4 +1,4 @@
-#include "wavfile.h"
+#include "wavFile.h"
 
 #include <cassert>
 #include <cstring>

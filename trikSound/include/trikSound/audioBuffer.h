@@ -10,6 +10,8 @@ namespace trikSound {
 class TRIKSOUNDSHARED_EXPORT AudioBuffer
 {
 public:
+
+    AudioBuffer();
     AudioBuffer(const QByteArray& bytes, const QAudioFormat& format);
 
     QAudioFormat audioFormat() const;
