@@ -108,6 +108,12 @@ CircularBufferQAdapter::CircularBufferPtr CircularBufferQAdapter::buffer() const
     return mBuffer;
 }
 
+void CircularBufferQAdapter::clear()
+{
+    mBuffer->clear();
+    mReadItr = mBuffer->begin();
+}
+
 qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
 {
     // check that buffer and len are fit to read sample data

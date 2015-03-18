@@ -142,6 +142,9 @@ void TrikSoundController::run()
 void TrikSoundController::restart()
 {
     stop();
+    mBufferAdapter->clear();
+    // in case of changes in windowSize
+    mBuffer->resize(BUFFER_CAPACITY * mWindowSize);
     run();
 }
 

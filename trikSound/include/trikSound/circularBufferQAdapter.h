@@ -67,6 +67,8 @@ public:
 
     CircularBufferPtr buffer() const;
 
+    void clear();
+
 signals:
 
 private slots:
