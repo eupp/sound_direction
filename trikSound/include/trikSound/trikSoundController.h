@@ -29,6 +29,10 @@ public:
     {
     public:
 
+        // construct Setting object with default controller settings
+
+        Settings();
+
         int angleDetectionHistoryDepth() const;
         void setAngleDetectionHistoryDepth(int angleDetectionHistoryDepth);
 

@@ -187,6 +187,23 @@ void TrikSoundController::setVolume(double vol)
 }
 
 
+TrikSoundController::Settings::Settings():
+
+    mSingleChannelFlag(false)
+  , mFilteringFlag(true)
+  , mAngleDetectionFlag(true)
+
+  , mSampleRate(44100)
+  , mSampleSize(16)
+  , mSampleType(QAudioFormat::SignedInt)
+
+  , mAngleDetectionHistoryDepth(5)
+  , mWindowSize(1024)
+  , mVolume(1.0)
+
+  , mMicrDist(10.0)
+{}
+
 int TrikSoundController::Settings::angleDetectionHistoryDepth() const
 {
     return mAngleDetectionHistoryDepth;
