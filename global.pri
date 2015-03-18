@@ -3,6 +3,7 @@ COMPILER_IS_ARM = $$find(COMPILER, arm-oe.*)
 
 count(COMPILER_IS_ARM, 1) {
     BUILD = trik
+    DEFINES += TRIK
 } else {
     BUILD = desktop
 }

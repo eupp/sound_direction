@@ -46,7 +46,9 @@ HEADERS += \
     include/trikSound/splitFilter.h \
     include/trikSound/stereoAudioFilter.h \
     include/trikSound/trikSoundController.h \
-    include/trikSound/audioEventListener.h \
     include/trikSound/audioEvent.h \
-    include/trikSound/wavFile.h
+    include/trikSound/wavFile.h \
+    include/trikSound/emptyFilter.h \
+    include/trikSound/emptyStereoFilter.h \
+    include/trikSound/iAudioEventListener.h
 

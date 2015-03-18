@@ -12,7 +12,6 @@ class TRIKSOUNDSHARED_EXPORT StereoAudioFilter
 public:
 
     typedef std::pair<Iter, Iter> range_type;
-
     typedef std::shared_ptr<StereoAudioFilter<Iter>> FilterPtr;
 
     StereoAudioFilter(const FilterPtr& prevFilter = FilterPtr());
@@ -21,7 +20,10 @@ public:
     void handleWindow(range_type channel1, range_type channel2);
 
     FilterPtr prevFilter() const;
-    void setPrevFilter(const FilterPtr& prevFilter);
+    // Set filter as previous filter to this.
+    // If current filter already had previous filter, it move it to the tail of chain of filters
+    // specified by prevFilter.
+    void insertFilter(FilterPtr& prevFilter);
 
 protected:
     virtual void handleWindowImpl(range_type channel1, range_type channel2) = 0;
@@ -51,8 +53,14 @@ typename StereoAudioFilter<Iter>::FilterPtr StereoAudioFilter<Iter>::prevFilter(
 }
 
 template <typename Iter>
-void StereoAudioFilter<Iter>::setPrevFilter(const typename StereoAudioFilter::FilterPtr& prev)
+void StereoAudioFilter<Iter>::insertFilter(typename StereoAudioFilter::FilterPtr& prev)
 {
+    if (prev->prevFilter()) {
+        prev->prevFilter()->insertFilter(mPrev);
+    }
+    else {
+        prev->insertFilter(mPrev);
+    }
     mPrev = prev;
 }
 

@@ -66,13 +66,13 @@ AngleDetector<Iter>::AngleDetector(int sampleRate, double micrDist, int historyD
 template <typename Iter>
 void AngleDetector<Iter>::setHistoryDepth(int historyDepth)
 {
-    mImpl->setHistoryDepth();
+    mImpl->setHistoryDepth(historyDepth);
 }
 
 template <typename Iter>
 int AngleDetector<Iter>::historyDepth() const
 {
-    return mImpl->getHistoryDepth();
+    return mImpl->historyDepth();
 }
 
 template <typename Iter>

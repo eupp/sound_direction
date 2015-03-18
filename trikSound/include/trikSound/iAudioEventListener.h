@@ -6,11 +6,11 @@
 namespace trikSound
 {
 
-class TRIKSOUNDSHARED_EXPORT AudioEventListener
+class TRIKSOUNDSHARED_EXPORT IAudioEventListener
 {
 public:
 
-    ~AudioEventListener() {}
+    virtual ~IAudioEventListener() {}
 
     virtual void recieve(const AudioEvent& event) = 0;
 };

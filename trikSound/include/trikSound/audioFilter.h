@@ -20,7 +20,10 @@ public:
     void handleWindow(Iter first, Iter last);
 
     FilterPtr prevFilter() const;
-    void setPrevFilter(const FilterPtr& prevFilter);
+    // Set filter as previous filter to this.
+    // If current filter already had previous filter, it move it to the tail of chain of filters
+    // specified by prevFilter.
+    void insertFilter(FilterPtr& prevFilter);
 
 protected:
 
@@ -51,8 +54,14 @@ typename AudioFilter<Iter>::FilterPtr AudioFilter<Iter>::prevFilter() const
 }
 
 template <typename Iter>
-void AudioFilter<Iter>::setPrevFilter(const typename AudioFilter::FilterPtr& prev)
+void AudioFilter<Iter>::insertFilter(typename AudioFilter::FilterPtr& prev)
 {
+    if (prev->prevFilter()) {
+        prev->prevFilter()->insertFilter(mPrev);
+    }
+    else {
+        prev->insertFilter(mPrev);
+    }
     mPrev = prev;
 }
 

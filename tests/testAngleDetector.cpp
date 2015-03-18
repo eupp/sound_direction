@@ -44,7 +44,7 @@ AngleDetectorFixture::AngleDetectorFixture():
     std::shared_ptr<StereoAudioFilter<iterator_type>> split =
             make_shared<SplitFilter<iterator_type>>(filter);
 
-    detector->setPrevFilter(split);
+    detector->insertFilter(split);
     detector->setMicrDist(10.2);
 }
 
