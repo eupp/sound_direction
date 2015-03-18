@@ -11,7 +11,7 @@
 #include "audioDeviceManager.h"
 #include "angleDetector.h"
 #include "iAudioEventListener.h"
-#include "settingsProvider.h"
+#include "iSettingsProvider.h"
 
 namespace trikSound {
 
@@ -20,7 +20,7 @@ class TRIKSOUNDSHARED_EXPORT TrikSoundController : public QObject
     Q_OBJECT
 public:
 
-    typedef std::shared_ptr<SettingsProvider> SettingsProviderPtr;
+    typedef std::shared_ptr<ISettingsProvider> SettingsProviderPtr;
     typedef std::shared_ptr<IAudioEventListener> ListenerPtr;
 
     // settings for controller constructor

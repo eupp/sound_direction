@@ -67,10 +67,14 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
         mStereoFilter->insertFilter(detector);
     }
 
-    connect(mSettingsProvider.get(), SIGNAL(updateAngleDetectionHistoryDepth(int)),
+    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
             this, SLOT(setAngleDetectionHistoryDepth(int)));
-    connect(mSettingsProvider.get(), SIGNAL(updateWindowSize(size_t)), this, SLOT(setWindowSize(size_t)));
-    connect(mSettingsProvider.get(), SIGNAL(updateVolume(double)), this, SLOT(setVolume(double)));
+
+    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateWindowSize(size_t)),
+            this, SLOT(setWindowSize(size_t)));
+
+    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
+            this, SLOT(setVolume(double)));
 }
 
 void TrikSoundController::addAudioEventListener(const TrikSoundController::ListenerPtr& listener)
