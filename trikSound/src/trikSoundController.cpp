@@ -23,7 +23,9 @@ using namespace boost;
 using namespace trikSound;
 
 
-TrikSoundController::TrikSoundController(const TrikSoundController::Settings& args):
+TrikSoundController::TrikSoundController(const TrikSoundController::Settings& args,
+                                         const SettingsProviderPtr& provider):
+
     mBuffer(make_shared<CircularBufferQAdapter::CircularBuffer>(BUFFER_CAPACITY * args.windowSize()))
   , mBufferAdapter(make_shared<CircularBufferQAdapter>(mBuffer))
   , mWindowSize(args.windowSize())
@@ -31,6 +33,8 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mFilter(make_shared<EmptyFilter<BufferIterator>>())
   , mStereoFilter(make_shared<EmptyStereoFilter<BufferIterator>>())
   , mAngleDetectionFlag(args.angleDetectionFlag())
+  , mSettingsProvider(provider)
+
 {
     QAudioDeviceInfo dev = QAudioDeviceInfo::defaultInputDevice();
     QAudioFormat fmt;
@@ -62,6 +66,11 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
         StereoFilterPtr detector = mAngleDetector;
         mStereoFilter->insertFilter(detector);
     }
+
+    connect(mSettingsProvider.get(), SIGNAL(updateAngleDetectionHistoryDepth(int)),
+            this, SLOT(setAngleDetectionHistoryDepth(int)));
+    connect(mSettingsProvider.get(), SIGNAL(updateWindowSize(size_t)), this, SLOT(setWindowSize(size_t)));
+    connect(mSettingsProvider.get(), SIGNAL(updateVolume(double)), this, SLOT(setVolume(double)));
 }
 
 void TrikSoundController::addAudioEventListener(const TrikSoundController::ListenerPtr& listener)
@@ -109,7 +118,7 @@ void TrikSoundController::handleDoubleChannel()
     extractChannel<CHANNEL_COUNT, 1>(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chl2Begin);
 
     mStereoFilter->handleWindow(make_pair(chl1Begin, chl1End),
-                          make_pair(chl2Begin, chl2End));
+                                make_pair(chl2Begin, chl2End));
 }
 
 void TrikSoundController::notify(const AudioEvent& event)
@@ -122,6 +131,23 @@ void TrikSoundController::notify(const AudioEvent& event)
 bool TrikSoundController::singleChannelFlag() const
 {
     return mSingleChannelFlag;
+}
+
+void TrikSoundController::run()
+{
+    connect(mBufferAdapter.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
+    mDeviceManager->start();
+}
+
+void TrikSoundController::restart()
+{
+    stop();
+    run();
+}
+
+void TrikSoundController::stop()
+{
+    mDeviceManager->stop();
 }
 
 int TrikSoundController::angleDetectionHistoryDepth() const
@@ -142,18 +168,20 @@ double TrikSoundController::volume() const
 void TrikSoundController::setAngleDetectionHistoryDepth(int historyDepth)
 {
     mAngleDetector->setHistoryDepth(historyDepth);
+    restart();
 }
 
 void TrikSoundController::setWindowSize(size_t size)
 {
     mWindowSize = size;
+    restart();
 }
 
 void TrikSoundController::setVolume(double vol)
 {
     mDeviceManager->setVolume(vol);
+    restart();
 }
-
 
 
 int TrikSoundController::Settings::angleDetectionHistoryDepth() const

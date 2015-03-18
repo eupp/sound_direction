@@ -11,6 +11,7 @@
 #include "audioDeviceManager.h"
 #include "angleDetector.h"
 #include "iAudioEventListener.h"
+#include "settingsProvider.h"
 
 namespace trikSound {
 
@@ -19,7 +20,10 @@ class TRIKSOUNDSHARED_EXPORT TrikSoundController : public QObject
     Q_OBJECT
 public:
 
+    typedef std::shared_ptr<SettingsProvider> SettingsProviderPtr;
     typedef std::shared_ptr<IAudioEventListener> ListenerPtr;
+
+    // settings for controller constructor
 
     class Settings
     {
@@ -80,6 +84,8 @@ public:
         double mMicrDist;
     };
 
+    // exception during initialization
+
     class InitException : public TrikSoundException
     {
     public:
@@ -88,17 +94,33 @@ public:
         {}
     };
 
-    TrikSoundController(const Settings& args);
+    // constructor
+
+    TrikSoundController(const Settings& args, const SettingsProviderPtr& provider);
+
+    // add listeners
 
     void addAudioEventListener(const ListenerPtr& listener);
+
+    // controller runtime settings
 
     int angleDetectionHistoryDepth() const;
     size_t windowSize() const;
     double volume() const;
 
+    // controller static settings
+
     bool singleChannelFlag() const;
 
 public slots:
+
+    // manage controller loop
+
+    void run();
+    void restart();
+    void stop();
+
+    // controller runtime settings
 
     void setAngleDetectionHistoryDepth(int historyDepth);
     void setWindowSize(size_t size);
@@ -116,7 +138,6 @@ private:
     typedef std::vector<sample_type> WindowContainer;
     typedef WindowContainer::iterator BufferIterator;
 
-
     typedef std::shared_ptr<CircularBufferQAdapter::CircularBuffer> CircularBufferPtr;
     typedef std::shared_ptr<CircularBufferQAdapter> CircularBufferQAdapterPtr;
     typedef std::shared_ptr<AngleDetector<BufferIterator>> AngleDetectorPtr;
@@ -132,19 +153,33 @@ private:
     // buffer capacity in terms of count of windows it stores
     static const int BUFFER_CAPACITY = 10;
 
+    // buffer objects
+
     CircularBufferPtr mBuffer;
     CircularBufferQAdapterPtr mBufferAdapter;
     // size of window in samples
     size_t mWindowSize;
     WindowContainer mWindowCopy;
 
+    // audio device management
+
     AudioDeviceManagerPtr mDeviceManager;
+
+    // filters
 
     AudioFilter<BufferIterator>::FilterPtr mFilter;
     StereoAudioFilter<BufferIterator>::FilterPtr mStereoFilter;
     AngleDetectorPtr mAngleDetector;
 
+    // settings provider
+
+    SettingsProviderPtr mSettingsProvider;
+
+    // listeners
+
     std::vector<ListenerPtr> mListeners;
+
+    // flags
 
     bool mAngleDetectionFlag;
     bool mSingleChannelFlag;
