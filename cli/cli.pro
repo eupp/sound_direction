@@ -1,22 +1,25 @@
 
 include(../global.pri)
 
-QT       += core multimedia
-QT       -= gui
+QT       += core multimedia gui
+#QT       -= gui
 
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-
 SOURCES += \
     src/main.cpp \
-    src/trikSoundApplication.cpp \
-    src/benchmark.cpp
+    src/argumentParser.cpp \
+    src/mainWindow.cpp
 
 HEADERS += \
-    include/internal/trikSoundApplication.h \
-    include/internal/benchmark.h
+    include/internal/argumentParser.h \
+    include/internal/mainWindow.h
+
+FORMS += \
+    ui/mainWindow.ui
 
 uses(trikSound)
+

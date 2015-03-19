@@ -56,6 +56,9 @@ typename AudioFilter<Iter>::FilterPtr AudioFilter<Iter>::prevFilter() const
 template <typename Iter>
 void AudioFilter<Iter>::insertFilter(typename AudioFilter::FilterPtr& prev)
 {
+    if (!prev) {
+        return;
+    }
     if (prev->prevFilter()) {
         prev->prevFilter()->insertFilter(mPrev);
     }

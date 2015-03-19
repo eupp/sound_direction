@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QObject>
-
 #include "triksound_global.h"
+
+namespace trikSound
+{
 
 class TRIKSOUNDSHARED_EXPORT ISettingsProvider
 {
@@ -17,3 +18,5 @@ signals:
     virtual void updateVolume(double vol) = 0;
 
 };
+
+}

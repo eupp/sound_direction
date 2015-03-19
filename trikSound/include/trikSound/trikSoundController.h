@@ -100,7 +100,7 @@ public:
 
     // constructor
 
-    TrikSoundController(const Settings& args, const SettingsProviderPtr& provider);
+    TrikSoundController(const Settings& args, const SettingsProviderPtr& provider = SettingsProviderPtr());
 
     // add listeners
 

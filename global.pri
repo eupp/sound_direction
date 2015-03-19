@@ -1,23 +1,23 @@
 
+COMPILER = $$(CXX)
+
 COMPILER_IS_ARM = $$find(COMPILER, arm-oe.*)
 
 count(COMPILER_IS_ARM, 1) {
     BUILD = trik
     DEFINES += TRIK
+    message("Building for TRIK")
 } else {
     BUILD = desktop
 }
+
 
 CONFIG(debug, debug | release) {
     CONFIGURATION = $$BUILD-debug
     CONFIGURATION_SUFFIX = -$$BUILD-d
 } else {
     CONFIGURATION = $$BUILD-release
-    equals(BUILD, "trik") {
-        CONFIGURATION_SUFFIX =
-    } else {
-        CONFIGURATION_SUFFIX = -$$BUILD
-    }
+    CONFIGURATION_SUFFIX = -$$BUILD
 }
 
 DESTDIR = $$PWD/bin/$$CONFIGURATION

@@ -55,6 +55,9 @@ typename StereoAudioFilter<Iter>::FilterPtr StereoAudioFilter<Iter>::prevFilter(
 template <typename Iter>
 void StereoAudioFilter<Iter>::insertFilter(typename StereoAudioFilter::FilterPtr& prev)
 {
+    if (!prev) {
+        return;
+    }
     if (prev->prevFilter()) {
         prev->prevFilter()->insertFilter(mPrev);
     }

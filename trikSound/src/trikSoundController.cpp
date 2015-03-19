@@ -33,6 +33,8 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mFilter(make_shared<EmptyFilter<BufferIterator>>())
   , mStereoFilter(make_shared<EmptyStereoFilter<BufferIterator>>())
   , mAngleDetectionFlag(args.angleDetectionFlag())
+  , mSingleChannelFlag(args.singleChannelFlag())
+
   , mSettingsProvider(provider)
 
 {
@@ -41,6 +43,13 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
     fmt.setSampleRate(args.sampleRate());
     fmt.setSampleSize(args.sampleSize());
     fmt.setSampleType(args.sampleType());
+    fmt.setCodec("audio/pcm");
+    if (args.singleChannelFlag()) {
+        fmt.setChannelCount(1);
+    }
+    else {
+        fmt.setChannelCount(2);
+    }
     if (!fmt.isValid()) {
         throw InitException("TrikSoundController error. Invalid audio format");
     }
@@ -67,14 +76,16 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
         mStereoFilter->insertFilter(detector);
     }
 
-    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
-            this, SLOT(setAngleDetectionHistoryDepth(int)));
+    if (mSettingsProvider) {
+        connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
+                this, SLOT(setAngleDetectionHistoryDepth(int)));
 
-    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateWindowSize(size_t)),
-            this, SLOT(setWindowSize(size_t)));
+        connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateWindowSize(size_t)),
+                this, SLOT(setWindowSize(size_t)));
 
-    connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
-            this, SLOT(setVolume(double)));
+        connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
+                this, SLOT(setVolume(double)));
+    }
 }
 
 void TrikSoundController::addAudioEventListener(const TrikSoundController::ListenerPtr& listener)
