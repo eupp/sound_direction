@@ -126,10 +126,6 @@ qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
     qint64 sampleCount = min(maxlen, bytesAvailable()) / sizeof(sample_type);
     sample_type* sampleData = reinterpret_cast<sample_type*>(data);
 
-    if (mReadItr == mBuffer->end()) {
-        qDebug() << "halt";
-    }
-
     auto readEnd = mReadItr + sampleCount;
     copy(mReadItr, readEnd, sampleData);
     mReadItr = readEnd;
@@ -173,5 +169,6 @@ qint64 CircularBufferQAdapter::writeData(const char *data, qint64 len)
         mReadItr = mBuffer->begin();
     }
 
+    emit readyRead();
     return sampleCount * sizeof(sample_type);
 }

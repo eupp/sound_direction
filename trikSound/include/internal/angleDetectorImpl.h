@@ -165,7 +165,8 @@ int AngleDetectorImpl<Iter>::calcPeakPos(size_t historyDepth)
     corr_array corrRes;
     corrRes.fill(0);
 
-    assert(historyDepth <= mCorrHistory.size());
+//    assert(historyDepth <= mCorrHistory.size());
+    historyDepth = std::min(historyDepth, mCorrHistory.size());
 
     auto end = mCorrHistory.rbegin();
     advance(end, historyDepth);

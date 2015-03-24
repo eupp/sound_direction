@@ -2,6 +2,7 @@
 #include "ui_mainWindow.h"
 
 #include <QKeyEvent>
+#include <QDebug>
 
 const int MainWindow::historyDiff = 1;
 const double MainWindow::volDiff = 0.1;
@@ -25,7 +26,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::recieve(const trikSound::AudioEvent& event)
 {
-    ui->angleIndicator->display(event.angle());
+    qDebug() << "angle: " << event.angle();
+//    ui->angleIndicator->display(event.angle());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -50,13 +52,13 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
         break;
     case Qt::Key_Down:
         vol -= volDiff;
-        if (vol > 0) {
+        if (vol >= 0) {
             controller->setVolume(vol);
         }
         break;
     case Qt::Key_Up:
         vol += volDiff;
-        if (vol < 1.0) {
+        if (vol <= 1.0) {
             controller->setVolume(vol);
         }
         break;

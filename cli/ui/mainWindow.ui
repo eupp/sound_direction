@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>177</width>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,17 +17,17 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>0</x>
       <y>10</y>
-      <width>371</width>
-      <height>221</height>
+      <width>171</width>
+      <height>201</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="1">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Change volume - arrow up/down</string>
+        <string>Volume</string>
        </property>
       </widget>
      </item>
@@ -51,21 +51,21 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Change hisory depth - arrow left/right</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLCDNumber" name="historyIndicator"/>
+     <item row="2" column="2">
+      <widget class="QLCDNumber" name="angleIndicator"/>
      </item>
      <item row="1" column="2">
       <widget class="QLCDNumber" name="volumeIndicator"/>
      </item>
-     <item row="2" column="2">
-      <widget class="QLCDNumber" name="angleIndicator"/>
+     <item row="0" column="2">
+      <widget class="QLCDNumber" name="historyIndicator"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Hisory depth</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -75,7 +75,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>177</width>
      <height>29</height>
     </rect>
    </property>

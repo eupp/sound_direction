@@ -1,5 +1,7 @@
 #include "audioDeviceManager.h"
 
+#include <QDebug>
+
 using namespace trikSound;
 
 AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
@@ -9,7 +11,9 @@ AudioDeviceManager::AudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
   , mInput(deviceInfo, audioFormat)
   , mBuffer(buffer)
 {
-    mBuffer->open(QIODevice::WriteOnly);
+    if (!mBuffer->isWritable()) {
+        throw InitException("AudioDeviceManager error. Buffer is not writable");
+    }
 }
 
 QAudioDeviceInfo AudioDeviceManager::deviceInfo() const
@@ -29,6 +33,7 @@ std::shared_ptr<QIODevice> AudioDeviceManager::buffer() const
 
 void AudioDeviceManager::start()
 {
+    qDebug() << "Start capture";
     mInput.start(mBuffer.get());
 }
 

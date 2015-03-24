@@ -17,10 +17,11 @@ int main(int argc, char** argv)
 
         TrikSoundController::Settings settings = ArgumentParser::parse();
         shared_ptr<TrikSoundController> controller = make_shared<TrikSoundController>(settings);
-        MainWindow window(controller);
+        shared_ptr<MainWindow> window = make_shared<MainWindow>(controller);
+        controller->addAudioEventListener(window);
 
         QTimer::singleShot(0, controller.get(), SLOT(run()));
-        window.show();
+        window->show();
 
         return app.exec();
     }

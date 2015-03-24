@@ -1,5 +1,7 @@
 #include "trikSoundController.h"
 
+#include <QDebug>
+
 #include <vector>
 
 #include "utils.h"
@@ -30,6 +32,7 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mBufferAdapter(make_shared<CircularBufferQAdapter>(mBuffer))
   , mWindowSize(args.windowSize())
   , mWindowCopy(2 * args.windowSize())
+  , mTmpWindowCopy(2 * args.windowSize())
   , mFilter(make_shared<EmptyFilter<BufferIterator>>())
   , mStereoFilter(make_shared<EmptyStereoFilter<BufferIterator>>())
   , mAngleDetectionFlag(args.angleDetectionFlag())
@@ -38,6 +41,8 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mSettingsProvider(provider)
 
 {
+    mBufferAdapter->open(QIODevice::ReadWrite);
+
     QAudioDeviceInfo dev = QAudioDeviceInfo::defaultInputDevice();
     QAudioFormat fmt;
     fmt.setSampleRate(args.sampleRate());
@@ -95,6 +100,7 @@ void TrikSoundController::addAudioEventListener(const TrikSoundController::Liste
 
 void TrikSoundController::bufferReadyReadHandler()
 {
+//    qDebug() << "readyRead!";
     if (mBufferAdapter->samplesAvailable() < CHANNEL_COUNT * mWindowSize) {
         return;
     }
@@ -118,7 +124,9 @@ void TrikSoundController::handleSingleChannel()
 {
     auto chlBegin = mWindowCopy.begin();
     auto chlEnd   = chlBegin + mWindowSize;
-    copy(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chlBegin);
+    mBufferAdapter->read((char*)mTmpWindowCopy.data(), mWindowSize * sizeof(sample_type));
+//    copy(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chlBegin);
+
     mFilter->handleWindow(chlBegin, chlEnd);
 }
 
@@ -129,8 +137,10 @@ void TrikSoundController::handleDoubleChannel()
     auto chl2Begin = chl1End;
     auto chl2End   = mWindowCopy.end();
 
-    extractChannel<CHANNEL_COUNT, 0>(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chl1Begin);
-    extractChannel<CHANNEL_COUNT, 1>(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chl2Begin);
+    mBufferAdapter->read((char*)mTmpWindowCopy.data(), CHANNEL_COUNT * mWindowSize * sizeof(sample_type));
+
+    extractChannel<CHANNEL_COUNT, 0>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl1Begin);
+    extractChannel<CHANNEL_COUNT, 1>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl2Begin);
 
     mStereoFilter->handleWindow(make_pair(chl1Begin, chl1End),
                                 make_pair(chl2Begin, chl2End));
@@ -138,6 +148,7 @@ void TrikSoundController::handleDoubleChannel()
 
 void TrikSoundController::notify(const AudioEvent& event)
 {
+//    qDebug() << "angle: " << event.angle();
     for (auto& listener: mListeners) {
         listener->recieve(event);
     }

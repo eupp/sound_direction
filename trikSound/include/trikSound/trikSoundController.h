@@ -155,7 +155,7 @@ private:
 
     static const int CHANNEL_COUNT = 2;
     // buffer capacity in terms of count of windows it stores
-    static const int BUFFER_CAPACITY = 10;
+    static const int BUFFER_CAPACITY = 20;
 
     // buffer objects
 
@@ -164,6 +164,7 @@ private:
     // size of window in samples
     size_t mWindowSize;
     WindowContainer mWindowCopy;
+    WindowContainer mTmpWindowCopy;
 
     // audio device management
 

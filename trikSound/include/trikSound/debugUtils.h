@@ -45,7 +45,7 @@ private:
 template <typename T>
 void dprint_sequence(const std::string& filename, T first, T last)
 {
-    DebugPrinter<true>::instance().print_sequence(filename, first, last);
+    DebugPrinter<false>::instance().print_sequence(filename, first, last);
 }
 
 }
