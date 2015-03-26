@@ -70,6 +70,8 @@ public:
      * @return Number of samples that were actually written
      */
     qint64 write(const AudioBuffer& buf);
+    qint64 write(const char* data, qint64 size);
+
 
 private:
     int bytesPerSample() const;

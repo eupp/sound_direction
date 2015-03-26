@@ -127,11 +127,21 @@ AudioBuffer WavFile::readAll()
 
 qint64 WavFile::write(const AudioBuffer& buf)
 {
-    qint64 bytesForWriting = qMin(buf.size(), std::numeric_limits<quint32>::max() - mFile.size());
-    qint64 bytesWritten    = mFile.write((char*) buf.data(), bytesForWriting);
+    return write((char*)buf.data(), buf.size());
+}
+
+qint64 WavFile::write(const char* data, qint64 size)
+{
+    if (size % bytesPerSample() != 0) {
+        return -1;
+    }
+    qint64 bytesForWriting = qMin(size, std::numeric_limits<quint32>::max() - mFile.size());
+    qint64 bytesWritten    = mFile.write(data, bytesForWriting);
     setHeaderDataSize(mFile.size());
     return bytesWritten;
 }
+
+
 
 int WavFile::bytesPerSample() const
 {

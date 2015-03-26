@@ -51,5 +51,7 @@ HEADERS += \
     include/trikSound/emptyFilter.h \
     include/trikSound/emptyStereoFilter.h \
     include/trikSound/iAudioEventListener.h \
-    include/trikSound/iSettingsProvider.h
+    include/trikSound/iSettingsProvider.h \
+    include/trikSound/stereoRecordFilter.h \
+    include/trikSound/recordFilter.h
 
