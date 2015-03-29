@@ -1,20 +1,34 @@
 #pragma once
 
+#include <vector>
+
 #include <QFile>
 #include <QAudioFormat>
 
 #include "audioBuffer.h"
+#include "trikSoundException.h"
 
 namespace trikSound {
 
 class TRIKSOUNDSHARED_EXPORT WavFile
 {
 public:
+
+    static const int HEADER_SIZE = 44;
+
     enum OpenMode
     {
           NotOpen         = 0
         , ReadOnly        = 1
         , WriteOnly       = 2
+    };
+
+    class OpenFileException: public TrikSoundException
+    {
+    public:
+        OpenFileException(const QString& msg):
+            TrikSoundException(msg.toStdString().data())
+        {}
     };
 
     WavFile(const QString& filename);
@@ -30,6 +44,10 @@ public:
 
     QString fileName() const;
     OpenMode openMode() const;
+    bool isOpen() const;
+    bool isWritable() const;
+    bool isReadable() const;
+
     QAudioFormat audioFormat() const;
 
     /**
@@ -72,7 +90,6 @@ public:
     qint64 write(const AudioBuffer& buf);
     qint64 write(const char* data, qint64 size);
 
-
 private:
     int bytesPerSample() const;
     qint64 byteNumToSample(qint64 bytePos) const;
@@ -82,10 +99,6 @@ private:
     bool writeHeader(const QAudioFormat& format);
 
     void setHeaderDataSize(quint32 size);
-
-    static bool isAudioFormatCorrect(const QAudioFormat& format);
-
-    static const int wavHeaderSize = 44;
 
     QFile mFile;
     OpenMode mMode;

@@ -2,10 +2,12 @@
 
 #include <iterator>
 #include <vector>
+#include <memory>
 
 #include <QString>
 
 #include "triksound_global.h"
+#include "trikSoundException.h"
 #include "audioFilter.h"
 #include "wavFile.h"
 
@@ -13,36 +15,59 @@ namespace trikSound
 {
 
 template <typename Iter>
-class RecordFilter: public AudioFilter<Iter>
+class TRIKSOUNDSHARED_EXPORT RecordFilter: public AudioFilter<Iter>
 {
 public:
 
-    using AudioFilter<Iter>::FilterPtr;
+    typedef typename std::iterator_traits<Iter>::value_type value_type;
+    typedef typename AudioFilter<Iter>::FilterPtr FilterPtr;
+    typedef std::shared_ptr<WavFile> WavFilePtr;
 
-    RecordFilter(const QString& filename, const FilterPtr& prevFilter);
+    class InitException: public TrikSoundException
+    {
+    public:
+        InitException(const char* msg):
+            TrikSoundException(msg)
+        {}
+    };
+
+    RecordFilter(const WavFilePtr& wavFile, const FilterPtr& prevFilter = FilterPtr());
+
+    void write(const std::vector<value_type>& buf);
 
 private:
 
     void handleWindowImpl(Iter first, Iter last);
 
 private:
-    WavFile mWavFile;
+    WavFilePtr mWavFile;
 };
 
 template <typename Iter>
-RecordFilter<Iter>::RecordFilter(const QString& filename, const AudioFilter::FilterPtr& prevFilter):
-    AudioFilter(prevFilter)
-  , mWavFile(filename)
+RecordFilter<Iter>::RecordFilter(const WavFilePtr& wavFile,
+                                 const typename AudioFilter<Iter>::FilterPtr& prevFilter):
+    AudioFilter<Iter>(prevFilter)
+  , mWavFile(wavFile)
 {
-    mWavFile.open(WavFile::WriteOnly);
+    if (!mWavFile->isWritable()) {
+        throw InitException("StereoRecordFilter error. Wav file is not writable");
+    }
+    if (mWavFile->audioFormat().sampleSize() != 8 * sizeof(value_type)) {
+        throw InitException("RecordFilter error. Incorrect format for specified type of range");
+    }
+}
+
+template <typename Iter>
+void RecordFilter<Iter>::write(const std::vector<typename RecordFilter<Iter>::value_type>& buf)
+{
+    mWavFile->write((char*) buf.data(), buf.size() * sizeof(value_type));
 }
 
 template <typename Iter>
 void RecordFilter<Iter>::handleWindowImpl(Iter first, Iter last)
 {
-    typedef typename std::iterator_traits<Iter>::value_type value_type;
     std::vector<value_type> buf(first, last);
-    mWavFile.write((char*)buf.data(), buf.size() * sizeof(value_type));
+    write(buf);
 }
 
 }

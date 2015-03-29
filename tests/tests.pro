@@ -10,7 +10,9 @@ CONFIG -= app_bundle
 
 SOURCES += main.cpp \
     testCircularBuffer.cpp \
-    testAngleDetector.cpp
+    testAngleDetector.cpp \
+    testWavFile.cpp \
+    testStereoRecordFilter.cpp
 
 LIBS+= -lboost_unit_test_framework
 

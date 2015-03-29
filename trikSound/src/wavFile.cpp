@@ -36,36 +36,33 @@ WavFile::WavFile(const QString& filename):
 
 bool WavFile::open(WavFile::OpenMode mode, const QAudioFormat& format)
 {
+    close();
     if (mode == ReadOnly) {
         if (!mFile.open(QIODevice::ReadOnly)) {
-            qDebug() << "Cannot open wav file: " << fileName() << "; error: " << mFile.errorString();
-            return false;
+            throw OpenFileException("Cannot open wav file: " + fileName() + "; error: " + mFile.errorString());
         }
         try {
             mAudioFormat = readHeader();
         }
         catch (UncorrectHeaderExc& exc) {
-            qDebug() << "Cannot open wav file: " << fileName() << "; error: Incorrect header";
             mFile.close();
-            return false;
+            throw OpenFileException("Cannot open wav file: " + fileName() + "; error: Incorrect header");
         }
     }
     else if (mode == WriteOnly) {
-        if (!isAudioFormatCorrect(format)) {
-            qDebug() << "Cannot open wav file: " << fileName() << "; error: Incorrect audio format";
-            return false;
+        if (!format.isValid()) {
+            throw OpenFileException("Cannot open wav file: " + fileName() + "; error: Incorrect audio format");
         }
         if (!mFile.open(QIODevice::WriteOnly)) {
-            qDebug() << "Cannot open wav file: " << fileName() << "; error: " << mFile.errorString();
-            return false;
+            throw OpenFileException("Cannot open wav file: " + fileName() + "; error: " + mFile.errorString());
         }
         if (!writeHeader(format)) {
-            qDebug() << "Cannot open wav file: " << fileName() << "; error: Cannot write wav header";
             mFile.close();
-            return false;
+            throw OpenFileException("Cannot open wav file: " + fileName() + "; error: Cannot write wav header");
         }
+        mAudioFormat = format;
     }
-    mFile.seek(wavHeaderSize);
+    mFile.seek(HEADER_SIZE);
     mMode = mode;
     return true;
 }
@@ -86,6 +83,21 @@ WavFile::OpenMode WavFile::openMode() const
     return mMode;
 }
 
+bool WavFile::isOpen() const
+{
+    return mMode != NotOpen;
+}
+
+bool WavFile::isWritable() const
+{
+    return mMode == WriteOnly;
+}
+
+bool WavFile::isReadable() const
+{
+    return mMode == ReadOnly;
+}
+
 QAudioFormat WavFile::audioFormat() const
 {
     return mAudioFormat;
@@ -98,7 +110,7 @@ qint64 WavFile::size() const
 
 qint64 WavFile::sampleCount() const
 {
-    qint64 count = mFile.size() / bytesPerSample();
+    qint64 count = (mFile.size() - HEADER_SIZE) / bytesPerSample();
     if (mAudioFormat.channelCount() == 2) {
         count /= 2;
     }
@@ -107,12 +119,12 @@ qint64 WavFile::sampleCount() const
 
 bool WavFile::seek(qint64 pos)
 {
-    return mFile.seek(wavHeaderSize + sampleNumToByte(pos));
+    return mFile.seek(HEADER_SIZE + sampleNumToByte(pos));
 }
 
 quint64 WavFile::pos() const
 {
-    return byteNumToSample(mFile.pos() - wavHeaderSize);
+    return byteNumToSample(mFile.pos() - HEADER_SIZE);
 }
 
 AudioBuffer WavFile::read(qint64 maxSize)
@@ -141,10 +153,10 @@ qint64 WavFile::write(const char* data, qint64 size)
     return bytesWritten;
 }
 
-
-
 int WavFile::bytesPerSample() const
 {
+    int fs = mAudioFormat.sampleRate();
+    int tmp = mAudioFormat.sampleSize();
     return mAudioFormat.sampleSize() / 8;
 }
 
@@ -161,7 +173,7 @@ qint64 WavFile::sampleNumToByte(qint64 samplePos) const
 
 QAudioFormat WavFile::readHeader()
 {
-    assert(sizeof(WavHeader) == wavHeaderSize);
+    assert(sizeof(WavHeader) == HEADER_SIZE);
 
     if (mFile.size() < sizeof(WavHeader)) {
         throw UncorrectHeaderExc();
@@ -211,7 +223,7 @@ QAudioFormat WavFile::readHeader()
 
 bool WavFile::writeHeader(const QAudioFormat& format)
 {
-    assert(sizeof(WavHeader) == wavHeaderSize);
+    assert(sizeof(WavHeader) == HEADER_SIZE);
 
     WavHeader header;
     memset((void*) &header, 0, sizeof(WavHeader));
@@ -236,16 +248,10 @@ bool WavFile::writeHeader(const QAudioFormat& format)
 
 void WavFile::setHeaderDataSize(quint32 size)
 {
-    qDebug() << "Wav header: data size = " << size;
+//    qDebug() << "Wav header: data size = " << size;
 
     qint64 currPos = mFile.pos();
-    mFile.seek(wavHeaderSize - 4);
+    mFile.seek(HEADER_SIZE - 4);
     mFile.write(reinterpret_cast<char*>(&size), sizeof(qint32));
     mFile.seek(currPos);
-}
-
-bool WavFile::isAudioFormatCorrect(const QAudioFormat& format)
-{
-    // to do: check is format correct
-    return true;
 }
