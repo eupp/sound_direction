@@ -63,6 +63,18 @@ public:
         double micrDist() const;
         void setMicrDist(double micrDist);
 
+        bool recordStreamFlag() const;
+        void setRecordStreamFlag(bool recordStreamFlag);
+
+        QString outputWavFilename() const;
+        void setOutputWavFilename(const QString& outputWavFilename);
+
+        int duration() const;
+        void setDuration(int duration);
+
+        bool durationSetFlag() const;
+        void setDurationSetFlag(bool durationSetFlag);
+
     private:
 
         // flags
@@ -70,6 +82,7 @@ public:
         bool mSingleChannelFlag;
         bool mFilteringFlag;
         bool mAngleDetectionFlag;
+        bool mRecordStreamFlag;
 
         // audio format parameters
 
@@ -86,6 +99,15 @@ public:
         // angle detector arguments
 
         double mMicrDist;
+
+        // duration settings
+
+        int mDuration;
+        bool mDurationSetFlag;
+
+        // other settings
+
+        QString mOutputWavFilename;
     };
 
     // exception during initialization
@@ -124,6 +146,8 @@ public slots:
     void restart();
     void stop();
 
+    void finish();
+
     // controller runtime settings
 
     void setAngleDetectionHistoryDepth(int historyDepth);
@@ -131,6 +155,8 @@ public slots:
     void setVolume(double vol);
 
 signals:
+
+    void finished();
 
 private slots:
 

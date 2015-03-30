@@ -11,11 +11,13 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
 {
     {"filename", ArgumentParser::Parameter("-f", "--filename", "Filename is missing.")}
   , {"outfile", ArgumentParser::Parameter("-o", "--output-filename", "Output filename is missing.")}
+  , {"duration", ArgumentParser::Parameter("-d", "--duration", "Duration is missing")}
 
   , {"channelCount", ArgumentParser::Parameter("", "--channels", "Channel count is missing.")}
 
-  , {"angleDetection", ArgumentParser::Parameter("-a", "--angle", "")}
-  , {"micrDist", ArgumentParser::Parameter("-d", "--micr_dist", "Microphone distance is missing.")}
+  , {"angleDetection", ArgumentParser::Parameter("-A", "--angle", "")}
+  , {"filtering", ArgumentParser::Parameter("-F", "--filtering", "")}
+  , {"micrDist", ArgumentParser::Parameter("-D", "--micr_dist", "Microphone distance is missing.")}
   , {"historyDepth", ArgumentParser::Parameter("", "--history-depth", "History depth is missing.")}
   , {"windowSize", ArgumentParser::Parameter("", "--window-size", "Window size is missing.")}
 
@@ -52,6 +54,22 @@ TrikSoundController::Settings ArgumentParser::parseArgumentList(const QStringLis
         if (*it == paramsMap["angleDetection"]) {
             settings.setAngleDetectionFlag(true);
         }
+        if (*it == paramsMap["duration"]) {
+            settings.setDurationSetFlag(true);
+            parseDuration(it, settings);
+            continue;
+        }
+        if (*it == paramsMap["outfile"]) {
+            settings.setRecordStreamFlag(true);
+            ++it;
+            if (it != args.end()) {
+                settings.setOutputWavFilename(*it);
+            }
+            else {
+                throw ParseException(paramsMap["outfile"].errorString());
+            }
+            continue;
+        }
     }
 
     checkSettings(settings);
@@ -64,6 +82,17 @@ void ArgumentParser::checkSettings(const Settings& settings)
     if (settings.angleDetectionFlag() && settings.singleChannelFlag()) {
         throw ParseException("Angle detection enabled but single channel capturing specified");
     }
+}
+
+void ArgumentParser::parseDuration(QStringList::ConstIterator& it, ArgumentParser::Settings& settings)
+{
+    ++it;
+    bool ok = true;
+    int duration = it->toInt(&ok);
+    if (!ok) {
+        throw ParseException(paramsMap["duration"].errorString());
+    }
+    settings.setDuration(duration);
 }
 
 void ArgumentParser::parseChannelCount(QStringList::ConstIterator& it, Settings& settings)

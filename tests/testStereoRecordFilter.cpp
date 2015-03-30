@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(testHandleWindow)
 {
     array<sample_type, arraySize / 2> channel1;
     array<sample_type, arraySize / 2> channel2;
-    for (size_t i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize / 2; ++i) {
         channel1[i] = randBytes[2 * i];
         channel2[i] = randBytes[2 * i + 1];
     }

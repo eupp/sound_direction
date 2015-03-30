@@ -50,6 +50,7 @@ private:
     static Settings parseArgumentList(const QStringList& args);
     static void checkSettings(const Settings& settings);
 
+    static void parseDuration(QStringList::ConstIterator& it, Settings& settings);
     static void parseChannelCount(QStringList::ConstIterator& it, Settings& settings);
     static void parseMicrDistance(QStringList::ConstIterator& it, Settings& settings);
     static void parseHistoryDepth(QStringList::ConstIterator& it, Settings& settings);

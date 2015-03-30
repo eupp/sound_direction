@@ -23,6 +23,8 @@ int main(int argc, char** argv)
         QTimer::singleShot(0, controller.get(), SLOT(run()));
         window->show();
 
+        QObject::connect(controller.get(), SIGNAL(finished()), &app, SLOT(quit()));
+
         return app.exec();
     }
     catch (exception& exc) {

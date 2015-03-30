@@ -1,8 +1,9 @@
 #include "trikSoundController.h"
 
-#include <QDebug>
-
 #include <vector>
+
+#include <QDebug>
+#include <QTimer>
 
 #include "utils.h"
 
@@ -10,6 +11,8 @@
 #include "emptyStereoFilter.h"
 #include "digitalAudioFilter.h"
 #include "splitFilter.h"
+#include "recordFilter.h"
+#include "stereoRecordFilter.h"
 
 #include "audioDeviceManager.h"
 
@@ -75,10 +78,22 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
         }
 
         mAngleDetector = make_shared<AngleDetector<BufferIterator>>(args.sampleRate(),
-                                                                   args.micrDist(),
-                                                                   args.angleDetectionHistoryDepth());
+                                                                    args.micrDist(),
+                                                                    args.angleDetectionHistoryDepth());
         StereoFilterPtr detector = mAngleDetector;
         mStereoFilter->insertFilter(detector);
+    }
+    if (args.recordStreamFlag()) {
+        RecordFilter<BufferIterator>::WavFilePtr wavFile = make_shared<WavFile>(args.outputWavFilename());
+        wavFile->open(WavFile::WriteOnly, fmt);
+        if (args.singleChannelFlag()) {
+            FilterPtr record = make_shared<RecordFilter<BufferIterator>>(wavFile);
+            mFilter->insertFilter(record);
+        }
+        else {
+            StereoFilterPtr record = make_shared<StereoRecordFilter<BufferIterator>>(wavFile);
+            mStereoFilter->insertFilter(record);
+        }
     }
 
     if (mSettingsProvider) {
@@ -90,6 +105,10 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
 
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
                 this, SLOT(setVolume(double)));
+    }
+
+    if (args.durationSetFlag()) {
+        QTimer::singleShot(args.duration(), this, SLOT(finish()));
     }
 }
 
@@ -114,6 +133,7 @@ void TrikSoundController::bufferReadyReadHandler()
 
     AudioEvent event;
     if (mAngleDetectionFlag) {
+        assert(mAngleDetector != nullptr);
         event.setAngle(mAngleDetector->getAngle());
     }
 
@@ -179,9 +199,15 @@ void TrikSoundController::stop()
     mDeviceManager->stop();
 }
 
+void TrikSoundController::finish()
+{
+    stop();
+    emit finished();
+}
+
 int TrikSoundController::angleDetectionHistoryDepth() const
 {
-    return mAngleDetector->historyDepth();
+    return mAngleDetector ? mAngleDetector->historyDepth() : 0;
 }
 
 size_t TrikSoundController::windowSize() const
@@ -196,8 +222,10 @@ double TrikSoundController::volume() const
 
 void TrikSoundController::setAngleDetectionHistoryDepth(int historyDepth)
 {
-    mAngleDetector->setHistoryDepth(historyDepth);
-    restart();
+    if (mAngleDetector) {
+        mAngleDetector->setHistoryDepth(historyDepth);
+        restart();
+    }
 }
 
 void TrikSoundController::setWindowSize(size_t size)
@@ -216,8 +244,9 @@ void TrikSoundController::setVolume(double vol)
 TrikSoundController::Settings::Settings():
 
     mSingleChannelFlag(false)
-  , mFilteringFlag(true)
-  , mAngleDetectionFlag(true)
+  , mFilteringFlag(false)
+  , mAngleDetectionFlag(false)
+  , mRecordStreamFlag(false)
 
   , mSampleRate(44100)
   , mSampleSize(16)
@@ -228,7 +257,11 @@ TrikSoundController::Settings::Settings():
   , mVolume(1.0)
 
   , mMicrDist(10.0)
+
+  , mDurationSetFlag(false)
+  , mDuration(0)
 {}
+
 
 int TrikSoundController::Settings::angleDetectionHistoryDepth() const
 {
@@ -328,4 +361,44 @@ double TrikSoundController::Settings::micrDist() const
 void TrikSoundController::Settings::setMicrDist(double micrDist)
 {
     mMicrDist = micrDist;
+}
+
+bool TrikSoundController::Settings::recordStreamFlag() const
+{
+    return mRecordStreamFlag;
+}
+
+void TrikSoundController::Settings::setRecordStreamFlag(bool recordStreamFlag)
+{
+    mRecordStreamFlag = recordStreamFlag;
+}
+
+QString TrikSoundController::Settings::outputWavFilename() const
+{
+    return mOutputWavFilename;
+}
+
+void TrikSoundController::Settings::setOutputWavFilename(const QString& outputWavFilename)
+{
+    mOutputWavFilename = outputWavFilename;
+}
+
+int TrikSoundController::Settings::duration() const
+{
+    return mDuration;
+}
+
+void TrikSoundController::Settings::setDuration(int duration)
+{
+    mDuration = duration;
+}
+
+bool TrikSoundController::Settings::durationSetFlag() const
+{
+    return mDurationSetFlag;
+}
+
+void TrikSoundController::Settings::setDurationSetFlag(bool durationSetFlag)
+{
+    mDurationSetFlag = durationSetFlag;
 }
