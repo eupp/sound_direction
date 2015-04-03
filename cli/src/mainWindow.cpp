@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
 void MainWindow::recieve(const trikSound::AudioEvent& event)
 {
     if (event.angleSetFlag()) {
-        qDebug() << "angle: " << event.angle();
+        qDebug() << "angle: " << (int) event.angle();
     }
 }
 
