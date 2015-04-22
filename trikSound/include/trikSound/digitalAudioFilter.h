@@ -16,8 +16,7 @@ public:
 
     typedef typename AudioFilter<Iter>::FilterPtr FilterPtr;
 
-    DigitalAudioFilter(const FilterPtr& prevFilter = FilterPtr());
-
+    DigitalAudioFilter();
 
 private:
     void handleWindowImpl(Iter first, Iter last);
@@ -26,9 +25,8 @@ private:
 };
 
 template <typename Iter>
-DigitalAudioFilter<Iter>::DigitalAudioFilter(const FilterPtr& prevFilter):
-    AudioFilter<Iter>(prevFilter)
-  , mImpl(new DigitalAudioFilterImpl<Iter>())
+DigitalAudioFilter<Iter>::DigitalAudioFilter():
+    mImpl(new DigitalAudioFilterImpl<Iter>())
 {}
 
 template <typename Iter>

@@ -27,10 +27,9 @@ public:
         {}
     };
 
-    AngleDetector(const FilterPtr& prevFilter = FilterPtr());
+    AngleDetector();
 
-    AngleDetector(int sampleRate, double micrDist, int historyDepth = 1,
-                  const FilterPtr& prevFilter = FilterPtr());
+    AngleDetector(int sampleRate, double micrDist, int historyDepth = 1);
 
     void setHistoryDepth(int historyDepth);
     int historyDepth() const;
@@ -52,15 +51,13 @@ private:
 };
 
 template <typename Iter>
-AngleDetector<Iter>::AngleDetector(const FilterPtr& prevFilter):
-    AngleDetector(-1, -1, 1, prevFilter)
+AngleDetector<Iter>::AngleDetector():
+    AngleDetector(-1, -1, 1)
 {}
 
 template <typename Iter>
-AngleDetector<Iter>::AngleDetector(int sampleRate, double micrDist, int historyDepth,
-                                   const FilterPtr& prevFilter):
-    StereoAudioFilter<Iter>(prevFilter)
-  , mImpl(new AngleDetectorImpl<Iter>(sampleRate, micrDist, historyDepth))
+AngleDetector<Iter>::AngleDetector(int sampleRate, double micrDist, int historyDepth):
+    mImpl(new AngleDetectorImpl<Iter>(sampleRate, micrDist, historyDepth))
 {}
 
 template <typename Iter>

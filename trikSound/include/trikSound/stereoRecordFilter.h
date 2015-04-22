@@ -31,7 +31,7 @@ public:
         {}
     };
 
-    StereoRecordFilter(const WavFilePtr& wavFile, const FilterPtr &prevFilter = FilterPtr());
+    StereoRecordFilter(const WavFilePtr& wavFile);
 
 protected:
 
@@ -42,10 +42,8 @@ private:
 };
 
 template <typename Iter>
-StereoRecordFilter<Iter>::StereoRecordFilter(const WavFilePtr& wavFile,
-                                             const typename StereoAudioFilter<Iter>::FilterPtr& prevFilter):
-    StereoAudioFilter<Iter>(prevFilter)
-  , mRecordFilter(wavFile)
+StereoRecordFilter<Iter>::StereoRecordFilter(const WavFilePtr& wavFile):
+    mRecordFilter(wavFile)
 {}
 
 template <typename Iter>

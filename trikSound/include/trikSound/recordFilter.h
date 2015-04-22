@@ -31,7 +31,7 @@ public:
         {}
     };
 
-    RecordFilter(const WavFilePtr& wavFile, const FilterPtr& prevFilter = FilterPtr());
+    RecordFilter(const WavFilePtr& wavFile);
 
     void write(const std::vector<value_type>& buf);
 
@@ -44,10 +44,8 @@ private:
 };
 
 template <typename Iter>
-RecordFilter<Iter>::RecordFilter(const WavFilePtr& wavFile,
-                                 const typename AudioFilter<Iter>::FilterPtr& prevFilter):
-    AudioFilter<Iter>(prevFilter)
-  , mWavFile(wavFile)
+RecordFilter<Iter>::RecordFilter(const WavFilePtr& wavFile):
+    mWavFile(wavFile)
 {
     if (!mWavFile->isWritable()) {
         throw InitException("StereoRecordFilter error. Wav file is not writable");

@@ -6,6 +6,7 @@
 #include "trikSound/angleDetector.h"
 #include "trikSound/splitFilter.h"
 #include "trikSound/digitalAudioFilter.h"
+#include "trikSound/audioPipe.h"
 #include "trikSound/wavFile.h"
 
 using namespace std;
@@ -24,6 +25,7 @@ public:
 
 protected:
 
+    StereoAudioPipe<iterator_type> audioPipe;
     std::shared_ptr<AngleDetector<iterator_type>> detector;
     AngleDetector<iterator_type>::range_type channel1;
     AngleDetector<iterator_type>::range_type channel2;
@@ -41,11 +43,17 @@ AngleDetectorFixture::AngleDetectorFixture():
 {
     std::shared_ptr<AudioFilter<iterator_type>> filter =
             make_shared<DigitalAudioFilter<iterator_type>>();
-    std::shared_ptr<StereoAudioFilter<iterator_type>> split =
-            make_shared<SplitFilter<iterator_type>>(filter);
 
-    detector->insertFilter(split);
+    std::shared_ptr<AudioPipe<iterator_type>> pipe =
+            make_shared<AudioPipe<iterator_type>>();
+    pipe->insertFilter(pipe->end(), filter);
+
+    std::shared_ptr<StereoAudioFilter<iterator_type>> split =
+            make_shared<SplitFilter<iterator_type>>(pipe);
+
     detector->setMicrDist(10.2);
+    audioPipe.insertFilter(audioPipe.end(), split);
+    audioPipe.insertFilter(audioPipe.end(), detector);
 }
 
 void AngleDetectorFixture::readAudioData(const QString& filename)
@@ -74,7 +82,7 @@ BOOST_FIXTURE_TEST_SUITE(testAngleDetector, AngleDetectorFixture)
 BOOST_AUTO_TEST_CASE(testLeft)
 {
     readAudioData("wav/left.wav");
-    detector->handleWindow(channel1, channel2);
+    audioPipe.handleWindow(channel1, channel2);
     int angle = round(ord * detector->getAngle());
     BOOST_CHECK_EQUAL(angle, -90 * ord);
 }
@@ -82,7 +90,7 @@ BOOST_AUTO_TEST_CASE(testLeft)
 BOOST_AUTO_TEST_CASE(testCenter)
 {
     readAudioData("wav/center.wav");
-    detector->handleWindow(channel1, channel2);
+    audioPipe.handleWindow(channel1, channel2);
     int angle = round(ord * detector->getAngle());
     BOOST_CHECK_EQUAL(angle, 0 * ord);
 }
@@ -90,7 +98,7 @@ BOOST_AUTO_TEST_CASE(testCenter)
 BOOST_AUTO_TEST_CASE(testRight)
 {
     readAudioData("wav/right.wav");
-    detector->handleWindow(channel1, channel2);
+    audioPipe.handleWindow(channel1, channel2);
     int angle = round(ord * detector->getAngle());
     BOOST_CHECK_EQUAL(angle, 90 * ord);
 }
