@@ -24,6 +24,32 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
   , {"volume", ArgumentParser::Parameter("-v", "--volume", "Volume is missing.")}
 };
 
+template <typename T>
+T convertArgument(const QString& arg, bool& ok);
+
+template <>
+int convertArgument(const QString& arg, bool& ok)
+{
+    return arg.toInt(&ok);
+}
+
+template <>
+double convertArgument(const QString& arg, bool& ok)
+{
+    return arg.toDouble(&ok);
+}
+
+template <typename T>
+T parseArgument(const char* paramName, const QString& param, const string& errorString)
+{
+    bool ok = true;
+    T res = convertArgument<T>(param, ok);
+    if (!ok) {
+        throw ArgumentParser::ParseException(errorString);
+    }
+    return res;
+}
+
 trikSound::TrikSoundController::Settings ArgumentParser::parse()
 {
     return parseArgumentList(QCoreApplication::arguments());
@@ -36,39 +62,37 @@ TrikSoundController::Settings ArgumentParser::parseArgumentList(const QStringLis
     for (auto it = args.begin(); it != args.end(); ++it) {
 
         if (*it == paramsMap["channelCount"]) {
-            parseChannelCount(it, settings);
-            continue;
+            int count = parseArgument<int>("channelCount", *(++it), paramsMap["channelCount"].errorString());
+            settings.setSingleChannelFlag(count == 1);
         }
-        if (*it == paramsMap["micrDist"]) {
-            parseMicrDistance(it, settings);
-            continue;
+        else if (*it == paramsMap["micrDist"]) {
+            double dist = parseArgument<double>("micrDist", *(++it), paramsMap["micrDist"].errorString());
+            settings.setMicrDist(dist);
         }
-        if (*it == paramsMap["historyDepth"]) {
-            parseHistoryDepth(it, settings);
-            continue;
+        else if (*it == paramsMap["historyDepth"]) {
+            int depth = parseArgument<int>("historyDepth", *(++it), paramsMap["historyDepth"].errorString());
+            settings.setAngleDetectionHistoryDepth(depth);
         }
-        if (*it == paramsMap["windowSize"]) {
-            parseWindowSize(it, settings);
-            continue;
+        else if (*it == paramsMap["windowSize"]) {
+            int wsize = parseArgument<int>("windowSize", *(++it), paramsMap["windowSize"].errorString());
+            settings.setWindowSize(wsize);
         }
-        if (*it == paramsMap["angleDetection"]) {
+        else if (*it == paramsMap["angleDetection"]) {
             settings.setAngleDetectionFlag(true);
         }
-        if (*it == paramsMap["duration"]) {
+        else if (*it == paramsMap["duration"]) {
+            int duration = parseArgument<int>("duration", *(++it), paramsMap["duration"].errorString());
             settings.setDurationSetFlag(true);
-            parseDuration(it, settings);
-            continue;
+            settings.setDuration(duration);
         }
-        if (*it == paramsMap["outfile"]) {
+        else if (*it == paramsMap["outfile"]) {
             settings.setRecordStreamFlag(true);
-            ++it;
-            if (it != args.end()) {
+            if (++it != args.end()) {
                 settings.setOutputWavFilename(*it);
             }
             else {
                 throw ParseException(paramsMap["outfile"].errorString());
             }
-            continue;
         }
     }
 
@@ -82,61 +106,6 @@ void ArgumentParser::checkSettings(const Settings& settings)
     if (settings.angleDetectionFlag() && settings.singleChannelFlag()) {
         throw ParseException("Angle detection enabled but single channel capturing specified");
     }
-}
-
-void ArgumentParser::parseDuration(QStringList::ConstIterator& it, ArgumentParser::Settings& settings)
-{
-    ++it;
-    bool ok = true;
-    int duration = it->toInt(&ok);
-    if (!ok) {
-        throw ParseException(paramsMap["duration"].errorString());
-    }
-    settings.setDuration(duration);
-}
-
-void ArgumentParser::parseChannelCount(QStringList::ConstIterator& it, Settings& settings)
-{
-    ++it;
-    bool ok = true;
-    int count = it->toInt(&ok);
-    if (!ok) {
-        throw ParseException(paramsMap["channelCount"].errorString());
-    }
-    settings.setSingleChannelFlag(count == 1);
-}
-
-void ArgumentParser::parseMicrDistance(QStringList::ConstIterator& it, ArgumentParser::Settings& settings)
-{
-    ++it;
-    bool ok = true;
-    double micrDist = it->toDouble(&ok);
-    if (!ok) {
-        throw ParseException(paramsMap["micrDist"].errorString());
-    }
-    settings.setMicrDist(micrDist);
-}
-
-void ArgumentParser::parseHistoryDepth(QStringList::ConstIterator& it, ArgumentParser::Settings& settings)
-{
-    ++it;
-    bool ok = true;
-    int histDepth = it->toInt(&ok);
-    if (!ok) {
-        throw ParseException(paramsMap["historyDepth"].errorString());
-    }
-    settings.setAngleDetectionHistoryDepth(histDepth);
-}
-
-void ArgumentParser::parseWindowSize(QStringList::ConstIterator& it, ArgumentParser::Settings& settings)
-{
-    ++it;
-    bool ok = true;
-    int windowSize = it->toInt(&ok);
-    if (!ok) {
-        throw ParseException(paramsMap["windowSize"].errorString());
-    }
-    settings.setWindowSize(windowSize);
 }
 
 ArgumentParser::Parameter::Parameter():
