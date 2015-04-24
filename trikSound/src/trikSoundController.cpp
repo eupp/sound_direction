@@ -7,8 +7,9 @@
 
 #include "utils.h"
 
-#include "emptyFilter.h"
-#include "emptyStereoFilter.h"
+#include "singleChannelCircularBuffer.h"
+#include "doubleChannelCircularBuffer.h"
+
 #include "digitalAudioFilter.h"
 #include "splitFilter.h"
 #include "recordFilter.h"
@@ -30,18 +31,21 @@ using namespace trikSound;
 
 TrikSoundController::TrikSoundController(const TrikSoundController::Settings& args,
                                          const SettingsProviderPtr& provider):
-
-    mBuffer(make_shared<CircularBufferQAdapter::CircularBuffer>(BUFFER_CAPACITY * args.windowSize()))
-  , mBufferAdapter(make_shared<CircularBufferQAdapter>(mBuffer))
-  , mWindowSize(args.windowSize())
-  , mWindowCopy(2 * args.windowSize())
-  , mTmpWindowCopy(2 * args.windowSize())
+    mWindowSize(args.windowSize())
+  , mWindowCopy(CHANNEL_COUNT * args.windowSize())
   , mAngleDetectionFlag(args.angleDetectionFlag())
   , mSingleChannelFlag(args.singleChannelFlag())
 
   , mSettingsProvider(provider)
 
 {
+    if (args.singleChannelFlag()) {
+        mBuffer = make_shared<SingleChannelCircularBuffer>(BUFFER_CAPACITY * args.windowSize());
+    }
+    else {
+        mBuffer = make_shared<DoubleChannelCircularBuffer>(BUFFER_CAPACITY * args.windowSize());
+    }
+    mBufferAdapter = make_shared<CircularBufferQAdapter>(mBuffer);
     mBufferAdapter->open(QIODevice::ReadWrite);
 
     QAudioDeviceInfo dev = QAudioDeviceInfo::defaultInputDevice();
@@ -106,7 +110,7 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
                 this, SLOT(setVolume(double)));
     }
 
-    if (args.durationSetFlag()) {
+    if (args.durationFlag()) {
         QTimer::singleShot(args.duration(), this, SLOT(finish()));
     }
 }
@@ -118,65 +122,53 @@ void TrikSoundController::addAudioEventListener(const TrikSoundController::Liste
 
 void TrikSoundController::bufferReadyReadHandler()
 {
-//    qDebug() << "readyRead!";
-    if (mBufferAdapter->samplesAvailable() < CHANNEL_COUNT * mWindowSize) {
-        return;
+    while (mBufferAdapter->samplesAvailable() >= CHANNEL_COUNT * mWindowSize) {
+
+        if (mSingleChannelFlag) {
+            handleSingleChannel();
+        }
+        else {
+            handleDoubleChannel();
+        }
+
+        AudioEvent event;
+        if (mAngleDetectionFlag) {
+            assert(mAngleDetector != nullptr);
+            event.setAngle(mAngleDetector->getAngle());
+        }
+
+        notify(event);
     }
 
-    if (mSingleChannelFlag) {
-        handleSingleChannel();
-    }
-    else {
-        handleDoubleChannel();
-    }
-
-    AudioEvent event;
-    if (mAngleDetectionFlag) {
-        assert(mAngleDetector != nullptr);
-        event.setAngle(mAngleDetector->getAngle());
-    }
-
-    notify(event);
 }
 
 void TrikSoundController::handleSingleChannel()
 {
-    auto chlBegin = mWindowCopy.begin();
-    auto chlEnd   = chlBegin + mWindowSize;
-    mBufferAdapter->read((char*)mTmpWindowCopy.data(), mWindowSize * sizeof(sample_type));
-//    copy(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chlBegin);
+    mBufferAdapter->read((char*)mWindowCopy.data(), mWindowSize * sizeof(sample_type));
+    auto begin = mWindowCopy.begin();
+    auto end   = begin + mWindowSize;
 
-    mPipe.handleWindow(make_pair(chlBegin, chlEnd),
-                          StereoAudioFilter<BufferIterator>::make_empty_range());
+    mPipe.handleWindow(make_pair(begin, end),
+                       StereoAudioFilter<BufferIterator>::make_empty_range());
 }
 
 void TrikSoundController::handleDoubleChannel()
 {
-    auto chl1Begin = mWindowCopy.begin();
-    auto chl1End   = chl1Begin + mWindowSize;
-    auto chl2Begin = chl1End;
-    auto chl2End   = mWindowCopy.end();
+    mBufferAdapter->read((char*)mWindowCopy.data(), 2 * mWindowSize * sizeof(sample_type));
+    auto leftBegin  = mWindowCopy.begin();
+    auto leftEnd    = leftBegin + mWindowSize;
+    auto rightBegin = leftEnd;
+    auto rightEnd   = mWindowCopy.end();
 
-    mBufferAdapter->read((char*)mTmpWindowCopy.data(), CHANNEL_COUNT * mWindowSize * sizeof(sample_type));
-
-    extractChannel<CHANNEL_COUNT, 0>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl1Begin);
-    extractChannel<CHANNEL_COUNT, 1>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl2Begin);
-
-    mPipe.handleWindow(make_pair(chl1Begin, chl1End),
-                       make_pair(chl2Begin, chl2End));
+    mPipe.handleWindow(make_pair(leftBegin , leftEnd),
+                       make_pair(rightBegin, rightEnd));
 }
 
 void TrikSoundController::notify(const AudioEvent& event)
 {
-//    qDebug() << "angle: " << event.angle();
     for (auto& listener: mListeners) {
         listener->recieve(event);
     }
-}
-
-bool TrikSoundController::singleChannelFlag() const
-{
-    return mSingleChannelFlag;
 }
 
 void TrikSoundController::run()
@@ -203,6 +195,11 @@ void TrikSoundController::finish()
 {
     stop();
     emit finished();
+}
+
+bool TrikSoundController::singleChannelFlag() const
+{
+    return mSingleChannelFlag;
 }
 
 int TrikSoundController::angleDetectionHistoryDepth() const
@@ -258,7 +255,7 @@ TrikSoundController::Settings::Settings():
 
   , mMicrDist(10.0)
 
-  , mDurationSetFlag(false)
+  , mDurationFlag(false)
   , mDuration(0)
 {}
 
@@ -393,12 +390,12 @@ void TrikSoundController::Settings::setDuration(int duration)
     mDuration = duration;
 }
 
-bool TrikSoundController::Settings::durationSetFlag() const
+bool TrikSoundController::Settings::durationFlag() const
 {
-    return mDurationSetFlag;
+    return mDurationFlag;
 }
 
-void TrikSoundController::Settings::setDurationSetFlag(bool durationSetFlag)
+void TrikSoundController::Settings::setDurationFlag(bool durationSetFlag)
 {
-    mDurationSetFlag = durationSetFlag;
+    mDurationFlag = durationSetFlag;
 }

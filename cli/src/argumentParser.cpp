@@ -82,7 +82,7 @@ TrikSoundController::Settings ArgumentParser::parseArgumentList(const QStringLis
         }
         else if (*it == paramsMap["duration"]) {
             int duration = parseArgument<int>("duration", *(++it), paramsMap["duration"].errorString());
-            settings.setDurationSetFlag(true);
+            settings.setDurationFlag(true);
             settings.setDuration(duration);
         }
         else if (*it == paramsMap["outfile"]) {

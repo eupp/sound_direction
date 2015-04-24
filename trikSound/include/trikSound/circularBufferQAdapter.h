@@ -3,12 +3,11 @@
 #include <memory>
 #include <iterator>
 
-#include <boost/circular_buffer.hpp>
-
 #include <QIODevice>
 
 #include "triksound_global.h"
 #include "types.h"
+#include "circularBuffer.h"
 
 namespace trikSound {
 
@@ -31,14 +30,12 @@ class TRIKSOUNDSHARED_EXPORT CircularBufferQAdapter : public QIODevice
     Q_OBJECT
 public:
 
-    typedef boost::circular_buffer<sample_type> CircularBuffer;
-
     typedef std::shared_ptr<CircularBuffer> CircularBufferPtr;
 
-    typedef CircularBuffer::const_iterator ReadIterator;
-    typedef std::back_insert_iterator<CircularBuffer> WriteIterator;
-
     CircularBufferQAdapter(const CircularBufferPtr& cb, QObject *parent = 0);
+
+    CircularBufferPtr getCircularBuffer() const;
+    void setCircularBuffer(const CircularBufferPtr& cb);
 
     bool isSequential() const;
 
@@ -52,6 +49,7 @@ public:
     bool atEnd() const;
     bool reset();
 
+    qint64 samplesAvailable() const;
     qint64 bytesAvailable() const;
     qint64 bytesToWrite() const;
 
@@ -59,13 +57,6 @@ public:
 
     bool waitForReadyRead(int msecs);
     bool waitForBytesWritten(int msecs);
-
-    qint64 samplesAvailable() const;
-
-    ReadIterator readBegin() const;
-    ReadIterator readEnd() const;
-
-    CircularBufferPtr buffer() const;
 
     void clear();
 
@@ -79,11 +70,9 @@ private slots:
 
 private:
 
-    CircularBufferPtr mBuffer;
-    ReadIterator mReadItr;
-    WriteIterator mWriteItr;
-
     static const QString errorIncorrectBuffer;
+
+    CircularBufferPtr mBuffer;
 };
 
 }

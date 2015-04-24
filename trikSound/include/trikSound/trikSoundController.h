@@ -5,6 +5,8 @@
 #include <QObject>
 
 #include "triksound_global.h"
+
+#include "circularBuffer.h"
 #include "circularBufferQAdapter.h"
 #include "audioFilter.h"
 #include "stereoAudioFilter.h"
@@ -73,8 +75,8 @@ public:
         int duration() const;
         void setDuration(int duration);
 
-        bool durationSetFlag() const;
-        void setDurationSetFlag(bool durationSetFlag);
+        bool durationFlag() const;
+        void setDurationFlag(bool durationFlag);
 
     private:
 
@@ -104,7 +106,7 @@ public:
         // duration settings
 
         int mDuration;
-        bool mDurationSetFlag;
+        bool mDurationFlag;
 
         // other settings
 
@@ -165,33 +167,38 @@ private slots:
 
 private:
 
-    typedef sample_type range_value_type;
-    typedef std::vector<sample_type> WindowContainer;
-    typedef WindowContainer::iterator BufferIterator;
+    typedef sample_type                 range_value_type;
+    typedef std::vector<sample_type>    WindowContainer;
+    typedef WindowContainer::iterator   BufferIterator;
 
-    typedef std::shared_ptr<CircularBufferQAdapter::CircularBuffer> CircularBufferPtr;
-    typedef std::shared_ptr<CircularBufferQAdapter> CircularBufferQAdapterPtr;
-    typedef std::shared_ptr<AngleDetector<BufferIterator>> AngleDetectorPtr;
-    typedef std::unique_ptr<AudioDeviceManager> AudioDeviceManagerPtr;
-    typedef AudioFilter<BufferIterator>::FilterPtr FilterPtr;
-    typedef StereoAudioFilter<BufferIterator>::FilterPtr StereoFilterPtr;
+    typedef std::shared_ptr<CircularBuffer>                             CircularBufferPtr;
+    typedef std::shared_ptr<CircularBufferQAdapter>                     CircularBufferQAdapterPtr;
+    typedef std::shared_ptr<AngleDetector<BufferIterator>>              AngleDetectorPtr;
+    typedef std::unique_ptr<AudioDeviceManager>                         AudioDeviceManagerPtr;
+    typedef AudioFilter<BufferIterator>::FilterPtr                      FilterPtr;
+    typedef StereoAudioFilter<BufferIterator>::FilterPtr                StereoFilterPtr;
 
     void handleSingleChannel();
     void handleDoubleChannel();
     void notify(const AudioEvent& event);
 
+    // maximum available count of channels
     static const int CHANNEL_COUNT = 2;
     // buffer capacity in terms of count of windows it stores
     static const int BUFFER_CAPACITY = 20;
 
-    // buffer objects
+    // circular buffer
 
     CircularBufferPtr mBuffer;
     CircularBufferQAdapterPtr mBufferAdapter;
+
     // size of window in samples
+
     size_t mWindowSize;
+
+    // copy of processing window
+
     WindowContainer mWindowCopy;
-    WindowContainer mTmpWindowCopy;
 
     // audio device management
 
@@ -200,8 +207,6 @@ private:
     // filters
 
     StereoAudioPipe<BufferIterator> mPipe;
-//    AudioFilter<BufferIterator>::FilterPtr mFilter;
-//    StereoAudioFilter<BufferIterator>::FilterPtr mStereoFilter;
     AngleDetectorPtr mAngleDetector;
 
     // settings provider

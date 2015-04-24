@@ -14,9 +14,18 @@ CircularBufferQAdapter::CircularBufferQAdapter(const CircularBufferQAdapter::Cir
                                                QObject* parent):
     QIODevice(parent)
   , mBuffer(cb)
-  , mReadItr(cb->begin())
-  , mWriteItr(back_inserter(*cb))
 {}
+
+CircularBufferQAdapter::CircularBufferPtr CircularBufferQAdapter::getCircularBuffer() const
+{
+    return mBuffer;
+}
+
+void CircularBufferQAdapter::setCircularBuffer(const CircularBufferQAdapter::CircularBufferPtr& cb)
+{
+    mBuffer = cb;
+    setOpenMode(QIODevice::NotOpen);
+}
 
 bool CircularBufferQAdapter::isSequential() const
 {
@@ -46,7 +55,7 @@ void CircularBufferQAdapter::close()
 
 qint64 CircularBufferQAdapter::size() const
 {
-    return mBuffer->size() * sizeof(sample_type);
+    return mBuffer->size    () * sizeof(sample_type);
 }
 
 
@@ -90,28 +99,12 @@ bool CircularBufferQAdapter::waitForBytesWritten(int msecs)
 
 qint64 CircularBufferQAdapter::samplesAvailable() const
 {
-    return (mBuffer->end() - mReadItr);
-}
-
-CircularBufferQAdapter::ReadIterator CircularBufferQAdapter::readBegin() const
-{
-    return mReadItr;
-}
-
-CircularBufferQAdapter::ReadIterator CircularBufferQAdapter::readEnd() const
-{
-    return mBuffer->end();
-}
-
-CircularBufferQAdapter::CircularBufferPtr CircularBufferQAdapter::buffer() const
-{
-    return mBuffer;
+    return mBuffer->samplesAvailable();
 }
 
 void CircularBufferQAdapter::clear()
 {
     mBuffer->clear();
-    mReadItr = mBuffer->begin();
 }
 
 qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
@@ -123,12 +116,16 @@ qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
         return -1;
     }
 
-    qint64 sampleCount = min(maxlen, bytesAvailable()) / sizeof(sample_type);
+    qint64 sampleCount = min( maxlen / (qint64)sizeof(sample_type), samplesAvailable());
     sample_type* sampleData = reinterpret_cast<sample_type*>(data);
 
-    auto readEnd = mReadItr + sampleCount;
-    copy(mReadItr, readEnd, sampleData);
-    mReadItr = readEnd;
+    if (sampleCount % mBuffer->channelCount() != 0) {
+        setErrorString(errorIncorrectBuffer);
+        qDebug() << errorString();
+        return -1;
+    }
+
+    mBuffer->read(sampleData, sampleCount);
 
     return sampleCount * sizeof(sample_type);
 }
@@ -152,22 +149,13 @@ qint64 CircularBufferQAdapter::writeData(const char *data, qint64 len)
     qint64 sampleCount = len / sizeof(sample_type);
     const sample_type* sampleData = reinterpret_cast<const sample_type*>(data);
 
-    bool overwriteFlag = false;
-    int freeSpace = (mReadItr - mBuffer->begin()) + (mBuffer->capacity() - mBuffer->size());
-    if (sampleCount > freeSpace) {
-        overwriteFlag = true;
+    if (sampleCount % mBuffer->channelCount() != 0) {
+        setErrorString(errorIncorrectBuffer);
+        qDebug() << errorString();
+        return -1;
     }
 
-    // special case for writing to the empty container
-    // in that case mReadItr == cb.begin() == cb.end()
-    bool emptyFlag = mBuffer->empty();
-
-    copy(sampleData, sampleData + sampleCount, mWriteItr);
-
-    // redirect read iterator to begin in case of overwriting or empty buffer
-    if (overwriteFlag || emptyFlag) {
-        mReadItr = mBuffer->begin();
-    }
+    mBuffer->write(sampleData, sampleCount);
 
     emit readyRead();
     return sampleCount * sizeof(sample_type);

@@ -18,7 +18,9 @@ SOURCES += \
     src/trikAudioDeviceManager.cpp \
     src/circularBufferQAdapter.cpp \
     src/trikSoundController.cpp \
-    src/wavFile.cpp
+    src/wavFile.cpp \
+    src/singleChannelCircularBuffer.cpp \
+    src/doubleChannelCircularBuffer.cpp
 
 HEADERS += \
     include/fpml/fixed_point.h \
@@ -48,5 +50,9 @@ HEADERS += \
     include/trikSound/iSettingsProvider.h \
     include/trikSound/stereoRecordFilter.h \
     include/trikSound/recordFilter.h \
-    include/trikSound/audioPipe.h
+    include/trikSound/audioPipe.h \
+    include/internal/circularBuffer.h \
+    include/trikSound/circularBuffer.h \
+    include/trikSound/doubleChannelCircularBuffer.h \
+    include/trikSound/singleChannelCircularBuffer.h
 

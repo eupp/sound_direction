@@ -47,9 +47,10 @@ void interweaveChannels(std::array<std::pair<InputIter, InputIter>, channelsCoun
 template <int channelsCount, int channelNum, typename InputIter, typename OutputIter>
 void extractChannel(InputIter first, InputIter last, OutputIter dst)
 {
-    int n = distance(first, last) / channelsCount;
+    int n = std::distance(first, last) / channelsCount;
     for (int i = 0; i < n; ++i) {
-        dst[i] = first[i * channelsCount + channelNum];
+        *dst = first[i * channelsCount + channelNum];
+        ++dst;
     }
 }
 
