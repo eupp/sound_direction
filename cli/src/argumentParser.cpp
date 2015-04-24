@@ -17,7 +17,7 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
 
   , {"angleDetection", ArgumentParser::Parameter("-A", "--angle", "")}
   , {"filtering", ArgumentParser::Parameter("-F", "--filtering", "")}
-  , {"micrDist", ArgumentParser::Parameter("-D", "--micr_dist", "Microphone distance is missing.")}
+  , {"micrDist", ArgumentParser::Parameter("-D", "--micr-dist", "Microphone distance is missing.")}
   , {"historyDepth", ArgumentParser::Parameter("", "--history-depth", "History depth is missing.")}
   , {"windowSize", ArgumentParser::Parameter("", "--window-size", "Window size is missing.")}
 
