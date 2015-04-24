@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     testCircularBuffer.cpp \
     testAngleDetector.cpp \
     testWavFile.cpp \
-    testStereoRecordFilter.cpp
+    testStereoRecordFilter.cpp \
+    testAudioPipe.cpp
 
 LIBS+= -lboost_unit_test_framework
 

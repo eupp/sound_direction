@@ -36,8 +36,6 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mWindowSize(args.windowSize())
   , mWindowCopy(2 * args.windowSize())
   , mTmpWindowCopy(2 * args.windowSize())
-  , mFilter(make_shared<EmptyFilter<BufferIterator>>())
-  , mStereoFilter(make_shared<EmptyStereoFilter<BufferIterator>>())
   , mAngleDetectionFlag(args.angleDetectionFlag())
   , mSingleChannelFlag(args.singleChannelFlag())
 
@@ -63,36 +61,37 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
     }
     mDeviceManager.reset(new AUDIO_DEVICE_MANAGER_TYPE(dev, fmt, mBufferAdapter));
 
+    auto monoPipe = make_shared<AudioPipe<BufferIterator>>();
+    StereoFilterPtr split = make_shared<SplitFilter<BufferIterator>>(monoPipe);
+    mPipe.insertFilter(mPipe.end(), split);
+
     if (args.filteringFlag()) {
         FilterPtr filter = make_shared<DigitalAudioFilter<BufferIterator>>();
-        mFilter->insertFilter(filter);
+        monoPipe->insertFilter(monoPipe->end(), filter);
     }
 
-    if (!args.singleChannelFlag()) {
-        StereoFilterPtr split = make_shared<SplitFilter<BufferIterator>>(mFilter);
-        mStereoFilter->insertFilter(split);
-    }
     if (args.angleDetectionFlag()) {
         if (args.singleChannelFlag()) {
-            throw InitException("TrikSoundController error. Angle detection enabled with single audio channel");
+            throw InitException("TrikSoundController error."
+                                "Angle detection enabled with single audio channel");
         }
 
         mAngleDetector = make_shared<AngleDetector<BufferIterator>>(args.sampleRate(),
                                                                     args.micrDist(),
                                                                     args.angleDetectionHistoryDepth());
-        StereoFilterPtr detector = mAngleDetector;
-        mStereoFilter->insertFilter(detector);
+        mPipe.insertFilter(mPipe.end(), static_pointer_cast<StereoAudioFilter<BufferIterator>>(mAngleDetector));
     }
+
     if (args.recordStreamFlag()) {
         RecordFilter<BufferIterator>::WavFilePtr wavFile = make_shared<WavFile>(args.outputWavFilename());
         wavFile->open(WavFile::WriteOnly, fmt);
         if (args.singleChannelFlag()) {
             FilterPtr record = make_shared<RecordFilter<BufferIterator>>(wavFile);
-            mFilter->insertFilter(record);
+            monoPipe->insertFilter(monoPipe->end(), record);
         }
         else {
             StereoFilterPtr record = make_shared<StereoRecordFilter<BufferIterator>>(wavFile);
-            mStereoFilter->insertFilter(record);
+            mPipe.insertFilter(mPipe.end(), record);
         }
     }
 
@@ -147,7 +146,8 @@ void TrikSoundController::handleSingleChannel()
     mBufferAdapter->read((char*)mTmpWindowCopy.data(), mWindowSize * sizeof(sample_type));
 //    copy(mBufferAdapter->readBegin(), mBufferAdapter->readEnd(), chlBegin);
 
-    mFilter->handleWindow(chlBegin, chlEnd);
+    mPipe.handleWindow(make_pair(chlBegin, chlEnd),
+                          StereoAudioFilter<BufferIterator>::make_empty_range());
 }
 
 void TrikSoundController::handleDoubleChannel()
@@ -162,8 +162,8 @@ void TrikSoundController::handleDoubleChannel()
     extractChannel<CHANNEL_COUNT, 0>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl1Begin);
     extractChannel<CHANNEL_COUNT, 1>(mTmpWindowCopy.begin(), mTmpWindowCopy.end(), chl2Begin);
 
-    mStereoFilter->handleWindow(make_pair(chl1Begin, chl1End),
-                                make_pair(chl2Begin, chl2End));
+    mPipe.handleWindow(make_pair(chl1Begin, chl1End),
+                       make_pair(chl2Begin, chl2End));
 }
 
 void TrikSoundController::notify(const AudioEvent& event)

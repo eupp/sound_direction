@@ -13,8 +13,6 @@ using namespace std;
 using namespace boost;
 using namespace trikSound;
 
-BOOST_TEST_DONT_PRINT_LOG_VALUE(QAudioFormat)
-
 class WavFileFixture
 {
 public:
@@ -45,6 +43,8 @@ WavFileFixture::WavFileFixture():
     default_random_engine gen(rd());
     generate(randBytes.begin(), randBytes.end(), [&gen]() {return (char) gen() % 256; });
 }
+
+BOOST_TEST_DONT_PRINT_LOG_VALUE(QAudioFormat)
 
 BOOST_FIXTURE_TEST_SUITE(testWavFile, WavFileFixture)
 

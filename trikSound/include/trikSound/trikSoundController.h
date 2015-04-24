@@ -12,6 +12,7 @@
 #include "angleDetector.h"
 #include "iAudioEventListener.h"
 #include "iSettingsProvider.h"
+#include "audioPipe.h"
 
 namespace trikSound {
 
@@ -198,8 +199,9 @@ private:
 
     // filters
 
-    AudioFilter<BufferIterator>::FilterPtr mFilter;
-    StereoAudioFilter<BufferIterator>::FilterPtr mStereoFilter;
+    StereoAudioPipe<BufferIterator> mPipe;
+//    AudioFilter<BufferIterator>::FilterPtr mFilter;
+//    StereoAudioFilter<BufferIterator>::FilterPtr mStereoFilter;
     AngleDetectorPtr mAngleDetector;
 
     // settings provider

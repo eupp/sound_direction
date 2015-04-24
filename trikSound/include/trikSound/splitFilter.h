@@ -5,7 +5,9 @@
 #include "triksound_global.h"
 #include "audioFilter.h"
 #include "stereoAudioFilter.h"
+#include "audioPipe.h"
 #include "utils.h"
+
 
 namespace trikSound {
 
@@ -14,12 +16,12 @@ class TRIKSOUNDSHARED_EXPORT SplitFilter : public StereoAudioFilter<Iter>
 {
 public:
 
-    typedef typename StereoAudioFilter<Iter>::range_type range_type;
-    typedef typename AudioFilter<Iter>::FilterPtr FilterPtr;
-    typedef typename StereoAudioFilter<Iter>::FilterPtr StereoFilterPtr;
+    using typename StereoAudioFilter<Iter>::range_type;
+    using typename StereoAudioFilter<Iter>::FilterPtr;
 
-    SplitFilter(const FilterPtr& channelFilter = FilterPtr(),
-                const StereoFilterPtr& prevFilter = StereoFilterPtr());
+    typedef std::shared_ptr<AudioPipe<Iter>> AudioPipePtr;
+
+    SplitFilter(const AudioPipePtr& pipe = AudioPipePtr());
 
 protected:
 
@@ -27,23 +29,21 @@ protected:
                           range_type channel2);
 
 private:
-    FilterPtr mChannelFilter;
+    AudioPipePtr mPipe;
 };
 
 template <typename Iter>
-SplitFilter<Iter>::SplitFilter(const SplitFilter<Iter>::FilterPtr& channelFilter,
-                               const SplitFilter<Iter>::StereoFilterPtr& prevFilter):
-    StereoAudioFilter<Iter>(prevFilter)
-  , mChannelFilter(channelFilter)
+SplitFilter<Iter>::SplitFilter(const AudioPipePtr& pipe):
+    mPipe(pipe)
 {}
 
 template <typename Iter>
 void SplitFilter<Iter>::handleWindowImpl(range_type channel1,
                                          range_type channel2)
 {
-    if (mChannelFilter) {
-        mChannelFilter->handleWindow(channel1.first, channel1.second);
-        mChannelFilter->handleWindow(channel2.first, channel2.second);
+    if (mPipe) {
+        mPipe->handleWindow(channel1.first, channel1.second);
+        mPipe->handleWindow(channel2.first, channel2.second);
     }
 }
 
