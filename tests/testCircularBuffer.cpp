@@ -158,19 +158,37 @@ BOOST_AUTO_TEST_CASE(testSimpleWriteDouble)
 
     const int channelSize = bytesCount / 4;
     sample_type* sample_data = (sample_type*) randBytes.data();
-    array<sample_type, channelSize> rearranged;
+    array<sample_type, bytesCount / 2> rearranged;
     for (int i = 0; i < channelSize; ++i) {
         rearranged[i] = sample_data[2 * i];
         rearranged[i + channelSize] = sample_data[2 * i + 1];
     }
 
+
     qint64 readCount = cb.read(readBytes.data(), bytesCount);
+
+    for (int i = 0; i < bytesCount; ++i) {
+        cout << (int) randBytes[i] << " ";
+    }
+    cout << endl;
+
+    for (int i = 0; i < bytesCount; ++i) {
+        cout << (int) readBytes[i] << " ";
+    }
+    cout << endl;
+
+    char* rear = (char*) rearranged.data();
+    for (int i = 0; i < bytesCount; ++i) {
+        cout << (int) rear[i] << " ";
+    }
+    cout << endl;
+
 
     BOOST_CHECK_EQUAL(readCount, bytesCount);
     BOOST_CHECK_EQUAL_COLLECTIONS(readBytes.data(),
                                   readBytes.data() + bytesCount,
                                   (char*)rearranged.data(),
-                                  (char*)rearranged.data() + bytesCount);
+                                  ((char*)rearranged.data()) + bytesCount);
 }
 
 BOOST_AUTO_TEST_CASE(testOverwriteDouble)
@@ -190,7 +208,7 @@ BOOST_AUTO_TEST_CASE(testOverwriteDouble)
     qint64 readCount = cb.read(readBytes.data(), halfCapacity);
 
     const int channelSize = halfCapacity / 4;
-    array<sample_type, channelSize> rearranged;
+    array<sample_type, halfCapacity / 2> rearranged;
     sample_type* sample_data = (sample_type*) (randBytes.data() + halfCapacity);
     for (int i = 0; i < channelSize; ++i) {
         rearranged[i] = sample_data[2 * i];
@@ -201,7 +219,7 @@ BOOST_AUTO_TEST_CASE(testOverwriteDouble)
     BOOST_CHECK_EQUAL_COLLECTIONS(readBytes.data(),
                                   readBytes.data() + halfCapacity,
                                   (char*) rearranged.data(),
-                                  (char*) rearranged.data() + halfCapacity);
+                                  ((char*) rearranged.data()) + halfCapacity);
 
     // check second half of readed samples
     // (which should be equal to the second half of rand bytes)
@@ -218,7 +236,7 @@ BOOST_AUTO_TEST_CASE(testOverwriteDouble)
     BOOST_CHECK_EQUAL_COLLECTIONS(readBytes.data(),
                                   readBytes.data() + halfCapacity,
                                   (char*) rearranged.data(),
-                                  (char*) rearranged.data() + halfCapacity);
+                                  ((char*) rearranged.data()) + halfCapacity);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
