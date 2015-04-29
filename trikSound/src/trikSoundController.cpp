@@ -15,6 +15,9 @@
 #include "recordFilter.h"
 #include "stereoRecordFilter.h"
 
+#include "fileAudioStream.h"
+#include "captureAudioStream.h"
+
 #include "audioDeviceManager.h"
 
 #ifdef TRIK
@@ -64,6 +67,13 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
         throw InitException("TrikSoundController error. Invalid audio format");
     }
     mDeviceManager.reset(new AUDIO_DEVICE_MANAGER_TYPE(dev, fmt, mBufferAdapter));
+
+    if (args.fileInputFlag()) {
+        mAudioStream.reset(new FileAudioStream(args.inputWavFilename()));
+    }
+    else {
+        mAudioStream.reset(new CaptureAudioStream(mDeviceManager, mBufferAdapter));
+    }
 
     auto monoPipe = make_shared<AudioPipe<BufferIterator>>();
     StereoFilterPtr split = make_shared<SplitFilter<BufferIterator>>(monoPipe);
@@ -122,7 +132,7 @@ void TrikSoundController::addAudioEventListener(const TrikSoundController::Liste
 
 void TrikSoundController::bufferReadyReadHandler()
 {
-    while (mBufferAdapter->samplesAvailable() >= CHANNEL_COUNT * mWindowSize) {
+    while (mAudioStream->samplesAvailable() >= mWindowSize) {
 
         if (mSingleChannelFlag) {
             handleSingleChannel();
@@ -144,7 +154,7 @@ void TrikSoundController::bufferReadyReadHandler()
 
 void TrikSoundController::handleSingleChannel()
 {
-    mBufferAdapter->read((char*)mWindowCopy.data(), mWindowSize * sizeof(sample_type));
+    mAudioStream->read(mWindowCopy.data(), mWindowSize);
     auto begin = mWindowCopy.begin();
     auto end   = begin + mWindowSize;
 
@@ -154,7 +164,7 @@ void TrikSoundController::handleSingleChannel()
 
 void TrikSoundController::handleDoubleChannel()
 {
-    mBufferAdapter->read((char*)mWindowCopy.data(), 2 * mWindowSize * sizeof(sample_type));
+    mAudioStream->read(mWindowCopy.data(), 2 * mWindowSize);
     auto leftBegin  = mWindowCopy.begin();
     auto leftEnd    = leftBegin + mWindowSize;
     auto rightBegin = leftEnd;
@@ -173,8 +183,7 @@ void TrikSoundController::notify(const AudioEvent& event)
 
 void TrikSoundController::run()
 {
-    connect(mBufferAdapter.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
-    mDeviceManager->start();
+    mAudioStream->run();
 }
 
 void TrikSoundController::restart()
@@ -188,7 +197,7 @@ void TrikSoundController::restart()
 
 void TrikSoundController::stop()
 {
-    mDeviceManager->stop();
+    mAudioStream->stop();
 }
 
 void TrikSoundController::finish()
@@ -244,6 +253,7 @@ TrikSoundController::Settings::Settings():
   , mFilteringFlag(false)
   , mAngleDetectionFlag(false)
   , mRecordStreamFlag(false)
+  , mFileInputFlag(false)
 
   , mSampleRate(44100)
   , mSampleSize(16)
@@ -399,3 +409,24 @@ void TrikSoundController::Settings::setDurationFlag(bool durationSetFlag)
 {
     mDurationFlag = durationSetFlag;
 }
+
+QString TrikSoundController::Settings::inputWavFilename() const
+{
+    return mInputWavFilename;
+}
+
+void TrikSoundController::Settings::setInputWavFilename(const QString& inputWavFilename)
+{
+    mInputWavFilename = inputWavFilename;
+}
+
+bool TrikSoundController::Settings::fileInputFlag() const
+{
+    return mFileInputFlag;
+}
+
+void TrikSoundController::Settings::setFileInputFlag(bool fileInputFlag)
+{
+    mFileInputFlag = fileInputFlag;
+}
+

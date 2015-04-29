@@ -38,6 +38,7 @@ public:
     QAudioDeviceInfo deviceInfo() const;
     QAudioFormat audioFormat() const;
     std::shared_ptr<QIODevice> buffer() const;
+    void setBuffer(const std::shared_ptr<QIODevice>& buffer);
 
     virtual double volume() const {
         return 1.0;

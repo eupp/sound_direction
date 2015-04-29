@@ -61,6 +61,9 @@ public:
      */
     qint64 sampleCount() const;
 
+    qint64 bytesAvailable() const;
+    size_t samplesAvailable() const;
+
     /**
      * @brief seek Seek to the sample with specified position.
      *             If file contains stereo audio, it will actually seek to position of pair of samples (left and right).
@@ -80,6 +83,7 @@ public:
      * @param maxSize
      * @return
      */
+    qint64 read(char* data, qint64 size);
     AudioBuffer read(qint64 maxSize);
     AudioBuffer readAll();
     /**

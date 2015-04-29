@@ -31,9 +31,15 @@ std::shared_ptr<QIODevice> AudioDeviceManager::buffer() const
     return mBuffer;
 }
 
+void AudioDeviceManager::setBuffer(const std::shared_ptr<QIODevice>& buffer)
+{
+    stop();
+    mBuffer = buffer;
+}
+
 void AudioDeviceManager::start()
 {
-    qDebug() << "Start capture";
+//    qDebug() << "Start capture";
     mInput.start(mBuffer.get());
 }
 

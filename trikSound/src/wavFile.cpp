@@ -7,6 +7,8 @@
 
 #include <QDebug>
 
+#include "types.h"
+
 using namespace trikSound;
 
 class UncorrectHeaderExc: public std::exception
@@ -117,6 +119,16 @@ qint64 WavFile::sampleCount() const
     return count;
 }
 
+qint64 WavFile::bytesAvailable() const
+{
+    return mFile.bytesAvailable();
+}
+
+size_t WavFile::samplesAvailable() const
+{
+    return mFile.bytesAvailable() / sizeof(sample_type);
+}
+
 bool WavFile::seek(qint64 pos)
 {
     return mFile.seek(HEADER_SIZE + sampleNumToByte(pos));
@@ -125,6 +137,11 @@ bool WavFile::seek(qint64 pos)
 quint64 WavFile::pos() const
 {
     return byteNumToSample(mFile.pos() - HEADER_SIZE);
+}
+
+qint64 WavFile::read(char* data, qint64 size)
+{
+    return mFile.read(data, size);
 }
 
 AudioBuffer WavFile::read(qint64 maxSize)

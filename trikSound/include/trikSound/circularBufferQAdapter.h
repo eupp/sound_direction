@@ -60,6 +60,8 @@ public:
 
     void clear();
 
+    int channelCount() const;
+
 signals:
 
 private slots:

@@ -15,6 +15,7 @@
 #include "iAudioEventListener.h"
 #include "iSettingsProvider.h"
 #include "audioPipe.h"
+#include "audioStream.h"
 
 namespace trikSound {
 
@@ -78,6 +79,12 @@ public:
         bool durationFlag() const;
         void setDurationFlag(bool durationFlag);
 
+        bool fileInputFlag() const;
+        void setFileInputFlag(bool fileInputFlag);
+
+        QString inputWavFilename() const;
+        void setInputWavFilename(const QString& inputWavFilename);
+
     private:
 
         // flags
@@ -86,6 +93,7 @@ public:
         bool mFilteringFlag;
         bool mAngleDetectionFlag;
         bool mRecordStreamFlag;
+        bool mFileInputFlag;
 
         // audio format parameters
 
@@ -110,6 +118,7 @@ public:
 
         // other settings
 
+        QString mInputWavFilename;
         QString mOutputWavFilename;
     };
 
@@ -174,9 +183,11 @@ private:
     typedef std::shared_ptr<CircularBuffer>                             CircularBufferPtr;
     typedef std::shared_ptr<CircularBufferQAdapter>                     CircularBufferQAdapterPtr;
     typedef std::shared_ptr<AngleDetector<BufferIterator>>              AngleDetectorPtr;
-    typedef std::unique_ptr<AudioDeviceManager>                         AudioDeviceManagerPtr;
     typedef AudioFilter<BufferIterator>::FilterPtr                      FilterPtr;
     typedef StereoAudioFilter<BufferIterator>::FilterPtr                StereoFilterPtr;
+
+    typedef std::shared_ptr<AudioDeviceManager>                         AudioDeviceManagerPtr;
+    typedef std::unique_ptr<AudioStream>                                AudioStreamPtr;
 
     void handleSingleChannel();
     void handleDoubleChannel();
@@ -186,6 +197,10 @@ private:
     static const int CHANNEL_COUNT = 2;
     // buffer capacity in terms of count of windows it stores
     static const int BUFFER_CAPACITY = 20;
+
+    // audio stream
+
+    AudioStreamPtr mAudioStream;
 
     // circular buffer
 

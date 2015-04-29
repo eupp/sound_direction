@@ -107,6 +107,11 @@ void CircularBufferQAdapter::clear()
     mBuffer->clear();
 }
 
+int CircularBufferQAdapter::channelCount() const
+{
+    return mBuffer->channelCount();
+}
+
 qint64 CircularBufferQAdapter::readData(char* data, qint64 maxlen)
 {
     // check that buffer and len are fit to read sample data
