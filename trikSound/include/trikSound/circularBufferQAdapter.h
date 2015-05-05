@@ -58,6 +58,7 @@ public:
     bool waitForReadyRead(int msecs);
     bool waitForBytesWritten(int msecs);
 
+    void resize(size_t size);
     void clear();
 
     int channelCount() const;

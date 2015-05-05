@@ -7,16 +7,7 @@
 
 #include "utils.h"
 
-#include "singleChannelCircularBuffer.h"
-#include "doubleChannelCircularBuffer.h"
-
-#include "digitalAudioFilter.h"
-#include "splitFilter.h"
-#include "recordFilter.h"
-#include "stereoRecordFilter.h"
-
-#include "fileAudioStream.h"
-#include "captureAudioStream.h"
+#include "initializer.h"
 
 #include "audioDeviceManager.h"
 
@@ -32,7 +23,7 @@ using namespace boost;
 using namespace trikSound;
 
 
-TrikSoundController::TrikSoundController(const TrikSoundController::Settings& args,
+TrikSoundController::TrikSoundController(const Settings& args,
                                          const SettingsProviderPtr& provider):
     mWindowSize(args.windowSize())
   , mWindowCopy(CHANNEL_COUNT * args.windowSize())
@@ -42,75 +33,16 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
   , mSettingsProvider(provider)
 
 {
-    if (args.singleChannelFlag()) {
-        mBuffer = make_shared<SingleChannelCircularBuffer>(BUFFER_CAPACITY * args.windowSize());
-    }
-    else {
-        mBuffer = make_shared<DoubleChannelCircularBuffer>(BUFFER_CAPACITY * args.windowSize());
-    }
-    mBufferAdapter = make_shared<CircularBufferQAdapter>(mBuffer);
-    mBufferAdapter->open(QIODevice::ReadWrite);
+    Initializer<BufferIterator> initializer(args);
 
-    QAudioDeviceInfo dev = QAudioDeviceInfo::defaultInputDevice();
-    QAudioFormat fmt;
-    fmt.setSampleRate(args.sampleRate());
-    fmt.setSampleSize(args.sampleSize());
-    fmt.setSampleType(args.sampleType());
-    fmt.setCodec("audio/pcm");
-    if (args.singleChannelFlag()) {
-        fmt.setChannelCount(1);
-    }
-    else {
-        fmt.setChannelCount(2);
-    }
-    if (!fmt.isValid()) {
-        throw InitException("TrikSoundController error. Invalid audio format");
-    }
-    mDeviceManager.reset(new AUDIO_DEVICE_MANAGER_TYPE(dev, fmt, mBufferAdapter));
+    mBufferAdapter = initializer.getCircularBuffer();
+    mAudioStream = initializer.getAudioStream();
+    mDeviceManager = initializer.getAudioDeviceManager();
+    mAngleDetector = initializer.getAngleDetector();
+    mPipe = initializer.getAudioPipe();
 
-    if (args.fileInputFlag()) {
-        mAudioStream.reset(new FileAudioStream(args.inputWavFilename(),
-                                               mWindowSize * fmt.channelCount()));
-    }
-    else {
-        mAudioStream.reset(new CaptureAudioStream(mDeviceManager,
-                                                  mBufferAdapter,
-                                                  mWindowSize * fmt.channelCount()));
-    }
-
-    auto monoPipe = make_shared<AudioPipe<BufferIterator>>();
-    StereoFilterPtr split = make_shared<SplitFilter<BufferIterator>>(monoPipe);
-    mPipe.insertFilter(mPipe.end(), split);
-
-    if (args.filteringFlag()) {
-        FilterPtr filter = make_shared<DigitalAudioFilter<BufferIterator>>();
-        monoPipe->insertFilter(monoPipe->end(), filter);
-    }
-
-    if (args.angleDetectionFlag()) {
-        if (args.singleChannelFlag()) {
-            throw InitException("TrikSoundController error."
-                                "Angle detection enabled with single audio channel");
-        }
-
-        mAngleDetector = make_shared<AngleDetector<BufferIterator>>(args.sampleRate(),
-                                                                    args.micrDist(),
-                                                                    args.angleDetectionHistoryDepth());
-        mPipe.insertFilter(mPipe.end(), static_pointer_cast<StereoAudioFilter<BufferIterator>>(mAngleDetector));
-    }
-
-    if (args.recordStreamFlag()) {
-        RecordFilter<BufferIterator>::WavFilePtr wavFile = make_shared<WavFile>(args.outputWavFilename());
-        wavFile->open(WavFile::WriteOnly, fmt);
-        if (args.singleChannelFlag()) {
-            FilterPtr record = make_shared<RecordFilter<BufferIterator>>(wavFile);
-            monoPipe->insertFilter(monoPipe->end(), record);
-        }
-        else {
-            StereoFilterPtr record = make_shared<StereoRecordFilter<BufferIterator>>(wavFile);
-            mPipe.insertFilter(mPipe.end(), record);
-        }
-    }
+    mAngleDetectionFlag = args.angleDetectionFlag();
+    mSingleChannelFlag = args.singleChannelFlag();
 
     if (mSettingsProvider) {
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
@@ -161,8 +93,8 @@ void TrikSoundController::handleSingleChannel()
     auto begin = mWindowCopy.begin();
     auto end   = begin + mWindowSize;
 
-    mPipe.handleWindow(make_pair(begin, end),
-                       StereoAudioFilter<BufferIterator>::make_empty_range());
+    mPipe->handleWindow(make_pair(begin, end),
+                        StereoAudioFilter<BufferIterator>::make_empty_range());
 }
 
 void TrikSoundController::handleDoubleChannel()
@@ -173,8 +105,8 @@ void TrikSoundController::handleDoubleChannel()
     auto rightBegin = leftEnd;
     auto rightEnd   = mWindowCopy.end();
 
-    mPipe.handleWindow(make_pair(leftBegin , leftEnd),
-                       make_pair(rightBegin, rightEnd));
+    mPipe->handleWindow(make_pair(leftBegin , leftEnd),
+                        make_pair(rightBegin, rightEnd));
 }
 
 void TrikSoundController::notify(const AudioEvent& event)
@@ -195,7 +127,7 @@ void TrikSoundController::restart()
     stop();
     mBufferAdapter->clear();
     // in case of changes in windowSize
-    mBuffer->resize(BUFFER_CAPACITY * mWindowSize);
+    mBufferAdapter->resize(Initializer<BufferIterator>::BUFFER_CAPACITY * mWindowSize);
     run();
 }
 
@@ -249,189 +181,5 @@ void TrikSoundController::setVolume(double vol)
 {
     mDeviceManager->setVolume(vol);
     restart();
-}
-
-
-TrikSoundController::Settings::Settings():
-
-    mSingleChannelFlag(false)
-  , mFilteringFlag(false)
-  , mAngleDetectionFlag(false)
-  , mRecordStreamFlag(false)
-  , mFileInputFlag(false)
-
-  , mSampleRate(44100)
-  , mSampleSize(16)
-  , mSampleType(QAudioFormat::SignedInt)
-
-  , mAngleDetectionHistoryDepth(5)
-  , mWindowSize(1024)
-  , mVolume(1.0)
-
-  , mMicrDist(10.0)
-
-  , mDurationFlag(false)
-  , mDuration(0)
-{}
-
-
-int TrikSoundController::Settings::angleDetectionHistoryDepth() const
-{
-    return mAngleDetectionHistoryDepth;
-}
-
-void TrikSoundController::Settings::setAngleDetectionHistoryDepth(int angleDetectionHistoryDepth)
-{
-    mAngleDetectionHistoryDepth = angleDetectionHistoryDepth;
-}
-
-size_t TrikSoundController::Settings::windowSize() const
-{
-    return mWindowSize;
-}
-
-void TrikSoundController::Settings::setWindowSize(const size_t& windowSize)
-{
-    mWindowSize = windowSize;
-}
-
-double TrikSoundController::Settings::volume() const
-{
-    return mVolume;
-}
-
-void TrikSoundController::Settings::setVolume(double volume)
-{
-    mVolume = volume;
-}
-
-QAudioFormat::SampleType TrikSoundController::Settings::sampleType() const
-{
-    return mSampleType;
-}
-
-void TrikSoundController::Settings::setSampleType(const QAudioFormat::SampleType& sampleType)
-{
-    mSampleType = sampleType;
-}
-
-int TrikSoundController::Settings::sampleSize() const
-{
-    return mSampleSize;
-}
-
-void TrikSoundController::Settings::setSampleSize(int sampleSize)
-{
-    mSampleSize = sampleSize;
-}
-
-int TrikSoundController::Settings::sampleRate() const
-{
-    return mSampleRate;
-}
-
-void TrikSoundController::Settings::setSampleRate(int sampleRate)
-{
-    mSampleRate = sampleRate;
-}
-
-bool TrikSoundController::Settings::angleDetectionFlag() const
-{
-    return mAngleDetectionFlag;
-}
-
-void TrikSoundController::Settings::setAngleDetectionFlag(bool angleDetectionFlag)
-{
-    mAngleDetectionFlag = angleDetectionFlag;
-}
-
-bool TrikSoundController::Settings::filteringFlag() const
-{
-    return mFilteringFlag;
-}
-
-void TrikSoundController::Settings::setFilteringFlag(bool filteringFlag)
-{
-    mFilteringFlag = filteringFlag;
-}
-
-bool TrikSoundController::Settings::singleChannelFlag() const
-{
-    return mSingleChannelFlag;
-}
-
-void TrikSoundController::Settings::setSingleChannelFlag(bool singleChannelFlag)
-{
-    mSingleChannelFlag = singleChannelFlag;
-}
-
-double TrikSoundController::Settings::micrDist() const
-{
-    return mMicrDist;
-}
-
-void TrikSoundController::Settings::setMicrDist(double micrDist)
-{
-    mMicrDist = micrDist;
-}
-
-bool TrikSoundController::Settings::recordStreamFlag() const
-{
-    return mRecordStreamFlag;
-}
-
-void TrikSoundController::Settings::setRecordStreamFlag(bool recordStreamFlag)
-{
-    mRecordStreamFlag = recordStreamFlag;
-}
-
-QString TrikSoundController::Settings::outputWavFilename() const
-{
-    return mOutputWavFilename;
-}
-
-void TrikSoundController::Settings::setOutputWavFilename(const QString& outputWavFilename)
-{
-    mOutputWavFilename = outputWavFilename;
-}
-
-int TrikSoundController::Settings::duration() const
-{
-    return mDuration;
-}
-
-void TrikSoundController::Settings::setDuration(int duration)
-{
-    mDuration = duration;
-}
-
-bool TrikSoundController::Settings::durationFlag() const
-{
-    return mDurationFlag;
-}
-
-void TrikSoundController::Settings::setDurationFlag(bool durationSetFlag)
-{
-    mDurationFlag = durationSetFlag;
-}
-
-QString TrikSoundController::Settings::inputWavFilename() const
-{
-    return mInputWavFilename;
-}
-
-void TrikSoundController::Settings::setInputWavFilename(const QString& inputWavFilename)
-{
-    mInputWavFilename = inputWavFilename;
-}
-
-bool TrikSoundController::Settings::fileInputFlag() const
-{
-    return mFileInputFlag;
-}
-
-void TrikSoundController::Settings::setFileInputFlag(bool fileInputFlag)
-{
-    mFileInputFlag = fileInputFlag;
 }
 

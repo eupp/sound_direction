@@ -50,14 +50,14 @@ T parseArgument(const char* paramName, const QString& param, const string& error
     return res;
 }
 
-trikSound::TrikSoundController::Settings ArgumentParser::parse()
+Settings ArgumentParser::parse()
 {
     return parseArgumentList(QCoreApplication::arguments());
 }
 
-TrikSoundController::Settings ArgumentParser::parseArgumentList(const QStringList& args)
+Settings ArgumentParser::parseArgumentList(const QStringList& args)
 {
-    trikSound::TrikSoundController::Settings settings;
+    Settings settings;
 
     for (auto it = args.begin(); it != args.end(); ++it) {
 

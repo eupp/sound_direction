@@ -1,5 +1,6 @@
 #pragma once
 
+#include "trikSound/settings.h"
 #include "trikSound/trikSoundController.h"
 
 #include <unordered_map>
@@ -13,7 +14,7 @@ private:
 
 public:
 
-    typedef trikSound::TrikSoundController::Settings Settings;
+    typedef trikSound::Settings Settings;
 
     class ParseException : public trikSound::TrikSoundException
     {

@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     try {
         QApplication app(argc, argv);
 
-        TrikSoundController::Settings settings = ArgumentParser::parse();
+        Settings settings = ArgumentParser::parse();
         shared_ptr<TrikSoundController> controller = make_shared<TrikSoundController>(settings);
         shared_ptr<MainWindow> window = make_shared<MainWindow>(controller);
         controller->addAudioEventListener(window);

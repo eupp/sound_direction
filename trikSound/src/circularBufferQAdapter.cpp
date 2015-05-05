@@ -97,6 +97,11 @@ bool CircularBufferQAdapter::waitForBytesWritten(int msecs)
     return false;
 }
 
+void CircularBufferQAdapter::resize(size_t size)
+{
+    mBuffer->resize(size);
+}
+
 qint64 CircularBufferQAdapter::samplesAvailable() const
 {
     return mBuffer->samplesAvailable();

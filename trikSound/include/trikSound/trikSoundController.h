@@ -6,16 +6,14 @@
 
 #include "triksound_global.h"
 
-#include "circularBuffer.h"
 #include "circularBufferQAdapter.h"
-#include "audioFilter.h"
-#include "stereoAudioFilter.h"
 #include "audioDeviceManager.h"
 #include "angleDetector.h"
 #include "iAudioEventListener.h"
 #include "iSettingsProvider.h"
 #include "audioPipe.h"
 #include "audioStream.h"
+#include "settings.h"
 
 namespace trikSound {
 
@@ -26,111 +24,6 @@ public:
 
     typedef std::shared_ptr<ISettingsProvider> SettingsProviderPtr;
     typedef std::shared_ptr<IAudioEventListener> ListenerPtr;
-
-    // settings for controller constructor
-
-    class Settings
-    {
-    public:
-
-        // construct Setting object with default controller settings
-
-        Settings();
-
-        int angleDetectionHistoryDepth() const;
-        void setAngleDetectionHistoryDepth(int angleDetectionHistoryDepth);
-
-        size_t windowSize() const;
-        void setWindowSize(const size_t& windowSize);
-
-        double volume() const;
-        void setVolume(double volume);
-
-        bool singleChannelFlag() const;
-        void setSingleChannelFlag(bool singleChannelFlag);
-
-        bool filteringFlag() const;
-        void setFilteringFlag(bool filteringFlag);
-
-        bool angleDetectionFlag() const;
-        void setAngleDetectionFlag(bool angleDetectionFlag);
-
-        int sampleRate() const;
-        void setSampleRate(int sampleRate);
-
-        int sampleSize() const;
-        void setSampleSize(int sampleSize);
-
-        QAudioFormat::SampleType sampleType() const;
-        void setSampleType(const QAudioFormat::SampleType& sampleType);
-
-        double micrDist() const;
-        void setMicrDist(double micrDist);
-
-        bool recordStreamFlag() const;
-        void setRecordStreamFlag(bool recordStreamFlag);
-
-        QString outputWavFilename() const;
-        void setOutputWavFilename(const QString& outputWavFilename);
-
-        int duration() const;
-        void setDuration(int duration);
-
-        bool durationFlag() const;
-        void setDurationFlag(bool durationFlag);
-
-        bool fileInputFlag() const;
-        void setFileInputFlag(bool fileInputFlag);
-
-        QString inputWavFilename() const;
-        void setInputWavFilename(const QString& inputWavFilename);
-
-    private:
-
-        // flags
-
-        bool mSingleChannelFlag;
-        bool mFilteringFlag;
-        bool mAngleDetectionFlag;
-        bool mRecordStreamFlag;
-        bool mFileInputFlag;
-
-        // audio format parameters
-
-        int mSampleRate;
-        int mSampleSize;
-        QAudioFormat::SampleType mSampleType;
-
-        // controller settings
-
-        int mAngleDetectionHistoryDepth;
-        size_t mWindowSize;
-        double mVolume;
-
-        // angle detector arguments
-
-        double mMicrDist;
-
-        // duration settings
-
-        int mDuration;
-        bool mDurationFlag;
-
-        // other settings
-
-        QString mInputWavFilename;
-        QString mOutputWavFilename;
-    };
-
-    // exception during initialization
-
-    class InitException : public TrikSoundException
-    {
-    public:
-        InitException(const char* msg):
-            TrikSoundException(msg)
-        {}
-    };
 
     // constructor
 
@@ -185,9 +78,10 @@ private:
     typedef std::shared_ptr<AngleDetector<BufferIterator>>              AngleDetectorPtr;
     typedef AudioFilter<BufferIterator>::FilterPtr                      FilterPtr;
     typedef StereoAudioFilter<BufferIterator>::FilterPtr                StereoFilterPtr;
+    typedef std::shared_ptr<StereoAudioPipe<BufferIterator>>            StereoAudioPipePtr;
 
     typedef std::shared_ptr<AudioDeviceManager>                         AudioDeviceManagerPtr;
-    typedef std::unique_ptr<AudioStream>                                AudioStreamPtr;
+    typedef std::shared_ptr<AudioStream>                                AudioStreamPtr;
 
     void handleSingleChannel();
     void handleDoubleChannel();
@@ -195,8 +89,6 @@ private:
 
     // maximum available count of channels
     static const int CHANNEL_COUNT = 2;
-    // buffer capacity in terms of count of windows it stores
-    static const int BUFFER_CAPACITY = 20;
 
     // audio stream
 
@@ -204,7 +96,6 @@ private:
 
     // circular buffer
 
-    CircularBufferPtr mBuffer;
     CircularBufferQAdapterPtr mBufferAdapter;
 
     // size of window in samples
@@ -221,7 +112,7 @@ private:
 
     // filters
 
-    StereoAudioPipe<BufferIterator> mPipe;
+    StereoAudioPipePtr mPipe;
     AngleDetectorPtr mAngleDetector;
 
     // settings provider

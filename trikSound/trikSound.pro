@@ -22,7 +22,8 @@ SOURCES += \
     src/singleChannelCircularBuffer.cpp \
     src/doubleChannelCircularBuffer.cpp \
     src/captureAudioStream.cpp \
-    src/fileAudioStream.cpp
+    src/fileAudioStream.cpp \
+    src/settings.cpp
 
 HEADERS += \
     include/fpml/fixed_point.h \
@@ -59,5 +60,7 @@ HEADERS += \
     include/trikSound/singleChannelCircularBuffer.h \
     include/trikSound/audioStream.h \
     include/trikSound/captureAudioStream.h \
-    include/trikSound/fileAudioStream.h
+    include/trikSound/fileAudioStream.h \
+    include/trikSound/initializer.h \
+    include/trikSound/settings.h
 
