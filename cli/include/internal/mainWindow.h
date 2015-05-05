@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <QMainWindow>
 
@@ -44,4 +45,5 @@ private:
 
     std::weak_ptr<trikSound::TrikSoundController> mController;
 
+    static const int SIZE = 60;
 };

@@ -4,10 +4,12 @@ namespace trikSound {
 
 CaptureAudioStream::CaptureAudioStream(CaptureAudioStream::AudioDeviceManagerPtr device,
                                        CaptureAudioStream::CircularBufferQAdapterPtr buffer,
+                                       size_t windowSize,
                                        QObject* parent):
     AudioStream(parent)
   , mDevice(device)
   , mBuffer(buffer)
+  , mWindowSize(windowSize)
 {
     mDevice->setBuffer(buffer);
 }
@@ -24,14 +26,24 @@ void CaptureAudioStream::stop()
     disconnect(mBuffer.get(), 0, this, 0);
 }
 
-void CaptureAudioStream::read(sample_type* buf, size_t size)
+void CaptureAudioStream::read(sample_type* buf)
 {
-    mBuffer->read((char*)buf, size * sizeof(sample_type));
+    mBuffer->read((char*)buf, mWindowSize * sizeof(sample_type));
 }
 
 size_t CaptureAudioStream::samplesAvailable() const
 {
     return mBuffer->samplesAvailable() / mBuffer->channelCount();
+}
+
+size_t CaptureAudioStream::windowSize() const
+{
+    return mWindowSize;
+}
+
+void CaptureAudioStream::setWindowSize(size_t size)
+{
+    mWindowSize = size;
 }
 
 }

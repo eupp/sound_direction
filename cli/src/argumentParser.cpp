@@ -85,6 +85,15 @@ TrikSoundController::Settings ArgumentParser::parseArgumentList(const QStringLis
             settings.setDurationFlag(true);
             settings.setDuration(duration);
         }
+        else if (*it == paramsMap["filename"]) {
+            settings.setFileInputFlag(true);
+            if (++it != args.end()) {
+                settings.setInputWavFilename(*it);
+            }
+            else {
+                throw ParseException(paramsMap["filename"].errorString());
+            }
+        }
         else if (*it == paramsMap["outfile"]) {
             settings.setRecordStreamFlag(true);
             if (++it != args.end()) {

@@ -69,10 +69,13 @@ TrikSoundController::TrikSoundController(const TrikSoundController::Settings& ar
     mDeviceManager.reset(new AUDIO_DEVICE_MANAGER_TYPE(dev, fmt, mBufferAdapter));
 
     if (args.fileInputFlag()) {
-        mAudioStream.reset(new FileAudioStream(args.inputWavFilename()));
+        mAudioStream.reset(new FileAudioStream(args.inputWavFilename(),
+                                               mWindowSize * fmt.channelCount()));
     }
     else {
-        mAudioStream.reset(new CaptureAudioStream(mDeviceManager, mBufferAdapter));
+        mAudioStream.reset(new CaptureAudioStream(mDeviceManager,
+                                                  mBufferAdapter,
+                                                  mWindowSize * fmt.channelCount()));
     }
 
     auto monoPipe = make_shared<AudioPipe<BufferIterator>>();
@@ -154,7 +157,7 @@ void TrikSoundController::bufferReadyReadHandler()
 
 void TrikSoundController::handleSingleChannel()
 {
-    mAudioStream->read(mWindowCopy.data(), mWindowSize);
+    mAudioStream->read(mWindowCopy.data());
     auto begin = mWindowCopy.begin();
     auto end   = begin + mWindowSize;
 
@@ -164,7 +167,7 @@ void TrikSoundController::handleSingleChannel()
 
 void TrikSoundController::handleDoubleChannel()
 {
-    mAudioStream->read(mWindowCopy.data(), 2 * mWindowSize);
+    mAudioStream->read(mWindowCopy.data());
     auto leftBegin  = mWindowCopy.begin();
     auto leftEnd    = leftBegin + mWindowSize;
     auto rightBegin = leftEnd;
@@ -183,6 +186,7 @@ void TrikSoundController::notify(const AudioEvent& event)
 
 void TrikSoundController::run()
 {
+    connect(mAudioStream.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
     mAudioStream->run();
 }
 
@@ -198,6 +202,7 @@ void TrikSoundController::restart()
 void TrikSoundController::stop()
 {
     mAudioStream->stop();
+    disconnect(mAudioStream.get(), 0, this, 0);
 }
 
 void TrikSoundController::finish()

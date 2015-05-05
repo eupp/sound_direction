@@ -20,19 +20,23 @@ public:
 
     CaptureAudioStream(AudioDeviceManagerPtr device,
                        CircularBufferQAdapterPtr buffer,
+                       size_t windowSize,
                        QObject* parent = 0);
 
     void run();
     void restart();
     void stop();
-    void read(sample_type *buf, size_t size);
+    void read(sample_type *buf);
     size_t samplesAvailable() const;
+
+    size_t windowSize() const;
+    void setWindowSize(size_t size);
 
 private:
 
     AudioDeviceManagerPtr mDevice;
     CircularBufferQAdapterPtr mBuffer;
-
+    size_t mWindowSize;
 };
 
 }

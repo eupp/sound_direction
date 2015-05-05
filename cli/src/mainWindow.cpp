@@ -1,8 +1,13 @@
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
 
+#include <iostream>
+#include <algorithm>
+
 #include <QKeyEvent>
 #include <QDebug>
+
+using namespace std;
 
 const int MainWindow::historyDiff = 1;
 const double MainWindow::volDiff = 0.1;
@@ -28,6 +33,13 @@ void MainWindow::recieve(const trikSound::AudioEvent& event)
 {
     if (event.angleSetFlag()) {
         qDebug() << "angle: " << (int) event.angle();
+//        int padd = (int) event.angle() / 3 + SIZE / 2;
+//        static char buf[SIZE + 2];
+//        memset(buf, ' ', SIZE);
+//        buf[SIZE / 2] = '|';
+//        buf[padd] = '#';
+//        buf[SIZE] = 0;
+//        cout << buf << '\r';
     }
 }
 
