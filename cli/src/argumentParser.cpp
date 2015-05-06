@@ -53,9 +53,6 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
             int wsize = convertParam<int>("windowSize", *(++it), paramsMap["windowSize"].errorString());
             settings.setWindowSize(wsize);
         }
-        else if (*it == paramsMap["angleDetection"]) {
-            settings.setAngleDetectionFlag(true);
-        }
         else if (*it == paramsMap["duration"]) {
             int duration = convertParam<int>("duration", *(++it), paramsMap["duration"].errorString());
             settings.setDurationFlag(true);
@@ -78,6 +75,12 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
             else {
                 throw ParseException(paramsMap["outfile"].errorString());
             }
+        }
+        else if (*it == paramsMap["angleDetection"]) {
+            settings.setAngleDetectionFlag(true);
+        }
+        else if (*it == paramsMap["filtering"]) {
+            settings.setFilteringFlag(true);
         }
     }
 
