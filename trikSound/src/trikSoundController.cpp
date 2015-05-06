@@ -24,8 +24,11 @@ using namespace trikSound;
 
 
 TrikSoundController::TrikSoundController(const Settings& args,
-                                         const SettingsProviderPtr& provider):
-    mWindowSize(args.windowSize())
+                                         const SettingsProviderPtr& provider,
+                                         QObject* parent):
+    QObject(parent)
+
+  , mWindowSize(args.windowSize())
   , mWindowCopy(CHANNEL_COUNT * args.windowSize())
   , mAngleDetectionFlag(args.angleDetectionFlag())
   , mSingleChannelFlag(args.singleChannelFlag())

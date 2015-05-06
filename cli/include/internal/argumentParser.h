@@ -14,8 +14,6 @@ private:
 
 public:
 
-    typedef trikSound::Settings Settings;
-
     class ParseException : public trikSound::TrikSoundException
     {
     public:
@@ -23,6 +21,8 @@ public:
             TrikSoundException(msg.c_str())
         {}
     };
+
+    typedef trikSound::Settings Settings;
 
     static Settings parse();
 

@@ -167,23 +167,6 @@ BOOST_AUTO_TEST_CASE(testSimpleWriteDouble)
 
     qint64 readCount = cb.read(readBytes.data(), bytesCount);
 
-    for (int i = 0; i < bytesCount; ++i) {
-        cout << (int) randBytes[i] << " ";
-    }
-    cout << endl;
-
-    for (int i = 0; i < bytesCount; ++i) {
-        cout << (int) readBytes[i] << " ";
-    }
-    cout << endl;
-
-    char* rear = (char*) rearranged.data();
-    for (int i = 0; i < bytesCount; ++i) {
-        cout << (int) rear[i] << " ";
-    }
-    cout << endl;
-
-
     BOOST_CHECK_EQUAL(readCount, bytesCount);
     BOOST_CHECK_EQUAL_COLLECTIONS(readBytes.data(),
                                   readBytes.data() + bytesCount,

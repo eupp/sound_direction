@@ -4,6 +4,8 @@
 
 #include <QCoreApplication>
 
+#include "utils.h"
+
 using namespace std;
 using namespace trikSound;
 
@@ -24,32 +26,6 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
   , {"volume", ArgumentParser::Parameter("-v", "--volume", "Volume is missing.")}
 };
 
-template <typename T>
-T convertArgument(const QString& arg, bool& ok);
-
-template <>
-int convertArgument(const QString& arg, bool& ok)
-{
-    return arg.toInt(&ok);
-}
-
-template <>
-double convertArgument(const QString& arg, bool& ok)
-{
-    return arg.toDouble(&ok);
-}
-
-template <typename T>
-T parseArgument(const char* paramName, const QString& param, const string& errorString)
-{
-    bool ok = true;
-    T res = convertArgument<T>(param, ok);
-    if (!ok) {
-        throw ArgumentParser::ParseException(errorString);
-    }
-    return res;
-}
-
 Settings ArgumentParser::parse()
 {
     return parseArgumentList(QCoreApplication::arguments());
@@ -62,26 +38,26 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
     for (auto it = args.begin(); it != args.end(); ++it) {
 
         if (*it == paramsMap["channelCount"]) {
-            int count = parseArgument<int>("channelCount", *(++it), paramsMap["channelCount"].errorString());
+            int count = convertParam<int>("channelCount", *(++it), paramsMap["channelCount"].errorString());
             settings.setSingleChannelFlag(count == 1);
         }
         else if (*it == paramsMap["micrDist"]) {
-            double dist = parseArgument<double>("micrDist", *(++it), paramsMap["micrDist"].errorString());
+            double dist = convertParam<double>("micrDist", *(++it), paramsMap["micrDist"].errorString());
             settings.setMicrDist(dist);
         }
         else if (*it == paramsMap["historyDepth"]) {
-            int depth = parseArgument<int>("historyDepth", *(++it), paramsMap["historyDepth"].errorString());
+            int depth = convertParam<int>("historyDepth", *(++it), paramsMap["historyDepth"].errorString());
             settings.setAngleDetectionHistoryDepth(depth);
         }
         else if (*it == paramsMap["windowSize"]) {
-            int wsize = parseArgument<int>("windowSize", *(++it), paramsMap["windowSize"].errorString());
+            int wsize = convertParam<int>("windowSize", *(++it), paramsMap["windowSize"].errorString());
             settings.setWindowSize(wsize);
         }
         else if (*it == paramsMap["angleDetection"]) {
             settings.setAngleDetectionFlag(true);
         }
         else if (*it == paramsMap["duration"]) {
-            int duration = parseArgument<int>("duration", *(++it), paramsMap["duration"].errorString());
+            int duration = convertParam<int>("duration", *(++it), paramsMap["duration"].errorString());
             settings.setDurationFlag(true);
             settings.setDuration(duration);
         }

@@ -1,11 +1,12 @@
-#include <QApplication>
+#include <QCoreApplication>
 #include <QTimer>
 #include <QDebug>
 
 #include "trikSound/trikSoundController.h"
 
 #include "argumentParser.h"
-#include "mainWindow.h"
+#include "outputFifo.h"
+#include "controlFifo.h"
 
 using namespace std;
 using namespace trikSound;
@@ -13,17 +14,17 @@ using namespace trikSound;
 int main(int argc, char** argv)
 {
     try {
-        QApplication app(argc, argv);
+        QCoreApplication app(argc, argv);
 
         Settings settings = ArgumentParser::parse();
-        shared_ptr<TrikSoundController> controller = make_shared<TrikSoundController>(settings);
-        shared_ptr<MainWindow> window = make_shared<MainWindow>(controller);
-        controller->addAudioEventListener(window);
+        shared_ptr<ISettingsProvider> provider = make_shared<ControlFifo>();
+        shared_ptr<IAudioEventListener> eventListener = make_shared<OutputFifo>();
 
-        QTimer::singleShot(0, controller.get(), SLOT(run()));
-        window->show();
+        TrikSoundController* controller = new TrikSoundController(settings, provider, &app);
+        controller->addAudioEventListener(eventListener);
 
-        QObject::connect(controller.get(), SIGNAL(finished()), &app, SLOT(quit()));
+        QTimer::singleShot(0, controller, SLOT(run()));
+        QObject::connect(controller, SIGNAL(finished()), &app, SLOT(quit()));
 
         return app.exec();
     }

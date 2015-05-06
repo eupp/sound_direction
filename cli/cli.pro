@@ -1,8 +1,8 @@
 
 include(../global.pri)
 
-QT       += core multimedia gui
-#QT       -= gui
+QT       += core multimedia
+QT       -= gui
 
 CONFIG   += console
 CONFIG   -= app_bundle
@@ -12,14 +12,14 @@ TEMPLATE = app
 SOURCES += \
     src/main.cpp \
     src/argumentParser.cpp \
-    src/mainWindow.cpp
+    src/controlFifo.cpp \
+    src/outputFifo.cpp
 
 HEADERS += \
     include/internal/argumentParser.h \
-    include/internal/mainWindow.h
-
-FORMS += \
-    ui/mainWindow.ui
+    include/internal/controlFifo.h \
+    include/internal/utils.h \
+    include/internal/outputFifo.h
 
 uses(trikSound)
 

@@ -27,7 +27,9 @@ public:
 
     // constructor
 
-    TrikSoundController(const Settings& args, const SettingsProviderPtr& provider = SettingsProviderPtr());
+    TrikSoundController(const Settings& args,
+                        const SettingsProviderPtr& provider = SettingsProviderPtr(),
+                        QObject* parent = 0);
 
     // add listeners
 
