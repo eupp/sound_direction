@@ -16,10 +16,14 @@ public:
 
     ControlFifo();
 
+public slots:
+
+    void processEvents();
+
 signals:
 
     void updateAngleDetectionHistoryDepth(int historyDepth);
-    void updateWindowSize(size_t size);
+    void updateWindowSize(quint64 size);
     void updateVolume(double vol);
 
 private slots:

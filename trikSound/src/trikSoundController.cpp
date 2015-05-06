@@ -49,13 +49,13 @@ TrikSoundController::TrikSoundController(const Settings& args,
 
     if (mSettingsProvider) {
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
-                this, SLOT(setAngleDetectionHistoryDepth(int)));
+                this, SLOT(setAngleDetectionHistoryDepth(int)), Qt::QueuedConnection);
 
-        connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateWindowSize(size_t)),
-                this, SLOT(setWindowSize(size_t)));
+        connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateWindowSize(quint64)),
+                this, SLOT(setWindowSize(quint64)), Qt::QueuedConnection);
 
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
-                this, SLOT(setVolume(double)));
+                this, SLOT(setVolume(double)), Qt::QueuedConnection);
     }
 
     if (args.durationFlag()) {
@@ -71,6 +71,10 @@ void TrikSoundController::addAudioEventListener(const TrikSoundController::Liste
 void TrikSoundController::bufferReadyReadHandler()
 {
     while (mAudioStream->samplesAvailable() >= mWindowSize) {
+
+        // get opportunity to waiting events to be processed
+        // before handle next window
+        processEvents();
 
         if (mSingleChannelFlag) {
             handleSingleChannel();
@@ -88,6 +92,11 @@ void TrikSoundController::bufferReadyReadHandler()
         notify(event);
     }
 
+}
+
+void TrikSoundController::processEvents()
+{
+    mSettingsProvider->processEvents();
 }
 
 void TrikSoundController::handleSingleChannel()
@@ -121,7 +130,8 @@ void TrikSoundController::notify(const AudioEvent& event)
 
 void TrikSoundController::run()
 {
-    connect(mAudioStream.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()));
+    connect(mAudioStream.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()),
+            Qt::QueuedConnection);
     mAudioStream->run();
 }
 
@@ -174,7 +184,7 @@ void TrikSoundController::setAngleDetectionHistoryDepth(int historyDepth)
     }
 }
 
-void TrikSoundController::setWindowSize(size_t size)
+void TrikSoundController::setWindowSize(quint64 size)
 {
     mWindowSize = size;
     restart();

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include <QCoreApplication>
 #include <QTextStream>
 #include <QDebug>
 
@@ -19,14 +20,34 @@ ControlFifo::ControlFifo():
     mNotifier.setEnabled(true);
 }
 
+void ControlFifo::processEvents()
+{
+    QCoreApplication::processEvents();
+}
+
 void ControlFifo::readData()
 {
-    mNotifier.setEnabled(false);
-    while (!fgets(mCmdBuffer, CMD_BUFFER_SIZE, mFile)) {
+    struct NotificationGuard
+    {
+        NotificationGuard(QSocketNotifier* notifier):
+            mNotifierPtr(notifier)
+        {
+            mNotifierPtr->setEnabled(false);
+        }
+        ~NotificationGuard()
+        {
+            mNotifierPtr->setEnabled(true);
+        }
+
+    private:
+        QSocketNotifier* mNotifierPtr;
+    };
+
+    NotificationGuard guard(&mNotifier);
+    if (fgets(mCmdBuffer, CMD_BUFFER_SIZE, mFile) != nullptr) {
         readCommand();
         fill(mCmdBuffer, end(mCmdBuffer), 0);
     }
-    mNotifier.setEnabled(true);
 }
 
 void ControlFifo::readCommand()
@@ -53,7 +74,7 @@ void ControlFifo::readCommand()
             emit updateAngleDetectionHistoryDepth(historyDepth);
         }
         else if (paramName == "windowSize") {
-            size_t windowSize = convertParam<size_t>(paramName.toAscii().data(), param,
+            quint64 windowSize = convertParam<quint64>(paramName.toAscii().data(), param,
                                           "ControlFifo error. Cannot convert windowSize to size_t."
                                           "Command: " + qstr.toStdString());
             emit updateWindowSize(windowSize);

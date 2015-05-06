@@ -11,10 +11,14 @@ public:
 
     virtual ~ISettingsProvider() {}
 
+public slots:
+
+    virtual void processEvents() = 0;
+
 signals:
 
     virtual void updateAngleDetectionHistoryDepth(int historyDepth) = 0;
-    virtual void updateWindowSize(size_t size) = 0;
+    virtual void updateWindowSize(quint64 size) = 0;
     virtual void updateVolume(double vol) = 0;
 
 };

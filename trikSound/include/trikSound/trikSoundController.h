@@ -58,7 +58,7 @@ public slots:
     // controller runtime settings
 
     void setAngleDetectionHistoryDepth(int historyDepth);
-    void setWindowSize(size_t size);
+    void setWindowSize(quint64 size);
     void setVolume(double vol);
 
 signals:
@@ -68,6 +68,7 @@ signals:
 private slots:
 
     void bufferReadyReadHandler();
+    void processEvents();
 
 private:
 
