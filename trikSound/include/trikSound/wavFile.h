@@ -48,6 +48,8 @@ public:
     bool isWritable() const;
     bool isReadable() const;
 
+    bool atEnd() const;
+
     QAudioFormat audioFormat() const;
 
     /**
@@ -95,6 +97,7 @@ public:
     qint64 write(const char* data, qint64 size);
 
 private:
+
     int bytesPerSample() const;
     qint64 byteNumToSample(qint64 bytePos) const;
     qint64 sampleNumToByte(qint64 samplePos) const;

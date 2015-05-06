@@ -37,6 +37,9 @@ void FileAudioStream::read(sample_type* buf)
     else {
         mFile.read((char*)buf, mWindow.size() * sizeof(sample_type));
     }
+    if (mFile.atEnd()) {
+        emit finished();
+    }
 }
 
 size_t FileAudioStream::samplesAvailable() const

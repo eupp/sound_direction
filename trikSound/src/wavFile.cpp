@@ -100,6 +100,11 @@ bool WavFile::isReadable() const
     return mMode == ReadOnly;
 }
 
+bool WavFile::atEnd() const
+{
+    return mFile.atEnd();
+}
+
 QAudioFormat WavFile::audioFormat() const
 {
     return mAudioFormat;

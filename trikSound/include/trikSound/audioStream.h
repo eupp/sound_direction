@@ -30,6 +30,7 @@ public:
 signals:
 
     virtual void readyRead();
+    virtual void finished();
 };
 
 }

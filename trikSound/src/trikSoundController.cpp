@@ -47,6 +47,8 @@ TrikSoundController::TrikSoundController(const Settings& args,
     mAngleDetectionFlag = args.angleDetectionFlag();
     mSingleChannelFlag = args.singleChannelFlag();
 
+    connect(mAudioStream.get(), SIGNAL(finished()), this, SLOT(finish()), Qt::QueuedConnection);
+
     if (mSettingsProvider) {
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateAngleDetectionHistoryDepth(int)),
                 this, SLOT(setAngleDetectionHistoryDepth(int)), Qt::QueuedConnection);
