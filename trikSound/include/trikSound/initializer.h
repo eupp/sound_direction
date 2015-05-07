@@ -22,11 +22,10 @@
 
 #include "settings.h"
 
+#include "audioDeviceManager.h"
+
 #ifdef TRIK
     #include "trikAudioDeviceManager.h"
-    #define AUDIO_DEVICE_MANAGER_TYPE TrikAudioDeviceManager
-#else
-    #define AUDIO_DEVICE_MANAGER_TYPE AudioDeviceManager
 #endif
 
 namespace trikSound {
@@ -184,7 +183,16 @@ void Initializer<Iter>::createAudioDeviceManager(const Settings& settings)
         createCircularBuffer(settings);
 
         QAudioDeviceInfo dev = QAudioDeviceInfo::defaultInputDevice();
-        mDeviceManager = std::make_shared<AUDIO_DEVICE_MANAGER_TYPE>(dev, *mAudioFormat.get(), mCircularBuffer);
+#ifdef TRIK
+        mDeviceManager = std::make_shared<TrikAudioDeviceManager>(dev,
+                                                                  *mAudioFormat.get(),
+                                                                  mCircularBuffer,
+                                                                  settings.audioDeviceInitFlag());
+#else
+        mDeviceManager = std::make_shared<AudioDeviceManager>(dev, *mAudioFormat.get(), mCircularBuffer);
+#endif
+
+
     }
 }
 

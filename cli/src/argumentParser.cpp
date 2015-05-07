@@ -23,6 +23,7 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
   , {"historyDepth", ArgumentParser::Parameter("", "--history-depth", "History depth is missing.")}
   , {"windowSize", ArgumentParser::Parameter("", "--window-size", "Window size is missing.")}
 
+  , {"audioDeviceInit",  ArgumentParser::Parameter("-I", "--force-init", "")}
   , {"volume", ArgumentParser::Parameter("-v", "--volume", "Volume is missing.")}
 };
 
@@ -81,6 +82,9 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
         }
         else if (*it == paramsMap["filtering"]) {
             settings.setFilteringFlag(true);
+        }
+        else if (*it == paramsMap["audioDeviceInit"]) {
+            settings.setAudioDeviceInitFlag(true);
         }
     }
 

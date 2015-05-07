@@ -66,6 +66,9 @@ public:
     QString inputWavFilename() const;
     void setInputWavFilename(const QString& inputWavFilename);
 
+    bool audioDeviceInitFlag() const;
+    void setAudioDeviceInitFlag(bool audioDeviceInitFlag);
+
 private:
 
     // flags
@@ -75,6 +78,7 @@ private:
     bool mAngleDetectionFlag;
     bool mRecordStreamFlag;
     bool mFileInputFlag;
+    bool mAudioDeviceInitFlag;
 
     // audio format parameters
 

@@ -8,24 +8,28 @@ const int TrikAudioDeviceManager::mMaxVolume = 119;
 
 TrikAudioDeviceManager::TrikAudioDeviceManager(const QAudioDeviceInfo& deviceInfo,
                                                const QAudioFormat& audioFormat,
-                                               const std::shared_ptr<QIODevice>& buffer):
+                                               const std::shared_ptr<QIODevice>& buffer,
+                                               bool forceInit):
     AudioDeviceManager(deviceInfo, audioFormat, buffer)
-  , mVolume(1.0)
+  , mVolume(0.5)
 {
-    QStringList initCommands;
-    initCommands << "amixer set \"Right PGA Mixer Mic3R\" on"
-                 << "amixer set \"Left PGA Mixer Mic3L\" on"
-                 << "amixer set \"Right PGA Mixer Line2R\" on"
-                 << "amixer set \"Left PGA Mixer Line2L\" on"
-                 << "amixer set AGC on";
 
-    for (auto& command: initCommands) {
-        int res = QProcess::execute(command);
-        if (res < 0) {
-            throw InitException((command + " - command failed").toAscii().data());
+    if (forceInit) {
+        QStringList initCommands;
+        initCommands << "amixer set \"Right PGA Mixer Mic3R\" on"
+                     << "amixer set \"Left PGA Mixer Mic3L\" on"
+                     << "amixer set \"Right PGA Mixer Line2R\" on"
+                     << "amixer set \"Left PGA Mixer Line2L\" on"
+                     << "amixer set AGC on";
+
+        for (auto& command: initCommands) {
+            int res = QProcess::execute(command);
+            if (res < 0) {
+                throw InitException((command + " - command failed").toAscii().data());
+            }
         }
-    }
 
+    }
     setVolume(mVolume);
 }
 

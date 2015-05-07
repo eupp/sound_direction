@@ -47,14 +47,11 @@ HEADERS += \
     include/trikSound/trikSoundController.h \
     include/trikSound/audioEvent.h \
     include/trikSound/wavFile.h \
-    include/trikSound/emptyFilter.h \
-    include/trikSound/emptyStereoFilter.h \
     include/trikSound/iAudioEventListener.h \
     include/trikSound/iSettingsProvider.h \
     include/trikSound/stereoRecordFilter.h \
     include/trikSound/recordFilter.h \
     include/trikSound/audioPipe.h \
-    include/internal/circularBuffer.h \
     include/trikSound/circularBuffer.h \
     include/trikSound/doubleChannelCircularBuffer.h \
     include/trikSound/singleChannelCircularBuffer.h \

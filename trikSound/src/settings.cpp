@@ -11,6 +11,7 @@ Settings::Settings():
   , mAngleDetectionFlag(false)
   , mRecordStreamFlag(false)
   , mFileInputFlag(false)
+  , mAudioDeviceInitFlag(false)
 
   , mSampleRate(44100)
   , mSampleSize(16)
@@ -176,6 +177,17 @@ void Settings::setInputWavFilename(const QString& inputWavFilename)
 {
     mInputWavFilename = inputWavFilename;
 }
+
+bool Settings::audioDeviceInitFlag() const
+{
+    return mAudioDeviceInitFlag;
+}
+
+void Settings::setAudioDeviceInitFlag(bool audioDeviceInitFlag)
+{
+    mAudioDeviceInitFlag = audioDeviceInitFlag;
+}
+
 
 bool Settings::fileInputFlag() const
 {
