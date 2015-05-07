@@ -1,6 +1,7 @@
 Makefile
 *.pro.user
 *.autosave
+*.pyc
 tests/wav/*
 bin/*
 .*
