@@ -9,6 +9,7 @@
 #include "circularBufferQAdapter.h"
 #include "audioDeviceManager.h"
 #include "angleDetector.h"
+#include "vadFilterWrapper.h"
 #include "iAudioEventListener.h"
 #include "iSettingsProvider.h"
 #include "audioPipe.h"
@@ -78,7 +79,10 @@ private:
 
     typedef std::shared_ptr<CircularBuffer>                             CircularBufferPtr;
     typedef std::shared_ptr<CircularBufferQAdapter>                     CircularBufferQAdapterPtr;
+
     typedef std::shared_ptr<AngleDetector<BufferIterator>>              AngleDetectorPtr;
+    typedef std::shared_ptr<VadFilterWrapper<BufferIterator>>           VadFilterWrapperPtr;
+
     typedef AudioFilter<BufferIterator>::FilterPtr                      FilterPtr;
     typedef StereoAudioFilter<BufferIterator>::FilterPtr                StereoFilterPtr;
     typedef std::shared_ptr<StereoAudioPipe<BufferIterator>>            StereoAudioPipePtr;
@@ -115,8 +119,9 @@ private:
 
     // filters
 
-    StereoAudioPipePtr mPipe;
-    AngleDetectorPtr mAngleDetector;
+    StereoAudioPipePtr  mPipe;
+    AngleDetectorPtr    mAngleDetector;
+    VadFilterWrapperPtr mVad;
 
     // settings provider
 
@@ -129,6 +134,7 @@ private:
     // flags
 
     bool mAngleDetectionFlag;
+    bool mVadFlag;
     bool mSingleChannelFlag;
 };
 

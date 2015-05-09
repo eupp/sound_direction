@@ -23,7 +23,8 @@ SOURCES += \
     src/doubleChannelCircularBuffer.cpp \
     src/captureAudioStream.cpp \
     src/fileAudioStream.cpp \
-    src/settings.cpp
+    src/settings.cpp \
+    src/vadFilterWrapper.cpp
 
 HEADERS += \
     include/fpml/fixed_point.h \
@@ -59,5 +60,9 @@ HEADERS += \
     include/trikSound/captureAudioStream.h \
     include/trikSound/fileAudioStream.h \
     include/trikSound/initializer.h \
-    include/trikSound/settings.h
+    include/trikSound/settings.h \
+    include/trikSound/vadFilter.h \
+    include/internal/vadFilterImpl.h \
+    include/trikSound/stereoVadFilter.h \
+    include/trikSound/vadFilterWrapper.h
 

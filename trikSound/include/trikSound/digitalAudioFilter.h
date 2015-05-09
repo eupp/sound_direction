@@ -18,9 +18,11 @@ public:
 
     DigitalAudioFilter();
 
-private:
+protected:
+
     void handleWindowImpl(Iter first, Iter last);
 
+private:
     std::unique_ptr<DigitalAudioFilterImpl<Iter>> mImpl;
 };
 

@@ -69,6 +69,9 @@ public:
     bool audioDeviceInitFlag() const;
     void setAudioDeviceInitFlag(bool audioDeviceInitFlag);
 
+    bool vadFlag() const;
+    void setVadFlag(bool vadFlag);
+
 private:
 
     // flags
@@ -76,6 +79,7 @@ private:
     bool mSingleChannelFlag;
     bool mFilteringFlag;
     bool mAngleDetectionFlag;
+    bool mVadFlag;
     bool mRecordStreamFlag;
     bool mFileInputFlag;
     bool mAudioDeviceInitFlag;

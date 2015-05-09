@@ -13,6 +13,9 @@
 #include "angleDetector.h"
 #include "recordFilter.h"
 #include "stereoRecordFilter.h"
+#include "vadFilter.h"
+#include "stereoVadFilter.h"
+#include "vadFilterWrapper.h"
 
 #include "audioDeviceManager.h"
 #include "audioStream.h"
@@ -42,6 +45,7 @@ public:
 
     typedef std::shared_ptr<StereoAudioPipe<Iter>>      AudioPipePtr;
     typedef std::shared_ptr<AngleDetector<Iter>>        AngleDetectorPtr;
+    typedef std::shared_ptr<VadFilterWrapper<Iter>>     VadFilterWrapperPtr;
 
     // buffer capacity in terms of count of windows it stores
     static const int BUFFER_CAPACITY = 20;
@@ -64,6 +68,8 @@ public:
 
     AudioPipePtr getAudioPipe() const;
     AngleDetectorPtr getAngleDetector() const;
+    VadFilterWrapperPtr getVadWrapper() const;
+
 
 private:
 
@@ -77,6 +83,7 @@ private:
 
     void createAudioPipe(const Settings& settings);
     void createAngleDetector(const Settings& settings);
+    void createVadWrapper(const Settings& settings);
 
 
     QAudioFormatPtr mAudioFormat;
@@ -85,7 +92,7 @@ private:
     AudioStreamPtr mAudioStream;
     AudioPipePtr mAudioPipe;
     AngleDetectorPtr mAngleDetector;
-
+    VadFilterWrapperPtr mVadWrapper;
 
 };
 
@@ -135,6 +142,12 @@ template <typename Iter>
 typename Initializer<Iter>::AngleDetectorPtr Initializer<Iter>::getAngleDetector() const
 {
     return mAngleDetector;
+}
+
+template <typename Iter>
+typename Initializer<Iter>::VadFilterWrapperPtr Initializer<Iter>::getVadWrapper() const
+{
+    return mVadWrapper;
 }
 
 
@@ -233,6 +246,12 @@ void Initializer<Iter>::createAudioPipe(const Settings& settings)
             monoPipe->insertFilter(monoPipe->end(), filter);
         }
 
+        if (settings.singleChannelFlag() && settings.vadFlag()) {
+            createVadWrapper(settings);
+            monoPipe->insertFilter(monoPipe->end(),
+                                   std::static_pointer_cast<AudioFilter<Iter>>(mVadWrapper->getMonoVad()));
+        }
+
         if (settings.singleChannelFlag() && settings.recordStreamFlag()) {
             auto wavFile = std::make_shared<WavFile>(settings.outputWavFilename());
             wavFile->open(WavFile::WriteOnly, *mAudioFormat.get());
@@ -240,10 +259,17 @@ void Initializer<Iter>::createAudioPipe(const Settings& settings)
             monoPipe->insertFilter(monoPipe->end(), record);
         }
 
+
         if (settings.angleDetectionFlag()) {
             createAngleDetector(settings);
             mAudioPipe->insertFilter(mAudioPipe->end(),
                                      std::static_pointer_cast<StereoAudioFilter<Iter>>(mAngleDetector));
+        }
+
+        if (!settings.singleChannelFlag() && settings.vadFlag()) {
+            createVadWrapper(settings);
+            mAudioPipe->insertFilter(mAudioPipe->end(),
+                                     std::static_pointer_cast<StereoAudioFilter<Iter>>(mVadWrapper->getStereoVad()));
         }
 
         if (!settings.singleChannelFlag() && settings.recordStreamFlag()) {
@@ -252,6 +278,7 @@ void Initializer<Iter>::createAudioPipe(const Settings& settings)
             StereoFilterPtr record = std::make_shared<StereoRecordFilter<Iter>>(wavFile);
             mAudioPipe->insertFilter(mAudioPipe->end(), record);
         }
+
 
         StereoFilterPtr split = std::make_shared<SplitFilter<Iter>>(monoPipe);
         mAudioPipe->insertFilter(mAudioPipe->begin(), split);
@@ -269,6 +296,21 @@ void Initializer<Iter>::createAngleDetector(const Settings& settings)
         mAngleDetector = std::make_shared<AngleDetector<Iter>>(settings.sampleRate(),
                                                                settings.micrDist(),
                                                                settings.angleDetectionHistoryDepth());
+    }
+}
+
+template <typename Iter>
+void Initializer<Iter>::createVadWrapper(const Settings& settings)
+{
+    if (!mVadWrapper) {
+        if (settings.singleChannelFlag()) {
+            auto vad = std::make_shared<VadFilter<Iter>>();
+            mVadWrapper = std::make_shared<VadFilterWrapper<Iter>>(vad);
+        }
+        else {
+            auto vad = std::make_shared<StereoVadFilter<Iter>>();
+            mVadWrapper = std::make_shared<VadFilterWrapper<Iter>>(vad);
+        }
     }
 }
 

@@ -188,6 +188,15 @@ void Settings::setAudioDeviceInitFlag(bool audioDeviceInitFlag)
     mAudioDeviceInitFlag = audioDeviceInitFlag;
 }
 
+bool Settings::vadFlag() const
+{
+    return mVadFlag;
+}
+
+void Settings::setVadFlag(bool vadFlag)
+{
+    mVadFlag = vadFlag;
+}
 
 bool Settings::fileInputFlag() const
 {

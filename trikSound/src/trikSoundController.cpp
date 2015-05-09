@@ -42,8 +42,10 @@ TrikSoundController::TrikSoundController(const Settings& args,
     mAudioStream = initializer.getAudioStream();
     mDeviceManager = initializer.getAudioDeviceManager();
     mAngleDetector = initializer.getAngleDetector();
+    mVad = initializer.getVadWrapper();
     mPipe = initializer.getAudioPipe();
 
+    mVadFlag = args.vadFlag();
     mAngleDetectionFlag = args.angleDetectionFlag();
     mSingleChannelFlag = args.singleChannelFlag();
 
@@ -89,6 +91,10 @@ void TrikSoundController::bufferReadyReadHandler()
         if (mAngleDetectionFlag) {
             assert(mAngleDetector != nullptr);
             event.setAngle(mAngleDetector->getAngle());
+        }
+        if (mVadFlag) {
+            assert(mVad != nullptr);
+            event.setVadCoef(mVad->getEnergyCoefficient());
         }
 
         notify(event);
