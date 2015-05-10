@@ -1,7 +1,7 @@
 #pragma once
 
-#include "trikSound/settings.h"
-#include "trikSound/trikSoundController.h"
+#include "settings.h"
+#include "trikSound/trikSoundException.h"
 
 #include <unordered_map>
 #include <string>
@@ -21,8 +21,6 @@ public:
             TrikSoundException(msg.c_str())
         {}
     };
-
-    typedef trikSound::Settings Settings;
 
     static Settings parse();
 
@@ -49,13 +47,11 @@ private:
     };
 
     static Settings parseArgumentList(const QStringList& args);
-    static void checkSettings(const Settings& settings);
+    static ControllerSettings parseControllerSettings(const QStringList& args);
+    static ViewSettings parseViewSettings(const QStringList& args);
 
-    static void parseDuration(QStringList::ConstIterator& it, Settings& settings);
-    static void parseChannelCount(QStringList::ConstIterator& it, Settings& settings);
-    static void parseMicrDistance(QStringList::ConstIterator& it, Settings& settings);
-    static void parseHistoryDepth(QStringList::ConstIterator& it, Settings& settings);
-    static void parseWindowSize(QStringList::ConstIterator& it, Settings& settings);
+    static void checkSettings(const ControllerSettings& settings);
 
     static std::unordered_map<const char*, Parameter> paramsMap;
+    static std::unordered_map<const char*, char>      showFormatting;
 };

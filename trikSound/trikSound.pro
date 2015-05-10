@@ -14,7 +14,6 @@ SOURCES += \
     src/audioBuffer.cpp \
     src/audioCaptureFilter.cpp \
     src/audioDeviceManager.cpp \
-#    src/thresholdVadFilter.cpp \
     src/trikAudioDeviceManager.cpp \
     src/circularBufferQAdapter.cpp \
     src/trikSoundController.cpp \
@@ -23,8 +22,7 @@ SOURCES += \
     src/doubleChannelCircularBuffer.cpp \
     src/captureAudioStream.cpp \
     src/fileAudioStream.cpp \
-    src/settings.cpp \
-    src/vadFilterWrapper.cpp
+    src/settings.cpp
 
 HEADERS += \
     include/fpml/fixed_point.h \

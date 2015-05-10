@@ -3,11 +3,11 @@
 #include <unordered_map>
 
 #include <QCoreApplication>
+#include <QStringList>
 
 #include "utils.h"
 
 using namespace std;
-using namespace trikSound;
 
 std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::paramsMap =
 {
@@ -18,6 +18,7 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
   , {"channelCount", ArgumentParser::Parameter("", "--channels", "Channel count is missing.")}
 
   , {"angleDetection", ArgumentParser::Parameter("-A", "--angle", "")}
+  , {"vad", ArgumentParser::Parameter("-V", "--vad", "")}
   , {"filtering", ArgumentParser::Parameter("-F", "--filtering", "")}
   , {"micrDist", ArgumentParser::Parameter("-D", "--micr-dist", "Microphone distance is missing.")}
   , {"historyDepth", ArgumentParser::Parameter("", "--history-depth", "History depth is missing.")}
@@ -25,6 +26,14 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
 
   , {"audioDeviceInit",  ArgumentParser::Parameter("-I", "--force-init", "")}
   , {"volume", ArgumentParser::Parameter("-v", "--volume", "Volume is missing.")}
+
+  , {"show", ArgumentParser::Parameter("-s", "--show", "Output formatting string is missing")}
+};
+
+std::unordered_map<const char*, char> ArgumentParser::showFormatting =
+{
+    {"angle", 'a'}
+  , {"vad", 'v'}
 };
 
 Settings ArgumentParser::parse()
@@ -34,7 +43,12 @@ Settings ArgumentParser::parse()
 
 Settings ArgumentParser::parseArgumentList(const QStringList& args)
 {
-    Settings settings;
+    return Settings(parseControllerSettings(args), parseViewSettings(args));
+}
+
+ControllerSettings ArgumentParser::parseControllerSettings(const QStringList& args)
+{
+    ControllerSettings settings;
 
     for (auto it = args.begin(); it != args.end(); ++it) {
 
@@ -83,6 +97,9 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
         else if (*it == paramsMap["filtering"]) {
             settings.setFilteringFlag(true);
         }
+        else if (*it == paramsMap["vad"]) {
+            settings.setVadFlag(true);
+        }
         else if (*it == paramsMap["audioDeviceInit"]) {
             settings.setAudioDeviceInitFlag(true);
         }
@@ -93,7 +110,28 @@ Settings ArgumentParser::parseArgumentList(const QStringList& args)
     return settings;
 }
 
-void ArgumentParser::checkSettings(const Settings& settings)
+ViewSettings ArgumentParser::parseViewSettings(const QStringList& args)
+{
+    ViewSettings settings;
+
+    for (auto it = args.begin(); it != args.end(); ++it) {
+        if (*it == paramsMap["show"]) {
+            if (++it != args.end()) {
+                QString show = *it;
+                if (show.contains(showFormatting["angle"])) {
+                    settings.setShowAngle(true);
+                }
+                if (show.contains(showFormatting["vad"])) {
+                    settings.setShowVadCoef(true);
+                }
+            }
+        }
+    }
+
+    return settings;
+}
+
+void ArgumentParser::checkSettings(const ControllerSettings& settings)
 {
     if (settings.angleDetectionFlag() && settings.singleChannelFlag()) {
         throw ParseException("Angle detection enabled but single channel capturing specified");

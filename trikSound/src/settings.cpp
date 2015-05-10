@@ -9,6 +9,7 @@ Settings::Settings():
     mSingleChannelFlag(false)
   , mFilteringFlag(false)
   , mAngleDetectionFlag(false)
+  , mVadFlag(false)
   , mRecordStreamFlag(false)
   , mFileInputFlag(false)
   , mAudioDeviceInitFlag(false)

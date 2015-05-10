@@ -3,8 +3,6 @@
 #include <iterator>
 #include <limits>
 
-#include "vadFilter.h"
-
 namespace trikSound
 {
 
@@ -13,7 +11,7 @@ class VadFilterImpl
 {
 private:
 
-    typedef unsigned long long energy_type;
+    typedef long long energy_type;
 
 public:
 
@@ -25,15 +23,21 @@ public:
 
     void handleWindowImpl(Iter first, Iter last)
     {
+        auto windowSize = std::distance(first, last);
+        if (windowSize == 0) {
+            mEnrgCoef = 0;
+            return;
+        }
+
         energy_type enrg = 0;
         for (; first != last; ++first) {
             energy_type x = static_cast<energy_type>(*first);
             enrg += x * x;
         }
 
-        energy_type frameMax = SQR_MAX * (last - first);
+        energy_type frameMax = SQR_MAX * windowSize;
 
-        mEnrgCoef = enrg / frameMax;
+        mEnrgCoef = (double) enrg / frameMax;
     }
 
     double getEnergyCoefficient() const

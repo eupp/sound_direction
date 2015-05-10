@@ -5,14 +5,25 @@
 
 using namespace std;
 
-OutputFifo::OutputFifo():
+OutputFifo::OutputFifo(const ViewSettings& settings):
     mOut(stdout, QIODevice::WriteOnly)
-{}
+  , mShowAngle(settings.showAngle())
+  , mShowVad(settings.showVadCoef())
+{
+    mOut.setRealNumberNotation(QTextStream::FixedNotation);
+    mOut.setRealNumberPrecision(8);
+    mOut.setFieldWidth(4);
+}
 
 void OutputFifo::recieve(const trikSound::AudioEvent& event)
 {
-    if (event.angleSetFlag()) {
+    static QString delim = "  ";
+    if (mShowAngle && event.angleSetFlag()) {
         int angle = round(event.angle());
-        mOut << angle << endl;
+        mOut << angle << delim;
     }
+    if (mShowVad && event.vadCoefSetFlag()) {
+        mOut << event.vadCoef() << delim;
+    }
+    mOut << endl;
 }

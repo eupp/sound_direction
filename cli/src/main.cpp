@@ -9,7 +9,10 @@
 #include "controlFifo.h"
 
 using namespace std;
-using namespace trikSound;
+
+using trikSound::IAudioEventListener;
+using trikSound::ISettingsProvider;
+using trikSound::TrikSoundController;
 
 int main(int argc, char** argv)
 {
@@ -17,10 +20,13 @@ int main(int argc, char** argv)
         QCoreApplication app(argc, argv);
 
         Settings settings = ArgumentParser::parse();
-        shared_ptr<ISettingsProvider> provider = make_shared<ControlFifo>();
-        shared_ptr<IAudioEventListener> eventListener = make_shared<OutputFifo>();
 
-        TrikSoundController* controller = new TrikSoundController(settings, provider, &app);
+        shared_ptr<ISettingsProvider> provider = make_shared<ControlFifo>();
+        shared_ptr<IAudioEventListener> eventListener = make_shared<OutputFifo>(settings.viewSettings());
+
+        TrikSoundController* controller = new TrikSoundController(settings.controllerSettings(),
+                                                                  provider,
+                                                                  &app);
         controller->addAudioEventListener(eventListener);
 
         QTimer::singleShot(0, controller, SLOT(run()));

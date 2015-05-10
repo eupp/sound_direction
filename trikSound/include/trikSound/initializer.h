@@ -259,6 +259,11 @@ void Initializer<Iter>::createAudioPipe(const Settings& settings)
             monoPipe->insertFilter(monoPipe->end(), record);
         }
 
+        if (!settings.singleChannelFlag() && settings.vadFlag()) {
+            createVadWrapper(settings);
+            mAudioPipe->insertFilter(mAudioPipe->end(),
+                                     std::static_pointer_cast<StereoAudioFilter<Iter>>(mVadWrapper->getStereoVad()));
+        }
 
         if (settings.angleDetectionFlag()) {
             createAngleDetector(settings);
@@ -266,11 +271,6 @@ void Initializer<Iter>::createAudioPipe(const Settings& settings)
                                      std::static_pointer_cast<StereoAudioFilter<Iter>>(mAngleDetector));
         }
 
-        if (!settings.singleChannelFlag() && settings.vadFlag()) {
-            createVadWrapper(settings);
-            mAudioPipe->insertFilter(mAudioPipe->end(),
-                                     std::static_pointer_cast<StereoAudioFilter<Iter>>(mVadWrapper->getStereoVad()));
-        }
 
         if (!settings.singleChannelFlag() && settings.recordStreamFlag()) {
             auto wavFile = std::make_shared<WavFile>(settings.outputWavFilename());
