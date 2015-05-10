@@ -9,7 +9,8 @@ class Runner(object):
 
     __args = []
     __dict_args = {}
-    __out = ' '
+    __out_angle = []
+    __out_vad   = []
     __env = {}
 
     def __init__(self, args):
@@ -35,8 +36,15 @@ class Runner(object):
 
         try:
             out = subprocess.check_output(self.__args, stderr=subprocess.STDOUT, env=self.__env)
-            out = out.split()
-            self.__out = [int(angle) for angle in out]
+            out = out.split('\n')
+            self.__out_angle = []
+            self.__out_vad = []
+            for line in out:
+                if not line:
+                    continue
+                data = line.split()
+                self.__out_angle.append(int(data[0]))
+                self.__out_vad.append((float(data[1])))
             return 0
         except subprocess.CalledProcessError as exc:
             return exc.returncode
@@ -45,6 +53,10 @@ class Runner(object):
 
         return self.__dict_args
 
-    def get_stdout(self):
+    def get_angle_out(self):
 
-        return self.__out
+        return self.__out_angle
+
+    def get_vad_out(self):
+
+        return self.__out_vad

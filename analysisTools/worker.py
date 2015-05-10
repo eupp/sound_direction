@@ -55,7 +55,10 @@ class Worker(object):
                     print "Args: {args}".format(args=args)
                     continue
 
-                self.__plotter.plot_sensor_out(runner.get_stdout(), runner.get_args(), destdir)
+                data = {}
+                data['vad'] = runner.get_vad_out()
+                data['angle'] = runner.get_angle_out()
+                self.__plotter.plot_sensor_out(data, runner.get_args(), destdir)
 
                 print 'args_set{i} : {tn} finished'.format(i=i, tn=test)
 
