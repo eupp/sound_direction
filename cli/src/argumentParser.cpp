@@ -19,6 +19,7 @@ std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::param
 
   , {"angleDetection", ArgumentParser::Parameter("-A", "--angle", "")}
   , {"vad", ArgumentParser::Parameter("-V", "--vad", "")}
+  , {"vadThreshold", ArgumentParser::Parameter("-T", "--threshold", "Threshold is missing")}
   , {"filtering", ArgumentParser::Parameter("-F", "--filtering", "")}
   , {"micrDist", ArgumentParser::Parameter("-D", "--micr-dist", "Microphone distance is missing.")}
   , {"historyDepth", ArgumentParser::Parameter("", "--history-depth", "History depth is missing.")}
@@ -53,23 +54,33 @@ ControllerSettings ArgumentParser::parseControllerSettings(const QStringList& ar
     for (auto it = args.begin(); it != args.end(); ++it) {
 
         if (*it == paramsMap["channelCount"]) {
-            int count = convertParam<int>("channelCount", *(++it), paramsMap["channelCount"].errorString());
+            checkArgsEnd(++it, args.end(), paramsMap["channelCount"].errorString());
+            int count = convertParam<int>("channelCount", *it, paramsMap["channelCount"].errorString());
             settings.setSingleChannelFlag(count == 1);
         }
         else if (*it == paramsMap["micrDist"]) {
-            double dist = convertParam<double>("micrDist", *(++it), paramsMap["micrDist"].errorString());
+            checkArgsEnd(++it, args.end(), paramsMap["micrDist"].errorString());
+            double dist = convertParam<double>("micrDist", *it, paramsMap["micrDist"].errorString());
             settings.setMicrDist(dist);
         }
+        else if (*it == paramsMap["vadThreshold"]) {
+            checkArgsEnd(++it, args.end(), paramsMap["vadThreshold"].errorString());
+            double thrsd = convertParam<double>("vadThreshold", *it, paramsMap["vadThreshold"].errorString());
+            settings.setVadThreshold(thrsd);
+        }
         else if (*it == paramsMap["historyDepth"]) {
-            int depth = convertParam<int>("historyDepth", *(++it), paramsMap["historyDepth"].errorString());
+            checkArgsEnd(++it, args.end(), paramsMap["historyDepth"].errorString());
+            int depth = convertParam<int>("historyDepth", *it, paramsMap["historyDepth"].errorString());
             settings.setAngleDetectionHistoryDepth(depth);
         }
         else if (*it == paramsMap["windowSize"]) {
-            int wsize = convertParam<int>("windowSize", *(++it), paramsMap["windowSize"].errorString());
+            checkArgsEnd(++it, args.end(), paramsMap["windowSize"].errorString());
+            int wsize = convertParam<int>("windowSize", *it, paramsMap["windowSize"].errorString());
             settings.setWindowSize(wsize);
         }
         else if (*it == paramsMap["duration"]) {
-            int duration = convertParam<int>("duration", *(++it), paramsMap["duration"].errorString());
+            checkArgsEnd(++it, args.end(), paramsMap["duration"].errorString());
+            int duration = convertParam<int>("duration", *it, paramsMap["duration"].errorString());
             settings.setDurationFlag(true);
             settings.setDuration(duration);
         }
@@ -129,6 +140,15 @@ ViewSettings ArgumentParser::parseViewSettings(const QStringList& args)
     }
 
     return settings;
+}
+
+void ArgumentParser::checkArgsEnd(const QStringList::const_iterator& it,
+                                  const QStringList::const_iterator& end,
+                                  string errMsg)
+{
+    if (it == end) {
+        throw ParseException(errMsg);
+    }
 }
 
 void ArgumentParser::checkSettings(const ControllerSettings& settings)

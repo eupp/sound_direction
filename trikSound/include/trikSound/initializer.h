@@ -304,11 +304,11 @@ void Initializer<Iter>::createVadWrapper(const Settings& settings)
 {
     if (!mVadWrapper) {
         if (settings.singleChannelFlag()) {
-            auto vad = std::make_shared<VadFilter<Iter>>();
+            auto vad = std::make_shared<VadFilter<Iter>>(settings.vadThreshold());
             mVadWrapper = std::make_shared<VadFilterWrapper<Iter>>(vad);
         }
         else {
-            auto vad = std::make_shared<StereoVadFilter<Iter>>();
+            auto vad = std::make_shared<StereoVadFilter<Iter>>(settings.vadThreshold());
             mVadWrapper = std::make_shared<VadFilterWrapper<Iter>>(vad);
         }
     }

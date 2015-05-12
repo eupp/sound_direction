@@ -14,6 +14,7 @@ void ViewSettings::setShowAngle(bool showAngle)
 {
     mShowAngle = showAngle;
 }
+
 bool ViewSettings::showVadCoef() const
 {
     return mShowVadCoef;

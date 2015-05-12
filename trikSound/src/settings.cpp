@@ -23,6 +23,7 @@ Settings::Settings():
   , mVolume(1.0)
 
   , mMicrDist(10.0)
+  , mVadThreshold(0)
 
   , mDurationFlag(false)
   , mDuration(0)
@@ -207,6 +208,16 @@ bool Settings::fileInputFlag() const
 void Settings::setFileInputFlag(bool fileInputFlag)
 {
     mFileInputFlag = fileInputFlag;
+}
+
+double Settings::vadThreshold() const
+{
+    return mVadThreshold;
+}
+
+void Settings::setVadThreshold(double vadThreshold)
+{
+    mVadThreshold = vadThreshold;
 }
 
 }

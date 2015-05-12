@@ -20,6 +20,11 @@ public:
     void setVadCoef(double vadCoef);
     bool vadCoefSetFlag() const;
 
+    bool vadIsActive() const;
+    void setVadIsActive(bool vadIsActive);
+    bool vadIsActiveSetFlag() const;
+
+
 private:
 
     bool mAngleSetFlag;
@@ -27,6 +32,9 @@ private:
 
     bool mVadCoefSetFlag;
     double mVadCoef;
+
+    bool mVadIsActiveSetFlag;
+    bool mVadIsActive;
 };
 
 inline AudioEvent::AudioEvent():
@@ -68,5 +76,22 @@ inline bool AudioEvent::vadCoefSetFlag() const
 {
     return mVadCoefSetFlag;
 }
+
+inline bool AudioEvent::vadIsActive() const
+{
+    return mVadIsActive;
+}
+
+inline void AudioEvent::setVadIsActive(bool vadIsActive)
+{
+    mVadIsActiveSetFlag = true;
+    mVadIsActive = vadIsActive;
+}
+
+inline bool AudioEvent::vadIsActiveSetFlag() const
+{
+    return mVadIsActiveSetFlag;
+}
+
 
 }

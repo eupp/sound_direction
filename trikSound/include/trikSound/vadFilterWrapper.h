@@ -28,6 +28,8 @@ public:
 
     double getEnergyCoefficient() const;
 
+    bool isActive() const;
+
     VadType getType() const;
 
     VadFilterPtr getMonoVad() const;
@@ -60,6 +62,17 @@ double VadFilterWrapper<Iter>::getEnergyCoefficient() const
     }
     else if (mStereoVad) {
         return mStereoVad->getEnergyCoefficient();
+    }
+}
+
+template <typename Iter>
+bool VadFilterWrapper<Iter>::isActive() const
+{
+    if (mMonoVad) {
+        return mMonoVad->isActive();
+    }
+    else if (mStereoVad) {
+        return mStereoVad->isActive();
     }
 }
 

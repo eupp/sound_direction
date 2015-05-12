@@ -25,14 +25,19 @@ class PlotBuilder(object):
         right_chl = wavdata[:, 1]
 
         fig, plts = plt.subplots(4, 1, sharex=True)
+        fig.set_size_inches(14., 10.)
+
         xlen = len(left_chl)
+        pcm_range = range(int(-3 * 1e4), int(4 * 1e4), int(1e4))
 
         # plts[0].axis([0, xlen, -2e15, 2e15])
         plts[0].set_title('Left channel')
+        plts[0].set_yticks(pcm_range)
         plts[0].plot(left_chl, color='blue', linestyle='-')
 
         # plts[1].axis([0, xlen, -2e15, 2e15])
         plts[1].set_title('Right channel')
+        plts[1].set_yticks(pcm_range)
         plts[1].plot(right_chl, color='blue', linestyle='-')
 
         wdots = range(0, xlen + window_size, window_size)
@@ -40,16 +45,15 @@ class PlotBuilder(object):
 
         # plts[2].axis([0, xlen, 0, 1e-1])
         plts[2].set_title('Energy')
-        plts[2].plot(wdots, data['vad'], color='red', linestyle='-', marker='o')
+        plts[2].plot(wdots, data['vad'], color='red', linestyle='-')
 
-        plts[3].axis([0, xlen, -120, 100])
+        plts[3].axis([0, xlen, -90, 90])
         plts[3].set_title('Angle')
         plts[3].set_xlabel('Sample')
         plts[3].set_ylabel('Degree')
+        plts[3].set_yticks(range(-90, 100, 30))
         plts[3].grid(True)
-        plts[3].text(0, 90, '+90$^{\circ}$')
-        plts[3].text(0, -90, '-90$^{\circ}$')
-        plts[3].plot(wdots, data['angle'], color='green', linestyle='-', marker='o')
+        plts[3].plot(wdots, data['angle'], color='green', linestyle='-')
 
         text = ('Test name: {tn} {sep}'
                 'Window size = {ws} samples {sep}'
@@ -63,4 +67,4 @@ class PlotBuilder(object):
         figname = self.__angle_plt_name + test_name + self.__plt_ext
         figname = os.path.join(destdir, figname)
         fig.savefig(figname)
-        fig.clf()
+        plt.close(fig)

@@ -95,6 +95,7 @@ void TrikSoundController::bufferReadyReadHandler()
         if (mVadFlag) {
             assert(mVad != nullptr);
             event.setVadCoef(mVad->getEnergyCoefficient());
+            event.setVadIsActive(mVad->isActive());
         }
 
         notify(event);

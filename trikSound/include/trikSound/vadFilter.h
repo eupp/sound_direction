@@ -14,13 +14,18 @@ class TRIKSOUNDSHARED_EXPORT VadFilter: public AudioFilter<Iter>
 {
 public:
 
-    VadFilter():
-        mImpl(new VadFilterImpl<Iter>())
+    explicit VadFilter(double threshold):
+        mImpl(new VadFilterImpl<Iter>(threshold))
     {}
 
     double getEnergyCoefficient() const
     {
         return mImpl->getEnergyCoefficient();
+    }
+
+    bool isActive() const
+    {
+        return mImpl->isActive();
     }
 
 protected:
@@ -38,4 +43,3 @@ void VadFilter<Iter>::handleWindowImpl(Iter first, Iter last)
 }
 
 }
-

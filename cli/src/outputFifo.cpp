@@ -18,12 +18,19 @@ OutputFifo::OutputFifo(const ViewSettings& settings):
 void OutputFifo::recieve(const trikSound::AudioEvent& event)
 {
     static QString delim = "  ";
-    if (mShowAngle && event.angleSetFlag()) {
-        int angle = round(event.angle());
-        mOut << angle << delim;
+    if (event.vadIsActiveSetFlag() && event.vadIsActive()) {
+
+        if (mShowAngle && event.angleSetFlag()) {
+            int angle = round(event.angle());
+            mOut << angle << delim;
+        }
+        if (mShowVad && event.vadCoefSetFlag()) {
+            mOut << event.vadCoef() << delim;
+        }
+        mOut << endl;
+
     }
-    if (mShowVad && event.vadCoefSetFlag()) {
-        mOut << event.vadCoef() << delim;
+    else {
+        mOut << "----" << endl;
     }
-    mOut << endl;
 }

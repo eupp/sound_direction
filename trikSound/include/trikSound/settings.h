@@ -18,6 +18,8 @@ public:
 
     Settings();
 
+    Settings(const Settings& other) = default;
+
     int angleDetectionHistoryDepth() const;
     void setAngleDetectionHistoryDepth(int angleDetectionHistoryDepth);
 
@@ -72,6 +74,9 @@ public:
     bool vadFlag() const;
     void setVadFlag(bool vadFlag);
 
+    double vadThreshold() const;
+    void setVadThreshold(double vadThreshold);
+
 private:
 
     // flags
@@ -99,6 +104,10 @@ private:
     // angle detector arguments
 
     double mMicrDist;
+
+    // vad arguments
+
+    double mVadThreshold;
 
     // duration settings
 

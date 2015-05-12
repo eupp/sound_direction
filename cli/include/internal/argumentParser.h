@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QStringList>
+
 #include "settings.h"
 #include "trikSound/trikSoundException.h"
 
@@ -49,6 +51,10 @@ private:
     static Settings parseArgumentList(const QStringList& args);
     static ControllerSettings parseControllerSettings(const QStringList& args);
     static ViewSettings parseViewSettings(const QStringList& args);
+
+    static void checkArgsEnd(const QStringList::const_iterator& it,
+                             const QStringList::const_iterator& end,
+                             std::string errMsg);
 
     static void checkSettings(const ControllerSettings& settings);
 
