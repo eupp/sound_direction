@@ -12,7 +12,6 @@ INCLUDEPATH += include/fpml
 
 SOURCES += \
     src/audioBuffer.cpp \
-    src/audioCaptureFilter.cpp \
     src/audioDeviceManager.cpp \
     src/trikAudioDeviceManager.cpp \
     src/circularBufferQAdapter.cpp \

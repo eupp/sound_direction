@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <utility>
 
+#include <QDebug>
+
 #include "utils.h"
 
 namespace trikSound
@@ -28,6 +30,14 @@ void DoubleChannelCircularBuffer::read(trikSound::sample_type* buf, size_t size)
 
     mLeftReadItr = leftReadEnd;
     mRightReadItr = rightReadEnd;
+    if (leftReadEnd == mLeftBuffer.end()) {
+        --mLeftReadItr;
+        --mRightReadItr;
+    }
+//    else {
+//        mLeftReadItr = mLeftBuffer.begin();
+//        mRightReadItr = mRightBuffer.begin();
+//    }
 }
 
 void DoubleChannelCircularBuffer::write(const sample_type* buf, size_t size)

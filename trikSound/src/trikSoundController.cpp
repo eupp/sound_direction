@@ -73,9 +73,10 @@ void TrikSoundController::bufferReadyReadHandler()
 {
     while (mAudioStream->samplesAvailable() >= mWindowSize) {
 
+
         // get opportunity to waiting events to be processed
         // before handle next window
-        processEvents();
+//        processEvents();
 
         if (mSingleChannelFlag) {
             handleSingleChannel();
@@ -97,7 +98,6 @@ void TrikSoundController::bufferReadyReadHandler()
 
         notify(event);
     }
-
 }
 
 void TrikSoundController::processEvents()
@@ -137,7 +137,7 @@ void TrikSoundController::notify(const AudioEvent& event)
 void TrikSoundController::run()
 {
     connect(mAudioStream.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()),
-            Qt::QueuedConnection);
+            Qt::DirectConnection);
     if (mTimeoutFlag) {
         QTimer::singleShot(mTimeout, this, SLOT(finish()));
     }

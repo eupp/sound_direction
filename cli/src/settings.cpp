@@ -1,7 +1,7 @@
 #include "settings.h"
 
 ViewSettings::ViewSettings():
-    mShowAngle(true)
+    mShowAngle(false)
   , mShowVadCoef(false)
 {}
 

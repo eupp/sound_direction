@@ -31,14 +31,16 @@ int main()
     BenchmarkWorker worker;
     array<int, 4> wSizes = {256, 512, 1024, 2048};
 
-    out << "Benchmarks: iteration count = " << BenchmarkWorker::ITERATION_COUNT << endl;
+    out << "Benchmarks: iteration count = " << BenchmarkWorker::ITERATION_COUNT << endl << endl;
 
     for (int i = 0; i < wSizes.size(); ++i) {
 
-        out << "Benchmarks: window size = " << wSizes[i] << endl;
+        out << "Benchmarks: window size = " << wSizes[i] << endl << endl;
 
         worker.setWindowSize(wSizes[i]);
         msec res = 0;
+
+        cout << "Angle detector benchmark" << endl;
 
         res = worker.benchmarkAngleDetector(detector);
         out << "Angle detector benchmark " << endl;
@@ -46,11 +48,15 @@ int main()
         out << "average ms = " << (double) res / BenchmarkWorker::ITERATION_COUNT << endl;
         out << endl;
 
+        cout << "Vad benchmark" << endl;
+
         res = worker.benchmarkVadFilter(vad);
         out << "Vad benchmark " << endl;
         out << "total ms = " << res << endl;
         out << "average ms = " << (double) res / BenchmarkWorker::ITERATION_COUNT << endl;
         out << endl;
+
+        cout << "Filter benchmark " << endl;
 
         res = worker.benchmarkDigitalFilter(filter);
         out << "Filter benchmark " << endl;

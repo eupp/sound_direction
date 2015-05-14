@@ -16,7 +16,12 @@ void SingleChannelCircularBuffer::read(sample_type* buf, size_t size)
 {
     auto readEnd = mReadItr + size;
     copy(mReadItr, readEnd, buf);
-    mReadItr = readEnd;
+    if (readEnd != mBuffer.end()) {
+        mReadItr = readEnd;
+    }
+    else {
+        mReadItr = mBuffer.begin();
+    }
 }
 
 void SingleChannelCircularBuffer::write(const sample_type* buf, size_t size)
