@@ -11,7 +11,7 @@ OutputFifo::OutputFifo(const ViewSettings& settings):
   , mShowVad(settings.showVadCoef())
 {
     mOut.setRealNumberNotation(QTextStream::FixedNotation);
-    mOut.setRealNumberPrecision(8);
+    mOut.setRealNumberPrecision(12);
     mOut.setFieldWidth(4);
 }
 

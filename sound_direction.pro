@@ -4,7 +4,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
     trikSound \
     cli \
-    tests
+    tests \
+    benchmarks
 
 cli.depends = trikSound
 test.depends = trikSound

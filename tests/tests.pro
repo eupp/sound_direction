@@ -1,4 +1,3 @@
-
 include(../global.pri)
 
 QT       += core multimedia
