@@ -1,20 +1,86 @@
 #include "benchmarks.h"
 
+#include <limits>
+#include <array>
+#include <algorithm>
 
+using namespace std;
+using namespace trikSound;
 
-msec benchmarkAngleDetector(const AngleDetectorPtr& detector)
+BenchmarkWorker::BenchmarkWorker():
+    mWindowSize(0)
+  , mRd()
+  , mGen(mRd())
+{}
+
+int BenchmarkWorker::getWindowSize() const
 {
-
+    return mWindowSize;
 }
 
-
-msec benchmarkVadFilter(const VadFilterPtr& vad)
+void BenchmarkWorker::setWindowSize(int windowSize)
 {
-
+    mWindowSize = windowSize;
 }
 
-
-msec benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter)
+msec BenchmarkWorker::benchmarkAngleDetector(const AngleDetectorPtr& detector)
 {
 
+    auto cb = [&detector](range_type chl1, range_type chl2) -> void
+    {
+        detector->handleWindow(chl1, chl2);
+    };
+    return do_benchmark(cb);
+}
+
+msec BenchmarkWorker::benchmarkVadFilter(const VadFilterPtr& vad)
+{
+    auto cb = [&vad](range_type chl1, range_type chl2) -> void
+    {
+        vad->handleWindow(chl1, chl2);
+    };
+    return do_benchmark(cb);
+}
+
+msec BenchmarkWorker::benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter)
+{
+    auto cb = [&filter](range_type chl1, range_type chl2) -> void
+    {
+        filter->handleWindow(chl1.first, chl1.second);
+        filter->handleWindow(chl2.first, chl2.second);
+    };
+    return do_benchmark(cb);
+}
+
+void BenchmarkWorker::generate_random(Iter first, Iter last)
+{
+    generate(first, last, [this]() {return (sample_type) mGen() % SAMPLE_MAX; });
+}
+
+template <typename Callback>
+msec BenchmarkWorker::do_benchmark(const Callback& cb)
+{
+    const int asize = 2;
+    array<Container, asize> data;
+    data[0].resize(2 * mWindowSize);
+    data[1].resize(2 * mWindowSize);
+    generate_random(data[0].begin(), data[0].end());
+    generate_random(data[1].begin(), data[1].end());
+
+    Iter first;
+    Iter sep;
+    Iter last;
+
+    PerformanceTimer timer;
+    for (int i = 0; i < ITERATION_COUNT; ++i) {
+        first   = data[i % asize].begin();
+        sep     = first + mWindowSize;
+        last    = data[i % asize].end();
+
+//        auto p = ;
+//        auto p1 = ;
+        cb(make_pair(first, sep), make_pair(sep, last));
+    }
+
+    return timer.elapses_msec();
 }
