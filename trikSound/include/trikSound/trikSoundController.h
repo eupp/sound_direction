@@ -123,6 +123,10 @@ private:
     AngleDetectorPtr    mAngleDetector;
     VadFilterWrapperPtr mVad;
 
+    // timer settings
+
+    int mTimeout;
+
     // settings provider
 
     SettingsProviderPtr mSettingsProvider;
@@ -136,6 +140,7 @@ private:
     bool mAngleDetectionFlag;
     bool mVadFlag;
     bool mSingleChannelFlag;
+    bool mTimeoutFlag;
 };
 
 }

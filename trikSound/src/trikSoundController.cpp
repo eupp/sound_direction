@@ -30,10 +30,15 @@ TrikSoundController::TrikSoundController(const Settings& args,
 
   , mWindowSize(args.windowSize())
   , mWindowCopy(CHANNEL_COUNT * args.windowSize())
+
+  , mVadFlag(args.vadFlag())
   , mAngleDetectionFlag(args.angleDetectionFlag())
   , mSingleChannelFlag(args.singleChannelFlag())
 
   , mSettingsProvider(provider)
+
+  , mTimeoutFlag(args.durationFlag())
+  , mTimeout(1000 * args.duration())
 
 {
     Initializer<BufferIterator> initializer(args);
@@ -44,10 +49,6 @@ TrikSoundController::TrikSoundController(const Settings& args,
     mAngleDetector = initializer.getAngleDetector();
     mVad = initializer.getVadWrapper();
     mPipe = initializer.getAudioPipe();
-
-    mVadFlag = args.vadFlag();
-    mAngleDetectionFlag = args.angleDetectionFlag();
-    mSingleChannelFlag = args.singleChannelFlag();
 
     connect(mAudioStream.get(), SIGNAL(finished()), this, SLOT(finish()), Qt::QueuedConnection);
 
@@ -60,10 +61,6 @@ TrikSoundController::TrikSoundController(const Settings& args,
 
         connect(dynamic_cast<QObject*>(mSettingsProvider.get()), SIGNAL(updateVolume(double)),
                 this, SLOT(setVolume(double)), Qt::QueuedConnection);
-    }
-
-    if (args.durationFlag()) {
-        QTimer::singleShot(args.duration(), this, SLOT(finish()));
     }
 }
 
@@ -141,6 +138,9 @@ void TrikSoundController::run()
 {
     connect(mAudioStream.get(), SIGNAL(readyRead()), this, SLOT(bufferReadyReadHandler()),
             Qt::QueuedConnection);
+    if (mTimeoutFlag) {
+        QTimer::singleShot(mTimeout, this, SLOT(finish()));
+    }
     mAudioStream->run();
 }
 
