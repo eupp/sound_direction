@@ -31,6 +31,6 @@ void OutputFifo::recieve(const trikSound::AudioEvent& event)
 
     }
     else {
-        mOut << "----" << endl;
+//        mOut << "----" << endl;
     }
 }
