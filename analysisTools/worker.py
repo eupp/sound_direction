@@ -1,4 +1,5 @@
 import os
+import math
 
 from runner import Runner
 from plot_builder import PlotBuilder
@@ -9,9 +10,11 @@ class Worker(object):
     __plotter = None
     __args = []
     __tests = []
+    __destdir = ''
 
     def __init__(self, args_filename, wav_dir, destdir):
 
+        self.__destdir = destdir
         self.__plots_dir = os.path.join(destdir, 'plots')
         if not os.path.isdir(self.__plots_dir):
             os.mkdir(self.__plots_dir)
@@ -34,6 +37,10 @@ class Worker(object):
     def do_angle_tests(self):
 
         i = 0
+
+        resfn = os.path.join(self.__destdir, 'res.txt')
+        resfd = open(resfn, 'w')
+
         for args in self.__args:
 
             destdir = 'args_set{}'.format(str(i))
@@ -42,7 +49,14 @@ class Worker(object):
                 os.mkdir(destdir)
             i += 1
 
+            sumdev = 0
+            maxdev = -1
+
             for test in self.__tests:
+
+                fname = os.path.splitext(os.path.basename(test))[0]
+                angle = int(fname.split('_')[1])
+                angle -= 90
 
                 ext_args = list(args)
                 ext_args.extend([Runner.PARAM_INPUT_FN[0], test])
@@ -58,10 +72,30 @@ class Worker(object):
                 data = {}
                 data['vad'] = runner.get_vad_out()
                 data['angle'] = runner.get_angle_out()
-                self.__plotter.plot_sensor_out(data, runner.get_args(), destdir)
+                #self.__plotter.plot_sensor_out(data, runner.get_args(), destdir)
 
-                print 'args_set{i} : {tn} finished'.format(i=i, tn=test)
+                dev = self.__calc_dev(angle, data['angle'])
+                sumdev += dev
+                if dev > maxdev:
+                    maxdev = dev
 
+                print 'args_set{i} : {tn} finished; dev={dev}'.format(i=i, tn=test, dev=dev)
+
+            avrdev = float(sumdev) / len(self.__tests)
+
+            hd = runner.get_args()['history_depth']
+            resfd.write('{:^4}, {:+12.6f}, {:+12.6f} {}'.format(hd, avrdev, maxdev, os.linesep))
+
+
+    def __calc_dev(self, angle, data):
+
+        dev = 0
+        for x in data:
+            xd = x - angle
+            xd *= xd
+            dev += xd
+        dev = math.sqrt(float(dev) / len(data))
+        return dev
 
 
 

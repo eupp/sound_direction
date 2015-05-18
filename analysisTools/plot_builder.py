@@ -54,13 +54,13 @@ class PlotBuilder(object):
         plts[3].set_yticks(range(-90, 100, 30))
         plts[3].grid(True)
         plts[3].plot(wdots, data['angle'], color='green', linestyle='-')
-
-        text = ('Test name: {tn} {sep}'
-                'Window size = {ws} samples {sep}'
-                'Hisory depth = {hd} windows {sep}'.format(tn=test_name,
-                                                           ws=window_size,
-                                                           hd=history_depth,
-                                                           sep=os.linesep))
+        #
+        # text = ('Test name: {tn} {sep}'
+        #         'Window size = {ws} samples {sep}'
+        #         'Hisory depth = {hd} windows {sep}'.format(tn=test_name,
+        #                                                    ws=window_size,
+        #                                                    hd=history_depth,
+        #                                                    sep=os.linesep))
 
         # plts[3].text(1, -120, text, bbox=dict(boxstyle='square,pad=0.3', ec='black', fc='white'))
 
