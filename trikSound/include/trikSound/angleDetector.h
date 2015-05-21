@@ -42,6 +42,8 @@ public:
 
     double getAngle();
 
+    void reset();
+
 protected:
 
     void handleWindowImpl(range_type channel1, range_type channel2);
@@ -100,6 +102,12 @@ template <typename Iter>
 double AngleDetector<Iter>::getAngle()
 {
     return mImpl->getAngle();
+}
+
+template <typename Iter>
+void AngleDetector<Iter>::reset()
+{
+    mImpl->reset();
 }
 
 template <typename Iter>

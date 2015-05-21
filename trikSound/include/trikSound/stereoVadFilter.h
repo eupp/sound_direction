@@ -25,6 +25,11 @@ public:
 
     bool isActive() const;
 
+    bool framePromotion() const
+    {
+        return isActive();
+    }
+
 protected:
 
     void handleWindowImpl(range_type channel1, range_type channel2);
