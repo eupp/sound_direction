@@ -150,8 +150,8 @@ typename AngleDetectorImpl<Iter>::corr_array AngleDetectorImpl<Iter>::calcCorrel
     corr_array corr;
     corr.fill(0);
 
-    Iter u = first1;
-    Iter v = first2 + offset;
+    Iter u = first2;
+    Iter v = first1 + offset;
     for (size_t i = 0; i < corrSize; i++) {
         for (size_t j = 0; j < windowSize; ++j) {
             corr[i] += u[i + j] * v[j];
