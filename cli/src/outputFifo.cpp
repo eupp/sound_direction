@@ -81,7 +81,7 @@ void OutputFifo::saveEventData(const trikSound::AudioEvent& event)
         int angle = round(event.angle());
         mAngles.push_back(angle);
 
-        mOut << "Angle received: " <<  angle << endl;
+//        mOut << "Angle received: " <<  angle << endl;
     }
     if (mShowVad && event.vadCoefSetFlag()) {
          mEnrg += event.vadCoef();

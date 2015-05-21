@@ -30,7 +30,7 @@ public:
         {}
     };
 
-    static const int offset = 40;
+    static const int offset = 60;
     static const int corrSize = 2 * offset + 1;
     static const size_t historySize = 40;
 
