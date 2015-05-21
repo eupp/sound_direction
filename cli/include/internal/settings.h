@@ -17,10 +17,15 @@ public:
     bool showVadCoef() const;
     void setShowVadCoef(bool showVadCoef);
 
+    int diffTime() const;
+    void setDiffTime(int diffTime);
+
 private:
 
     bool mShowAngle;
     bool mShowVadCoef;
+
+    int mDiffTime;
 };
 
 

@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QApplication>
 #include <QTimer>
 #include <QDebug>
 
@@ -17,7 +18,7 @@ using trikSound::TrikSoundController;
 int main(int argc, char** argv)
 {
     try {
-        QCoreApplication app(argc, argv);
+        QApplication app(argc, argv);
 
         Settings settings = ArgumentParser::parse();
 

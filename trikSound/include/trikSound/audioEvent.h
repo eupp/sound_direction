@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ctime>
+
 #include "triksound_global.h"
 
 namespace trikSound
@@ -24,6 +26,7 @@ public:
     void setVadIsActive(bool vadIsActive);
     bool vadIsActiveSetFlag() const;
 
+    clock_t timestamp() const;
 
 private:
 
@@ -35,6 +38,8 @@ private:
 
     bool mVadIsActiveSetFlag;
     bool mVadIsActive;
+
+    clock_t mTimestamp;
 };
 
 inline AudioEvent::AudioEvent():
@@ -43,6 +48,8 @@ inline AudioEvent::AudioEvent():
 
   , mVadCoef(0)
   , mVadCoefSetFlag(false)
+
+  , mTimestamp(clock())
 {}
 
 inline double AudioEvent::angle() const
@@ -92,6 +99,12 @@ inline bool AudioEvent::vadIsActiveSetFlag() const
 {
     return mVadIsActiveSetFlag;
 }
+
+inline clock_t AudioEvent::timestamp() const
+{
+    return mTimestamp;
+}
+
 
 
 }

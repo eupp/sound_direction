@@ -3,6 +3,7 @@
 ViewSettings::ViewSettings():
     mShowAngle(false)
   , mShowVadCoef(false)
+  , mDiffTime(0)
 {}
 
 bool ViewSettings::showAngle() const
@@ -24,6 +25,16 @@ void ViewSettings::setShowVadCoef(bool showVadCoef)
 {
     mShowVadCoef = showVadCoef;
 }
+int ViewSettings::diffTime() const
+{
+    return mDiffTime;
+}
+
+void ViewSettings::setDiffTime(int diffTime)
+{
+    mDiffTime = diffTime;
+}
+
 
 Settings::Settings(const ControllerSettings& cSettings, const ViewSettings& vSettings):
     mControllerSettings(cSettings)
