@@ -21,21 +21,44 @@ public:
 
     void handleWindow(range_type channel1, range_type channel2);
 
+    virtual bool framePromotion() const
+    {
+        return true;
+    }
+
+    virtual void reset() {}
+
+    void setUpdated(bool updated);
+    bool updated() const;
+
 protected:
     virtual void handleWindowImpl(range_type channel1, range_type channel2) = 0;
 
 private:
-    FilterPtr mPrev;
+    bool mUpdated;
 };
 
 template <typename Iter>
-StereoAudioFilter<Iter>::StereoAudioFilter()
+StereoAudioFilter<Iter>::StereoAudioFilter():
+    mUpdated(false)
 {}
 
 template <typename Iter>
 void StereoAudioFilter<Iter>::handleWindow(range_type channel1, range_type channel2)
 {
     handleWindowImpl(channel1, channel2);
+}
+
+template <typename Iter>
+void StereoAudioFilter<Iter>::setUpdated(bool updated)
+{
+    mUpdated = updated;
+}
+
+template <typename Iter>
+bool StereoAudioFilter<Iter>::updated() const
+{
+    return mUpdated;
 }
 
 template <typename Iter>

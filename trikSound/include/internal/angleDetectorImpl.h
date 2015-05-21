@@ -56,6 +56,8 @@ public:
     int sampleRate() const;
     void setSampleRate(int sampleRate);
 
+    void reset();
+
 private:
 
     corr_array calcCorrelation(Iter first1, Iter last1,
@@ -194,6 +196,12 @@ template <typename Iter>
 void AngleDetectorImpl<Iter>::setSampleRate(int sampleRate)
 {
     mSampleRate = sampleRate;
+}
+
+template <typename Iter>
+void AngleDetectorImpl<Iter>::reset()
+{
+    mCorrHistory.clear();
 }
 
 template <typename Iter>

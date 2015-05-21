@@ -76,8 +76,17 @@ using StereoAudioPipe = AudioPipeBase<typename StereoAudioFilter<Iter>::range_ty
 template <typename T, typename Filter>
 void AudioPipeBase<T, Filter>::handleWindow(T windowSpec1, T windowSpec2)
 {
+    bool framePromotion = true;
     for (auto& filt: m_filters) {
-        filt->handleWindow(windowSpec1, windowSpec2);
+        if (framePromotion) {
+            filt->handleWindow(windowSpec1, windowSpec2);
+            filt->setUpdated(true);
+            framePromotion = filt->framePromotion();
+        }
+        else {
+            filt->setUpdated(false);
+            filt->reset();
+        }
     }
 }
 

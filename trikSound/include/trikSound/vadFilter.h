@@ -28,6 +28,11 @@ public:
         return mImpl->isActive();
     }
 
+    bool framePromotion() const
+    {
+        return isActive();
+    }
+
 protected:
 
     void handleWindowImpl(Iter first, Iter last);

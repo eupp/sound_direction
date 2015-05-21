@@ -5,6 +5,8 @@
 #include "triksound_global.h"
 #include "types.h"
 
+#include "stereoAudioFilter.h"
+
 namespace trikSound
 {
 
@@ -23,6 +25,8 @@ public:
     virtual void read(sample_type* buf) = 0;
     // count of samples available for reading per channels (i.e. channel[i].samplesAvailable() )
     virtual size_t samplesAvailable() const = 0;
+
+
 
     virtual size_t windowSize() const = 0;
     virtual void setWindowSize(size_t size) = 0;

@@ -88,7 +88,9 @@ void TrikSoundController::bufferReadyReadHandler()
         AudioEvent event;
         if (mAngleDetectionFlag) {
             assert(mAngleDetector != nullptr);
-            event.setAngle(mAngleDetector->getAngle());
+            if (mAngleDetector->updated()) {
+                event.setAngle(mAngleDetector->getAngle());
+            }
         }
         if (mVadFlag) {
             assert(mVad != nullptr);
