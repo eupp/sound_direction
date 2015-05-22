@@ -86,6 +86,11 @@ ControllerSettings ArgumentParser::parseControllerSettings(const QStringList& ar
             settings.setDurationFlag(true);
             settings.setDuration(duration);
         }
+        else if (*it == paramsMap["volume"]) {
+            checkArgsEnd(++it, args.end(), paramsMap["volume"].errorString());
+            double vol = convertParam<double>("volume", *it, paramsMap["volume"].errorString());
+            settings.setVolume(vol);
+        }
         else if (*it == paramsMap["filename"]) {
             settings.setFileInputFlag(true);
             if (++it != args.end()) {

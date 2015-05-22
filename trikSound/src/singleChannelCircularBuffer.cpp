@@ -16,11 +16,9 @@ void SingleChannelCircularBuffer::read(sample_type* buf, size_t size)
 {
     auto readEnd = mReadItr + size;
     copy(mReadItr, readEnd, buf);
-    if (readEnd != mBuffer.end()) {
-        mReadItr = readEnd;
-    }
-    else {
-        mReadItr = mBuffer.begin();
+    mReadItr = readEnd;
+    if (readEnd == mBuffer.end()) {
+        --mReadItr;
     }
 }
 

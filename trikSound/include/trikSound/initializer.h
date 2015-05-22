@@ -204,7 +204,7 @@ void Initializer<Iter>::createAudioDeviceManager(const Settings& settings)
 #else
         mDeviceManager = std::make_shared<AudioDeviceManager>(dev, *mAudioFormat.get(), mCircularBuffer);
 #endif
-
+        mDeviceManager->setVolume(settings.volume());
 
     }
 }

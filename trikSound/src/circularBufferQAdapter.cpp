@@ -55,7 +55,7 @@ void CircularBufferQAdapter::close()
 
 qint64 CircularBufferQAdapter::size() const
 {
-    return mBuffer->size    () * sizeof(sample_type);
+    return mBuffer->size() * sizeof(sample_type);
 }
 
 
