@@ -71,7 +71,7 @@ benchmark_result BenchmarkWorker::do_benchmark(const Callback& cb)
     Iter sep;
     Iter last;
 
-    array<double, ITERATION_COUNT> ts = {0};
+    array<msec, ITERATION_COUNT> ts = {0};
     for (int i = 0; i < ITERATION_COUNT; ++i) {
         first   = data[i % asize].begin();
         sep     = first + mWindowSize;
@@ -86,7 +86,7 @@ benchmark_result BenchmarkWorker::do_benchmark(const Callback& cb)
         ts[i] = timer.elapses_msec() / count;
     }
 
-    double total = accumulate(ts.begin(), ts.end(), 0);
+    double total = accumulate(ts.begin(), ts.end(), 0.0);
     double avr = total / ITERATION_COUNT;
     double dev = 0;
     for (int i = 0; i < ITERATION_COUNT; ++i) {
