@@ -16,6 +16,8 @@ typedef PerformanceTimer::msec msec;
 typedef std::vector<trikSound::sample_type> Container;
 typedef Container::iterator                 Iter;
 
+typedef std::pair<msec, double> benchmark_result;
+
 typedef std::shared_ptr<trikSound::AngleDetector<Iter>>       AngleDetectorPtr;
 typedef std::shared_ptr<trikSound::StereoVadFilter<Iter>>     VadFilterPtr;
 typedef std::shared_ptr<trikSound::DigitalAudioFilter<Iter>>  DigitalAudioFilterPtr;
@@ -24,7 +26,7 @@ class BenchmarkWorker
 {
 public:
 
-    static const int ITERATION_COUNT                = 1000;
+    static const int ITERATION_COUNT                = 100;
     static const trikSound::sample_type SAMPLE_MAX  = std::numeric_limits<trikSound::sample_type>::max();
 
     BenchmarkWorker();
@@ -32,18 +34,18 @@ public:
     int getWindowSize() const;
     void setWindowSize(int windowSize);
 
-    msec benchmarkAngleDetector(const AngleDetectorPtr& detector);
+    benchmark_result benchmarkAngleDetector(const AngleDetectorPtr& detector);
 
-    msec benchmarkVadFilter(const VadFilterPtr& vad);
+    benchmark_result benchmarkVadFilter(const VadFilterPtr& vad);
 
-    msec benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter);
+    benchmark_result benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter);
 
 private:
 
     typedef trikSound::StereoAudioFilter<Iter>::range_type range_type;
 
     template <typename Callback>
-    msec do_benchmark(const Callback& cb);
+    benchmark_result do_benchmark(const Callback& cb);
 
     void generate_random(Iter first, Iter last);
 

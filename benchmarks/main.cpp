@@ -38,30 +38,33 @@ int main()
         out << "Benchmarks: window size = " << wSizes[i] << endl << endl;
 
         worker.setWindowSize(wSizes[i]);
-        msec res = 0;
+        benchmark_result res;
 
         cout << "Angle detector benchmark" << endl;
 
         res = worker.benchmarkAngleDetector(detector);
         out << "Angle detector benchmark " << endl;
-        out << "total ms = " << res << endl;
-        out << "average ms = " << (double) res / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "total ms = " << res.first << endl;
+        out << "average ms = " << (double) res.first / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "standard deviation = " << res.second << endl;
         out << endl;
 
         cout << "Vad benchmark" << endl;
 
         res = worker.benchmarkVadFilter(vad);
         out << "Vad benchmark " << endl;
-        out << "total ms = " << res << endl;
-        out << "average ms = " << (double) res / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "total ms = " << res.first << endl;
+        out << "average ms = " << (double) res.first / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "standard deviation = " << res.second << endl;
         out << endl;
 
         cout << "Filter benchmark " << endl;
 
         res = worker.benchmarkDigitalFilter(filter);
         out << "Filter benchmark " << endl;
-        out << "total ms = " << res << endl;
-        out << "average ms = " << (double) res / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "total ms = " << res.first << endl;
+        out << "average ms = " << (double) res.first / BenchmarkWorker::ITERATION_COUNT << endl;
+        out << "standard deviation = " << res.second << endl;
         out << endl;
     }
 

@@ -23,7 +23,7 @@ void BenchmarkWorker::setWindowSize(int windowSize)
     mWindowSize = windowSize;
 }
 
-msec BenchmarkWorker::benchmarkAngleDetector(const AngleDetectorPtr& detector)
+benchmark_result BenchmarkWorker::benchmarkAngleDetector(const AngleDetectorPtr& detector)
 {
 
     auto cb = [&detector](range_type chl1, range_type chl2) -> void
@@ -33,7 +33,7 @@ msec BenchmarkWorker::benchmarkAngleDetector(const AngleDetectorPtr& detector)
     return do_benchmark(cb);
 }
 
-msec BenchmarkWorker::benchmarkVadFilter(const VadFilterPtr& vad)
+benchmark_result BenchmarkWorker::benchmarkVadFilter(const VadFilterPtr& vad)
 {
     auto cb = [&vad](range_type chl1, range_type chl2) -> void
     {
@@ -42,7 +42,7 @@ msec BenchmarkWorker::benchmarkVadFilter(const VadFilterPtr& vad)
     return do_benchmark(cb);
 }
 
-msec BenchmarkWorker::benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter)
+benchmark_result BenchmarkWorker::benchmarkDigitalFilter(const DigitalAudioFilterPtr& filter)
 {
     auto cb = [&filter](range_type chl1, range_type chl2) -> void
     {
@@ -58,7 +58,7 @@ void BenchmarkWorker::generate_random(Iter first, Iter last)
 }
 
 template <typename Callback>
-msec BenchmarkWorker::do_benchmark(const Callback& cb)
+benchmark_result BenchmarkWorker::do_benchmark(const Callback& cb)
 {
     const int asize = 2;
     array<Container, asize> data;
@@ -71,16 +71,31 @@ msec BenchmarkWorker::do_benchmark(const Callback& cb)
     Iter sep;
     Iter last;
 
-    PerformanceTimer timer;
+    array<double, ITERATION_COUNT> ts = {0};
     for (int i = 0; i < ITERATION_COUNT; ++i) {
         first   = data[i % asize].begin();
         sep     = first + mWindowSize;
         last    = data[i % asize].end();
 
-//        auto p = ;
-//        auto p1 = ;
-        cb(make_pair(first, sep), make_pair(sep, last));
+        int count = 100;
+
+        PerformanceTimer timer;
+        for (int j = 0; j < count; ++j) {
+            cb(make_pair(first, sep), make_pair(sep, last));
+        }
+        ts[i] = timer.elapses_msec() / count;
     }
 
-    return timer.elapses_msec();
+    double total = accumulate(ts.begin(), ts.end(), 0);
+    double avr = total / ITERATION_COUNT;
+    double dev = 0;
+    for (int i = 0; i < ITERATION_COUNT; ++i) {
+        double d = ts[i] - avr;
+        d *= d;
+        dev += d;
+    }
+    dev /= ITERATION_COUNT;
+    dev = sqrt(dev);
+
+    return make_pair(round(total), dev);
 }

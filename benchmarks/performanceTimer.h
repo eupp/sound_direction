@@ -7,7 +7,7 @@ class PerformanceTimer
 {
 public:
 
-    typedef std::int32_t msec;
+    typedef double msec;
 
     PerformanceTimer():
         mStart(clock())
@@ -15,7 +15,7 @@ public:
 
     msec elapses_msec()
     {
-        return (clock() - mStart) / TO_MILLY_SECONDS_COEF;
+        return (double) (clock() - mStart) / TO_MILLY_SECONDS_COEF;
     }
 
 private:
