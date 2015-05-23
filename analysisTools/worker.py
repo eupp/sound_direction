@@ -52,6 +52,7 @@ class Worker(object):
             sumdev = 0
             maxdev = -1
 
+            devs = []
             for test in self.__tests:
 
                 fname = os.path.splitext(os.path.basename(test))[0]
@@ -72,9 +73,10 @@ class Worker(object):
                 data = {}
                 data['vad'] = runner.get_vad_out()
                 data['angle'] = runner.get_angle_out()
-                #self.__plotter.plot_sensor_out(data, runner.get_args(), destdir)
+                # self.__plotter.plot_sensor_out(data, runner.get_args(), destdir)
 
                 dev = self.__calc_dev(angle, data['angle'])
+                devs.append(dev)
                 sumdev += dev
                 if dev > maxdev:
                     maxdev = dev
@@ -82,9 +84,13 @@ class Worker(object):
                 print 'args_set{i} : {tn} finished; dev={dev}'.format(i=i, tn=test, dev=dev)
 
             avrdev = float(sumdev) / len(self.__tests)
+            ddev = 0
+            for dev in devs:
+                ddev += (dev - avrdev) ** 2
+            ddev = math.sqrt(float(ddev) / len(devs))
 
             hd = runner.get_args()['history_depth']
-            resfd.write('{:^4}, {:+12.6f}, {:+12.6f} {}'.format(hd, avrdev, maxdev, os.linesep))
+            resfd.write('{:^4}, {:+12.6f}, {:+12.6f}, {:+12.6f} {}'.format(hd, avrdev, ddev, maxdev, os.linesep))
 
 
     def __calc_dev(self, angle, data):

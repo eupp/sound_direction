@@ -1,5 +1,8 @@
+# coding=utf-8
+
 import os
 import matplotlib.pyplot as plt
+from matplotlib import rc
 import scipy.io.wavfile as wav
 
 from runner import Runner
@@ -10,6 +13,11 @@ class PlotBuilder(object):
     __plt_ext = '.png'
 
     def __init__(self):
+
+        font = {'family': 'Droid Sans',
+                'weight': 'normal',
+                'size': 20}
+        rc('font', **font)
 
         pass
 
@@ -24,36 +32,37 @@ class PlotBuilder(object):
         left_chl  = wavdata[:, 0]
         right_chl = wavdata[:, 1]
 
-        fig, plts = plt.subplots(4, 1, sharex=True)
+        fig, plts = plt.subplots(3, 1, sharex=True)
         fig.set_size_inches(14., 10.)
 
         xlen = len(left_chl)
         pcm_range = range(int(-3 * 1e4), int(4 * 1e4), int(1e4))
 
         # plts[0].axis([0, xlen, -2e15, 2e15])
-        plts[0].set_title('Left channel')
+        plts[0].set_title(u'Левый канал')
         plts[0].set_yticks(pcm_range)
         plts[0].plot(left_chl, color='blue', linestyle='-')
 
         # plts[1].axis([0, xlen, -2e15, 2e15])
-        plts[1].set_title('Right channel')
+        plts[1].set_title(u'Правый канал')
         plts[1].set_yticks(pcm_range)
         plts[1].plot(right_chl, color='blue', linestyle='-')
 
         wdots = range(0, xlen + window_size, window_size)
         wdots = wdots[:len(data['angle'])]
 
-        # plts[2].axis([0, xlen, 0, 1e-1])
-        plts[2].set_title('Energy')
-        plts[2].plot(wdots, data['vad'], color='red', linestyle='-')
+        # # plts[2].axis([0, xlen, 0, 1e-1])
+        # plts[2].set_title(u'Энергия')
+        # plts[2].set_xlabel(u'Отсчеты')
+        # plts[2].plot(wdots, data['vad'], color='red', linestyle='-')
 
-        plts[3].axis([0, xlen, -90, 90])
-        plts[3].set_title('Angle')
-        plts[3].set_xlabel('Sample')
-        plts[3].set_ylabel('Degree')
-        plts[3].set_yticks(range(-90, 100, 30))
-        plts[3].grid(True)
-        plts[3].plot(wdots, data['angle'], color='green', linestyle='-')
+        plts[2].axis([0, xlen, -90, 90])
+        plts[2].set_title(u'Угол')
+        plts[2].set_xlabel(u'Отсчёты')
+        plts[2].set_ylabel(u"Градусы")
+        plts[2].set_yticks(range(-90, 100, 30))
+        plts[2].grid(True)
+        plts[2].plot(wdots, data['angle'], color='green', linestyle='-')
         #
         # text = ('Test name: {tn} {sep}'
         #         'Window size = {ws} samples {sep}'
