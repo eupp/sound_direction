@@ -32,6 +32,7 @@ private:
     bool mShowVad;
 
     clock_t mPrevTimestamp;
+    bool mEventFlag;
     std::vector<int> mAngles;
     double mEnrg;
 

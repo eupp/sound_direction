@@ -6,6 +6,8 @@
 
 #include <boost/circular_buffer.hpp>
 
+#include "../trikSound/types.h"
+
 namespace trikSound
 {
 
@@ -20,7 +22,7 @@ public:
 
     typedef typename std::iterator_traits<Iter>::value_type value_type;
 
-    explicit VadFilterImpl(double threshold):
+    explicit VadFilterImpl(threshold_type threshold):
         mEnrgBuf(HISTORY_DEPTH)
       , mThreshold(threshold)
     {}
@@ -60,7 +62,7 @@ private:
 
     static const int HISTORY_DEPTH = 5;
 
-    double calcEnrgCoef() const
+    threshold_type calcEnrgCoef() const
     {
         if (mEnrgBuf.empty()) {
             return 0;
@@ -71,12 +73,11 @@ private:
             enrg += it->first;
             frameSize += it->second;
         }
-        energy_type frameMax = SQR_MAX * frameSize;
-        return (double) enrg / frameMax;
+        return enrg / frameSize;
     }
 
     boost::circular_buffer<frame_params> mEnrgBuf;
-    double mThreshold;
+    threshold_type mThreshold;
 };
 
 }

@@ -6,6 +6,7 @@
 #include <QAudioFormat>
 
 #include "triksound_global.h"
+#include "types.h"
 
 namespace trikSound
 {
@@ -107,7 +108,7 @@ private:
 
     // vad arguments
 
-    double mVadThreshold;
+    threshold_type mVadThreshold;
 
     // duration settings
 

@@ -30,6 +30,12 @@ inline quint64 convertParam(const QString &param, bool &ok)
 }
 
 template <>
+inline long long convertParam(const QString& param, bool& ok)
+{
+    return param.toLongLong(&ok);
+}
+
+template <>
 inline double convertParam(const QString& param, bool& ok)
 {
     return param.toDouble(&ok);

@@ -5,9 +5,12 @@
 #include <QCoreApplication>
 #include <QStringList>
 
+#include "trikSound/types.h"
+
 #include "utils.h"
 
 using namespace std;
+using trikSound::threshold_type;
 
 std::unordered_map<const char*, ArgumentParser::Parameter> ArgumentParser::paramsMap =
 {
@@ -67,7 +70,8 @@ ControllerSettings ArgumentParser::parseControllerSettings(const QStringList& ar
         }
         else if (*it == paramsMap["vadThreshold"]) {
             checkArgsEnd(++it, args.end(), paramsMap["vadThreshold"].errorString());
-            double thrsd = convertParam<double>("vadThreshold", *it, paramsMap["vadThreshold"].errorString());
+            threshold_type thrsd =
+                    convertParam<threshold_type>("vadThreshold", *it, paramsMap["vadThreshold"].errorString());
             settings.setVadThreshold(thrsd);
         }
         else if (*it == paramsMap["historyDepth"]) {

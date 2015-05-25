@@ -5,6 +5,7 @@
 #include "triksound_global.h"
 #include "audioFilter.h"
 #include "vadFilterImpl.h"
+#include "types.h"
 
 namespace trikSound
 {
@@ -14,11 +15,11 @@ class TRIKSOUNDSHARED_EXPORT VadFilter: public AudioFilter<Iter>
 {
 public:
 
-    explicit VadFilter(double threshold):
+    explicit VadFilter(threshold_type threshold):
         mImpl(new VadFilterImpl<Iter>(threshold))
     {}
 
-    double getEnergyCoefficient() const
+    threshold_type getEnergyCoefficient() const
     {
         return mImpl->getEnergyCoefficient();
     }

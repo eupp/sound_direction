@@ -3,6 +3,8 @@
 #include <ctime>
 
 #include "triksound_global.h"
+#include "vadFilter.h"
+#include "types.h"
 
 namespace trikSound
 {
@@ -18,8 +20,8 @@ public:
     bool angleSetFlag() const;
 
 
-    double vadCoef() const;
-    void setVadCoef(double vadCoef);
+    threshold_type vadCoef() const;
+    void setVadCoef(threshold_type vadCoef);
     bool vadCoefSetFlag() const;
 
     bool vadIsActive() const;
@@ -68,12 +70,12 @@ inline bool AudioEvent::angleSetFlag() const
     return mAngleSetFlag;
 }
 
-inline double AudioEvent::vadCoef() const
+inline threshold_type AudioEvent::vadCoef() const
 {
     return mVadCoef;
 }
 
-inline void AudioEvent::setVadCoef(double vadCoef)
+inline void AudioEvent::setVadCoef(threshold_type vadCoef)
 {
     mVadCoefSetFlag = true;
     mVadCoef = vadCoef;

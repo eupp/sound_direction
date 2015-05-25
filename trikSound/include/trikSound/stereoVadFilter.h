@@ -6,6 +6,7 @@
 #include "triksound_global.h"
 #include "stereoAudioFilter.h"
 #include "vadFilter.h"
+#include "types.h"
 
 namespace trikSound
 {
@@ -18,10 +19,9 @@ public:
     using typename StereoAudioFilter<Iter>::FilterPtr;
     using typename StereoAudioFilter<Iter>::range_type;
 
+    explicit StereoVadFilter(threshold_type threshold);
 
-    explicit StereoVadFilter(double threshold);
-
-    double getEnergyCoefficient() const;
+    threshold_type getEnergyCoefficient() const;
 
     bool isActive() const;
 
@@ -43,13 +43,13 @@ private:
 };
 
 template <typename Iter>
-StereoVadFilter<Iter>::StereoVadFilter(double threshold):
+StereoVadFilter<Iter>::StereoVadFilter(threshold_type threshold):
     mLeftVad(new VadFilter<Iter>(threshold))
   , mRightVad(new VadFilter<Iter>(threshold))
 {}
 
 template <typename Iter>
-double StereoVadFilter<Iter>::getEnergyCoefficient() const
+threshold_type StereoVadFilter<Iter>::getEnergyCoefficient() const
 {
     return std::max(mLeftVad->getEnergyCoefficient(), mRightVad->getEnergyCoefficient());
 }
