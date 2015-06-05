@@ -5,8 +5,6 @@
 
 #include <QTextStream>
 
-#include <trikControl/motorInterface.h>
-
 #include "trikSound/iAudioEventListener.h"
 
 #include "settings.h"
@@ -34,9 +32,8 @@ private:
     clock_t mPrevTimestamp;
     bool mEventFlag;
     std::vector<int> mAngles;
+    int mFrameCnt;
     double mEnrg;
 
     int mDiffTime;
-
-    trikControl::MotorInterface* mMotor;
 };

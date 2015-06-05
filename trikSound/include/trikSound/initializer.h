@@ -289,6 +289,9 @@ template <typename Iter>
 void Initializer<Iter>::createAngleDetector(const Settings& settings)
 {
     if (!mAngleDetector) {
+        if (!settings.angleDetectionFlag()) {
+            return;
+        }
         if (settings.singleChannelFlag()) {
             throw InitException("Initialization error."
                                 "Angle detection enabled with single audio channel");
